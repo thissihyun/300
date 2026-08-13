@@ -2030,6 +2030,43 @@ button,a,.day:not(.empty),.home-card,.event-item,.firsts-item,.result-item,nav.m
 }
 </style>
 
+<style id="v22-envelope-open">
+.v22-envelope-stage{display:flex; flex-direction:column; align-items:center; gap:14px; margin:40px 0 12px; perspective:1200px;}
+.v22-envelope{position:relative; width:min(320px,86vw); aspect-ratio:3/2; cursor:pointer; transform-style:preserve-3d;}
+.v22-envelope-locked{width:min(220px,64vw); margin:0 auto 4px;}
+.v22-envelope-back{position:absolute; inset:0; background:linear-gradient(160deg,#efe3c8,#e6d6b3);
+  border:1px solid var(--line); border-radius:6px; box-shadow:var(--shadow);}
+.v22-letter-sheet{position:absolute; left:6%; right:6%; top:9%; bottom:9%; background:#fffdf6;
+  border:1px solid var(--line); border-radius:4px; box-shadow:0 4px 14px rgba(51,43,34,.15);
+  padding:16px 15px; overflow:auto; transform:translateY(4%) scale(.93); transform-origin:center bottom;
+  transition:transform .6s cubic-bezier(.22,.9,.3,1.15); z-index:2;}
+.v22-letter-text{font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:15px; line-height:1.75; color:var(--ink); white-space:pre-wrap;}
+.v22-envelope-front{position:absolute; left:0; right:0; bottom:0; height:58%;
+  background:linear-gradient(160deg,#e7d6ae,#dcc79a); clip-path:polygon(0 100%,100% 100%,100% 0,50% 34%,0 0);
+  border-radius:0 0 6px 6px; z-index:3; box-shadow:inset 0 2px 4px rgba(0,0,0,.06); transition:opacity .3s;}
+.v22-envelope-flap{position:absolute; top:0; left:0; right:0; height:58%;
+  background:linear-gradient(160deg,#e2cd9d,#d8bd88); clip-path:polygon(0 0,100% 0,50% 74%);
+  transform-origin:top center; transform:rotateX(0deg); transition:transform .65s cubic-bezier(.4,0,.2,1), opacity .5s;
+  z-index:4; display:flex; align-items:flex-end; justify-content:center; padding-bottom:8px;}
+.v22-seal{width:34px; height:34px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#c9686c,var(--rose));
+  color:#fff8ef; display:flex; align-items:center; justify-content:center; font-size:15px;
+  box-shadow:0 2px 5px rgba(0,0,0,.25); transform:translateY(50%);}
+.v22-envelope.open .v22-envelope-flap{transform:rotateX(150deg); opacity:0; pointer-events:none;}
+.v22-envelope.open .v22-letter-sheet{transform:translateY(-46%) scale(1.05);}
+.v22-envelope.open .v22-envelope-front{opacity:0;}
+.v22-envelope-hint{font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:12.5px; color:var(--ink-soft);}
+@keyframes v22shake{0%,100%{transform:translateX(0) rotate(0)} 20%{transform:translateX(-4px) rotate(-2deg)}
+  40%{transform:translateX(4px) rotate(2deg)} 60%{transform:translateX(-3px) rotate(-1deg)} 80%{transform:translateX(3px) rotate(1deg)}}
+.v22-envelope.v22-shake{animation:v22shake .5s ease;}
+.v22-heart-particle{position:fixed; z-index:500; color:var(--rose); pointer-events:none; transform:translate(-50%,-50%);
+  animation:v22HeartFloat 1.15s ease-out forwards;}
+@keyframes v22HeartFloat{
+  0%{opacity:0; transform:translate(-50%,-50%) scale(.4);}
+  15%{opacity:1;}
+  100%{opacity:0; transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) - 40px)) scale(1.1);}
+}
+</style>
+
 </head>
 <body>
 <div class="bg-noise"></div>
@@ -5443,6 +5480,79 @@ renderFuture = async function(){
   }
 
   return _v21fixed_renderFuture();
+};
+
+/* ================= V22 — INTERACTIVE ENVELOPE FOR DAY 500 LETTER ================= */
+function v22HeartBurst(centerEl){
+  const rect = centerEl.getBoundingClientRect();
+  const originX = rect.left + rect.width/2, originY = rect.top + rect.height*0.3;
+  for(let i=0;i<10;i++){
+    const h = document.createElement('div');
+    h.className = 'v22-heart-particle';
+    h.textContent = '♥';
+    const angle = Math.PI + Math.random()*Math.PI; // spread upward
+    const dist = 55 + Math.random()*70;
+    h.style.left = originX+'px';
+    h.style.top = originY+'px';
+    h.style.setProperty('--dx', (Math.cos(angle)*dist)+'px');
+    h.style.setProperty('--dy', (Math.sin(angle)*dist)+'px');
+    h.style.fontSize = (12+Math.random()*10)+'px';
+    h.style.animationDelay = (Math.random()*0.15)+'s';
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(), 1400);
+  }
+}
+const _v22_renderDay500 = renderDay500;
+renderDay500 = async function(container){
+  const start = new Date('2025-10-23T00:00:00');
+  const openDate = new Date(start); openDate.setDate(openDate.getDate()+499);
+  const now = new Date();
+  const isOpen = now >= openDate;
+
+  if(!isOpen){
+    await _v22_renderDay500(container);
+    const wrap = container.querySelector('.v20-future-wrap');
+    const card = container.querySelector('.v20-card');
+    if(wrap && card){
+      const badge = document.createElement('div');
+      badge.className = 'v22-envelope v22-envelope-locked';
+      badge.innerHTML = `<div class="v22-envelope-back"></div>
+        <div class="v22-envelope-front"></div>
+        <div class="v22-envelope-flap"><div class="v22-seal">🔒</div></div>`;
+      wrap.insertBefore(badge, card);
+      badge.addEventListener('click', ()=>{
+        badge.classList.remove('v22-shake');
+        void badge.offsetWidth;
+        badge.classList.add('v22-shake');
+      });
+    }
+    return;
+  }
+
+  let saved = '';
+  try{ const r = await window.storage.get('letter_day500', true); saved = r ? JSON.parse(r.value).text : ''; }catch(e){}
+  container.innerHTML = `<div class="v20-future-wrap">
+    ${v20FutureHero('Day 500', '이제 열어볼 수 있는 타임캡슐. 그때의 우리가 지금의 마음을 다시 만나는 페이지.')}
+    <div class="v22-envelope-stage">
+      <div class="v22-envelope" id="v22Day500Envelope">
+        <div class="v22-envelope-back"></div>
+        <div class="v22-letter-sheet" id="v22Day500Sheet">
+          <div class="v22-letter-text">${saved ? escapeHtml(saved).replace(/\n/g,'<br>') : '아직 쓰인 편지가 없어요.'}</div>
+        </div>
+        <div class="v22-envelope-front"></div>
+        <div class="v22-envelope-flap"><div class="v22-seal">♥</div></div>
+      </div>
+      <div class="v22-envelope-hint" id="v22Day500Hint">봉투를 눌러 열어보세요</div>
+    </div>
+  </div>`;
+  const env = container.querySelector('#v22Day500Envelope');
+  const hint = container.querySelector('#v22Day500Hint');
+  env.addEventListener('click', ()=>{
+    const wasOpen = env.classList.contains('open');
+    const opened = env.classList.toggle('open');
+    hint.textContent = opened ? '다시 봉인하려면 한 번 더 눌러보세요' : '봉투를 눌러 열어보세요';
+    if(opened && !wasOpen) v22HeartBurst(env);
+  });
 };
 
 </script>
