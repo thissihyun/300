@@ -107,6 +107,9 @@
   .day.has-event{background:rgba(193,123,127,0.13); border-color:rgba(193,123,127,0.35);}
   .day.has-event .num{color:var(--ink); font-weight:700;}
   .day.has-event::after{content:"♥"; position:absolute; bottom:3px; font-size:7px; color:var(--rose-deep); opacity:.85;}
+  .day.has-chat-only{background:rgba(184,146,63,0.09); border-color:rgba(184,146,63,0.4); border-style:dashed;}
+  .day.has-chat-only .num{color:var(--ink-soft);}
+  .day.has-chat-only::after{content:"💬"; position:absolute; bottom:3px; font-size:7px; color:var(--gold-text); opacity:.8;}
   .day.today{outline:2px solid var(--gold); outline-offset:-2px;}
   .day.has-photo{overflow:hidden;}
   .day .day-thumb{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; opacity:0.7;}
@@ -468,24 +471,6 @@
   .v7-hub-card .t{font-family:'Playfair Display','Griun Mongtori',serif;font-style:italic;font-size:18px;margin:18px 0 5px}
   .v7-hub-card .s{font-family:'Cormorant Garamond','Griun Mongtori',serif;color:var(--ink-soft);font-size:13px;line-height:1.35}
 
-  /* Same place / story connections */
-  .v7-connection-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center}
-  .v7-memory-link{
-    background:#fffdf8;border:1px solid var(--line);border-radius:8px;padding:14px;cursor:pointer;
-    min-height:120px; transition:.16s;
-  }
-  .v7-memory-link:hover{border-color:var(--rose);transform:translateY(-2px)}
-  .v7-memory-link .date{font-family:'Griun Mongtori','Gaegu',cursive;color:var(--clay);font-size:11px}
-  .v7-memory-link .title{font-family:'Playfair Display','Griun Mongtori',serif;font-style:italic;font-size:17px;margin-top:5px}
-  .v7-memory-link .copy{font-family:'Cormorant Garamond','Griun Mongtori',serif;color:var(--ink-soft);font-size:12.5px;margin-top:6px}
-  .v7-connection-arrow{font-family:'Playfair Display','Griun Mongtori',serif;color:var(--gold-text);font-size:28px}
-  .v7-connection-photo{
-    height:150px; margin-bottom:10px; background:var(--paper-deep); border-radius:5px;
-    overflow:hidden; display:grid;place-items:center;color:var(--ink-soft);
-    font-family:'Cormorant Garamond','Griun Mongtori',serif;font-size:11px;
-  }
-  .v7-connection-photo img{width:100%;height:100%;object-fit:cover}
-
   /* Memory modal variations */
   .modal{transition:background .25s ease}
   .modal.layout-museum .modal-head{background:#f2efe8}
@@ -558,8 +543,6 @@
     .v7-home-hero,.v7-hero-copy{min-height:520px}
     .v7-hero-copy{padding:34px 24px}
     .v7-hero-note{right:12px;top:12px;font-size:11px}
-    .v7-connection-grid{grid-template-columns:1fr}
-    .v7-connection-arrow{transform:rotate(90deg);text-align:center}
   }
 
 
@@ -576,6 +559,7 @@
     background:rgba(255,253,248,.9); border:1px solid rgba(217,203,176,.7);
   }
   .day.has-event::after{bottom:auto; top:8px; right:7px; font-size:9px;}
+  .day.has-chat-only::after{bottom:auto; top:8px; right:7px; font-size:9px;}
   .day.has-photo .num{background:rgba(255,253,248,.94); box-shadow:0 1px 3px rgba(0,0,0,.06)}
   .day .day-thumb{opacity:.62;}
   @media(max-width:600px){
@@ -737,8 +721,11 @@
 .day{min-height:92px;aspect-ratio:auto}
 .day .num{font-size:14px;font-weight:700;position:relative;z-index:3}
 .day .dtitle{font-size:10px;line-height:1.18;max-height:26px;bottom:5px;padding:2px 4px;font-weight:700}
-.v10-special{position:absolute;right:4px;top:4px;z-index:5;font-size:14px;filter:drop-shadow(0 1px 1px rgba(255,255,255,.8))}
-.v10-special-label{position:absolute;top:4px;left:4px;z-index:4;font-family:'Griun Mongtori','Gaegu',cursive;font-size:8px;color:var(--rose-deep);background:rgba(255,253,248,.9);padding:1px 4px;border-radius:999px}
+.v10-special{position:absolute; right:-7px; top:-7px; z-index:6; width:23px; height:23px; border-radius:50%;
+  background:#fff8ec; border:2px solid var(--gold); display:flex; align-items:center; justify-content:center;
+  font-size:12.5px; box-shadow:0 2px 5px rgba(51,43,34,.22);}
+.day.v22-special-day{border-width:2px !important; border-style:double !important; border-color:var(--gold) !important;}
+.day.v22-special-day.has-event::after{content:none;}
 .v10-mood-row{position:absolute;left:3px;right:3px;bottom:27px;z-index:5;display:flex;gap:3px;justify-content:center;pointer-events:none}
 .v10-mood-dot{font-size:8px;background:rgba(255,253,248,.92);border:1px solid rgba(217,203,176,.8);border-radius:999px;padding:1px 3px;white-space:nowrap}
 .day.has-photo .v10-mood-row{bottom:29px}
@@ -1006,11 +993,6 @@ p,.desc,.story,.text,.note-area,.v9-answer-box,.v9-reveal-card .ans,
 .day.has-photo .dtitle{
   font-weight:500 !important;
 }
-.v10-special-label{
-  font-size:8.5px;
-  line-height:1.1;
-  font-weight:400 !important;
-}
 
 /* Quotes / handwritten notes can use Mongtori selectively */
 .handwritten,
@@ -1190,7 +1172,8 @@ p,.desc,.story,.text,.note-area,.v9-answer-box,.v9-reveal-card .ans,
   background:#fff;border:1px solid var(--line);padding:5px 5px 8px;border-radius:5px;
   position:relative;cursor:pointer;overflow:hidden
 }
-.v15-photo-card img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:2px}
+.v15-photo-card .thumb{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1/1;background:#f1ebda;border-radius:2px;overflow:hidden}
+.v15-photo-card img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:2px}
 .v15-photo-card .date{
   font-family:'Cormorant Garamond',serif;font-size:9px;color:var(--ink-soft);margin-top:5px
 }
@@ -1683,6 +1666,9 @@ body.theme-spring .calendar-wrap{background:linear-gradient(180deg,rgba(216,183,
 #view-movie .section-label{
   text-align:center;
 }
+
+/* OUR STORY, AS A MOVIE — narrower reading column instead of full panel width */
+#view-timeline #chaptersWrap{max-width:620px; margin:0 auto;}
 
 /* OUR FUTURE centered top */
 #view-future .panel{
@@ -2268,27 +2254,17 @@ button,a,.day:not(.empty),.home-card,.event-item,.firsts-item,.result-item,nav.m
       <div class="v7-hub-grid">
         <div class="v7-hub-card" onclick="switchView('firsts')"><div class="n">01 · MILESTONES</div><div class="t">Our Firsts</div><div class="s">첫 카톡부터 300일까지, 처음들의 기록.</div></div>
         <div class="v7-hub-card" onclick="switchView('places')"><div class="n">02 · PLACES</div><div class="t">Our Places</div><div class="s">New York과 우리가 함께 지나온 도시들.</div></div>
-        <div class="v7-hub-card" onclick="switchView('connections')"><div class="n">03 · CALLBACKS</div><div class="t">Same Place, Different Us</div><div class="s">같은 장소로 돌아왔을 때 달라져 있던 우리.</div></div>
-        <div class="v7-hub-card" onclick="switchView('posters')"><div class="n">04 · FAVORITE DATES</div><div class="t">The Dates I'd Live Again</div><div class="s">다시 살고 싶은 날들을 영화 포스터처럼.</div></div>
-        <div class="v7-hub-card" onclick="switchView('constellation')"><div class="n">05 · EMOTIONAL MAP</div><div class="t">Our Constellation</div><div class="s">중요한 순간들을 별자리처럼 이어보기.</div></div>
-        <div class="v7-hub-card" onclick="switchView('words')"><div class="n">06 · LANGUAGE</div><div class="t">Words That Became Ours</div><div class="s">사랑해, 보고싶어, 여보, 평생.</div></div>
-        <div class="v7-hub-card" onclick="switchView('seasons')"><div class="n">07 · SEASONS</div><div class="t">The Seasons We Shared</div><div class="s">가을 뉴욕에서 여름의 300일까지.</div></div>
-        <div class="v7-hub-card" onclick="switchView('food')"><div class="n">08 · FOOD</div><div class="t">“밥 먹자”</div><div class="s">평범한 한 끼에서 시작된 우리의 love language.</div></div>
-        <div class="v7-hub-card" onclick="switchView('numbers')"><div class="n">09 · DATA</div><div class="t">Us, By the Numbers</div><div class="s">메시지·사진·단어를 실제 데이터로 다시 보기.</div></div>
-        <div class="v7-hub-card" onclick="switchView('photobooth')"><div class="n">10 · PHOTOBOOTH</div><div class="t">Photobooth Archive</div><div class="s">인생네컷만 날짜순으로 모은 작은 필름함.</div></div>
-        <div class="v7-hub-card" onclick="switchView('awards')"><div class="n">11 · PLAYFUL</div><div class="t">Mini Awards</div><div class="s">가장 많이 걷고, 웃고, 우리다웠던 날.</div></div>
-        <div class="v7-hub-card" onclick="switchView('favorites')"><div class="n">12 · FAVORITES</div><div class="t">Our Favorites ♥</div><div class="s">둘이 직접 골라둔 기억들.</div></div>
+        <div class="v7-hub-card" onclick="switchView('posters')"><div class="n">03 · FAVORITE DATES</div><div class="t">The Dates I'd Live Again</div><div class="s">다시 살고 싶은 날들을 영화 포스터처럼.</div></div>
+        <div class="v7-hub-card" onclick="switchView('constellation')"><div class="n">04 · EMOTIONAL MAP</div><div class="t">Our Constellation</div><div class="s">중요한 순간들을 별자리처럼 이어보기.</div></div>
+        <div class="v7-hub-card" onclick="switchView('words')"><div class="n">05 · LANGUAGE</div><div class="t">Words That Became Ours</div><div class="s">사랑해, 보고싶어, 여보, 평생.</div></div>
+        <div class="v7-hub-card" onclick="switchView('seasons')"><div class="n">06 · SEASONS</div><div class="t">The Seasons We Shared</div><div class="s">가을 뉴욕에서 여름의 300일까지.</div></div>
+        <div class="v7-hub-card" onclick="switchView('food')"><div class="n">07 · FOOD</div><div class="t">“밥 먹자”</div><div class="s">평범한 한 끼에서 시작된 우리의 love language.</div></div>
+        <div class="v7-hub-card" onclick="switchView('numbers')"><div class="n">08 · DATA</div><div class="t">Us, By the Numbers</div><div class="s">메시지·사진·단어를 실제 데이터로 다시 보기.</div></div>
+        <div class="v7-hub-card" onclick="switchView('photobooth')"><div class="n">09 · PHOTOBOOTH</div><div class="t">Photobooth Archive</div><div class="s">인생네컷만 날짜순으로 모은 작은 필름함.</div></div>
+        <div class="v7-hub-card" onclick="switchView('awards')"><div class="n">10 · PLAYFUL</div><div class="t">Mini Awards</div><div class="s">가장 많이 걷고, 웃고, 우리다웠던 날.</div></div>
+        <div class="v7-hub-card" onclick="switchView('favorites')"><div class="n">11 · FAVORITES</div><div class="t">Our Favorites ♥</div><div class="s">둘이 직접 골라둔 기억들.</div></div>
       </div>
       </div>
-    </div>
-  </section>
-
-  <!-- SAME PLACE, DIFFERENT US -->
-  <section class="view" id="view-connections">
-    <div class="panel">
-      <h2>SAME PLACE, DIFFERENT US</h2>
-      <div class="desc">같은 장소가 두 번 등장할 때, 그 사이에 달라진 우리를 함께 봅니다.</div>
-      <div id="v7ConnectionsWrap"></div>
     </div>
   </section>
 
@@ -2298,11 +2274,11 @@ button,a,.day:not(.empty),.home-card,.event-item,.firsts-item,.result-item,nav.m
       <h2>OUR PHOTO ALBUM</h2>
       <div class="desc">날짜에 흩어진 실제 사진을 한 권의 디지털 사진첩처럼 다시 모아봅니다.</div>
       <div class="v15-album-toolbar">
-        <button data-album="months" class="active">월별 앨범</button>
-        <button data-album="contact">CONTACT SHEET</button>
-        <button data-album="film">FILM STRIP</button>
-        <button data-album="hero">HERO PHOTOS</button>
-        <button data-album="random">RANDOM PHOTO</button>
+        <button data-album="months" class="active">월별로 보기</button>
+        <button data-album="contact">전체 사진 한눈에</button>
+        <button data-album="film">필름처럼 넘겨보기</button>
+        <button data-album="hero">대표사진만 모아보기</button>
+        <button data-album="random">오늘의 랜덤 추억</button>
         <span class="v15-album-count" id="v15AlbumCount"></span>
       </div>
       <div class="v16-album-filterbar">
@@ -2857,14 +2833,6 @@ const V7_STORY_LINKS = {
   "2026-01-19":[["2025-11-13","The first time we held hands"]]
 };
 
-const V7_SAME_PLACE = [
-  {
-    a:"2025-10-04", b:"2025-12-20",
-    label:"MoMA",
-    line:"We came back to where it began."
-  }
-];
-
 function v7ThemeForDate(dateStr){
   if(dateStr.startsWith("2025-10")) return "theme-oct";
   if(dateStr.startsWith("2025-11")) return "theme-nov";
@@ -3341,8 +3309,8 @@ async function v10ApplyTodaySavedState(){
 async function v10DecorateCalendarDay(dateStr,cell){
   const sp=V10_SPECIAL_DAYS[dateStr];
   if(sp){
+    cell.classList.add('v22-special-day');
     const i=document.createElement('span');i.className='v10-special';i.textContent=sp.icon;i.title=sp.label;cell.appendChild(i);
-    const l=document.createElement('span');l.className='v10-special-label';l.textContent=sp.label;cell.appendChild(l);
   }
   const [s,g]=await Promise.all([v10GetCheckin(dateStr,'시현'),v10GetCheckin(dateStr,'강원')]);
   const moods=[s?.mood?`시 ${V10_MOOD_EMOJI[s.mood]||'♥'}`:null,g?.mood?`강 ${V10_MOOD_EMOJI[g.mood]||'♥'}`:null].filter(Boolean);
@@ -3484,7 +3452,6 @@ function switchView(name){
   if(name==='awards') renderAwards();
   if(name==='lookback') renderLookback();
   if(name==='future') renderFuture();
-  if(name==='connections') v7RenderConnections();
   if(name==='home'){ v7RenderHomeHero(); setTimeout(v9RenderToday,0); }
   if(name==='photoalbum') setTimeout(()=>v15RenderAlbum(v15AlbumMode),0);
 }
@@ -3636,7 +3603,7 @@ function v15PhotoCard(p){
   return `<div class="v15-photo-card" data-date="${p.date}" data-src="${encodeURIComponent(p.src)}">
     ${p.hero?'<span class="hero-mark">HERO</span>':''}
     <button class="v16-editmeta" data-meta="1" title="사진 태그 수정">✎</button>
-    <img src="${p.src}" alt="${escapeHtml(p.title)}" loading="lazy">
+    <div class="thumb"><img src="${p.src}" alt="${escapeHtml(p.title)}" loading="lazy"></div>
     <div class="date">${p.date}</div><div class="title">${escapeHtml(p.title)}</div>
     <div class="v16-tags">${tags.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div>
   </div>`;
@@ -3819,9 +3786,13 @@ async function markCustomDays(daysInMonth){
     ]);
     if(!isBuilt){
       const hasCurated = CURATED_CHAT[dateStr] && CURATED_CHAT[dateStr].length;
-      if(entry || (photos && photos.length) || hasCurated){
+      const hasOwnContent = entry || (photos && photos.length);
+      if(hasOwnContent){
         cell.classList.add('has-event');
         if(entry && entry.title){ const t=document.createElement('div'); t.className='dtitle'; t.textContent=entry.title; cell.appendChild(t); }
+      } else if(hasCurated){
+        cell.classList.add('has-chat-only');
+        cell.title = '이 날짜에 카톡 기록이 있어요 — 아직 다이어리로 정리되지 않았어요';
       }
     }
     const heroUrl = (hero && photos.includes(hero)) ? hero : (photos && photos.length ? photos[0] : null);
@@ -4754,47 +4725,15 @@ async function v7RenderHomeHero(){
     : `<div class="v7-hero-empty">DAY 1에 대표 사진을 올리면 이곳이 실제 사진으로 바뀝니다.</div>`;
 }
 
-async function v7RenderConnections(){
-  const wrap = document.getElementById('v7ConnectionsWrap');
-  if(!wrap) return;
-  const blocks = [];
-  for(const item of V7_SAME_PLACE){
-    const a = EVENTS[item.a], b = EVENTS[item.b];
-    const aPhoto = await getHeroPhoto(item.a) || (await getPhotos(item.a))[0] || null;
-    const bPhoto = await getHeroPhoto(item.b) || (await getPhotos(item.b))[0] || null;
-    blocks.push(`
-      <div style="margin-bottom:24px">
-        <div class="section-label">${escapeHtml(item.label)}</div>
-        <div class="v7-connection-grid">
-          <div class="v7-memory-link" data-date="${item.a}">
-            <div class="v7-connection-photo">${aPhoto?`<img src="${aPhoto}">`:'REAL PHOTO · '+item.a}</div>
-            <div class="date">${item.a}</div>
-            <div class="title">${a?escapeHtml(a.title):item.a}</div>
-          </div>
-          <div class="v7-connection-arrow">↔</div>
-          <div class="v7-memory-link" data-date="${item.b}">
-            <div class="v7-connection-photo">${bPhoto?`<img src="${bPhoto}">`:'REAL PHOTO · '+item.b}</div>
-            <div class="date">${item.b}</div>
-            <div class="title">${b?escapeHtml(b.title):item.b}</div>
-          </div>
-        </div>
-        <div class="home-quote" style="margin-top:14px">${escapeHtml(item.line)}</div>
-      </div>`);
-  }
-  wrap.innerHTML = blocks.join('');
-  wrap.querySelectorAll('.v7-memory-link').forEach(el=>el.addEventListener('click',()=>openModal(el.dataset.date)));
-}
-
 /* Hook v7 rendering into navigation without disturbing existing storage logic */
 document.querySelectorAll('#mainnav button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const v = btn.dataset.view;
     if(v==='home') setTimeout(v7RenderHomeHero,0);
-    if(v==='connections') setTimeout(v7RenderConnections,0);
   });
 });
 setTimeout(()=>{
-  v7RenderHomeHero(); v7RenderConnections(); v9RenderToday(); v9RenderPulse(); v10ApplyTodaySavedState(); v12RenderCheckinStatus();
+  v7RenderHomeHero(); v9RenderToday(); v9RenderPulse(); v10ApplyTodaySavedState(); v12RenderCheckinStatus();
   document.querySelectorAll('[id*="chatbot"],[class*="chatbot"],#botBubble').forEach(el=>el.style.display='none');
 }, 600);
 
