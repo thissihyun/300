@@ -2079,6 +2079,10 @@ h1.site-title{animation:v22TitleIn 1.1s cubic-bezier(.22,.9,.25,1) both;}
 .v22-hero-dots{position:absolute; z-index:3; right:18px; bottom:16px; display:flex; gap:6px;}
 .v22-hero-dot{width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.45); cursor:pointer; transition:.25s;}
 .v22-hero-dot.active{background:#fffaf0; width:18px; border-radius:4px;}
+.v22-day-likes{display:flex; gap:8px; margin-bottom:16px;}
+.v22-like-pill{border:1px solid var(--line); background:rgba(255,253,248,.85); border-radius:999px; padding:6px 13px;
+  font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:13px; cursor:pointer; color:var(--ink-soft); transition:.15s;}
+.v22-like-pill.active{background:var(--rose); border-color:var(--rose); color:#fff;}
 </style>
 
 </head>
@@ -2296,6 +2300,7 @@ h1.site-title{animation:v22TitleIn 1.1s cubic-bezier(.22,.9,.25,1) both;}
         <div class="v7-hub-card" onclick="switchView('photobooth')"><div class="n">09 · PHOTOBOOTH</div><div class="t">Photobooth Archive</div><div class="s">인생네컷만 날짜순으로 모은 작은 필름함.</div></div>
         <div class="v7-hub-card" onclick="switchView('awards')"><div class="n">10 · PLAYFUL</div><div class="t">Mini Awards</div><div class="s">가장 많이 걷고, 웃고, 우리다웠던 날.</div></div>
         <div class="v7-hub-card" onclick="switchView('favorites')"><div class="n">11 · FAVORITES</div><div class="t">Our Favorites ♥</div><div class="s">둘이 직접 골라둔 기억들.</div></div>
+        <div class="v7-hub-card" onclick="switchView('liked')"><div class="n">12 · LIKED DAYS</div><div class="t">Days We Both Loved</div><div class="s">각자 좋아요 한 날, 둘 다 좋아한 날을 몰아보기.</div></div>
       </div>
       </div>
     </div>
@@ -2441,6 +2446,20 @@ h1.site-title{animation:v22TitleIn 1.1s cubic-bezier(.22,.9,.25,1) both;}
       <h2>OUR FAVORITES ♥</h2>
       <div class="desc">모달에서 ♥를 누른 기억들이 여기 모여요. (둘이 공유돼요.)</div>
       <div id="favList" class="event-list"></div>
+    </div>
+  </section>
+
+  <!-- LIKED DAYS -->
+  <section class="view" id="view-liked">
+    <div class="panel">
+      <h2>DAYS WE BOTH LOVED</h2>
+      <div class="desc">날짜를 열면 각자 좋아요를 누를 수 있어요. 여기서는 좋아요한 날들을 모아 몰아볼 수 있어요.</div>
+      <div class="tab-pills" id="likedTabs">
+        <div class="tab-pill active" data-tab="both">둘 다 좋아한 날</div>
+        <div class="tab-pill" data-tab="시현">시현이 좋아한 날</div>
+        <div class="tab-pill" data-tab="강원">강원이 좋아한 날</div>
+      </div>
+      <div id="likedContent" class="event-list"></div>
     </div>
   </section>
 
@@ -3473,6 +3492,7 @@ function switchView(name){
   if(name==='firsts') renderFirsts();
   if(name==='words') renderWordCloud();
   if(name==='favorites') renderFavorites();
+  if(name==='liked') renderLikedDays(v22LikedTab);
   if(name==='numbers'){ renderStats(); setTimeout(v9RenderPulse,0); }
   if(name==='places') renderPlaces();
   if(name==='constellation') renderConstellation();
@@ -3780,6 +3800,24 @@ async function setHeroPhoto(dateStr, url){ try{ await window.storage.set('hero:'
 async function getCustomEntry(dateStr){ try{ const r=await window.storage.get('entry:'+dateStr,true); return r?JSON.parse(r.value):null; }catch(e){return null;} }
 async function getFav(dateStr){ try{ const r=await window.storage.get('fav:'+dateStr,true); return r?JSON.parse(r.value)===true:false; }catch(e){return false;} }
 async function setFav(dateStr,val){ try{ await window.storage.set('fav:'+dateStr, JSON.stringify(val), true); }catch(e){} }
+async function getDayLike(dateStr,user){ try{ const r=await window.storage.get('daylike:'+dateStr+':'+user,true); return r?JSON.parse(r.value)===true:false; }catch(e){return false;} }
+async function setDayLike(dateStr,user,val){ try{ await window.storage.set('daylike:'+dateStr+':'+user, JSON.stringify(val), true); }catch(e){} }
+async function v22RenderDayLikes(dateStr){
+  const wrap = document.getElementById('v22DayLikes');
+  if(!wrap) return;
+  const users = ['시현','강원'];
+  const state = {};
+  await Promise.all(users.map(async u=>{ state[u] = await getDayLike(dateStr,u); }));
+  wrap.querySelectorAll('.v22-like-pill').forEach(btn=>{
+    const u = btn.dataset.user;
+    btn.classList.toggle('active', state[u]);
+    btn.textContent = `${u} ${state[u]?'♥':'🤍'}`;
+    btn.onclick = async ()=>{
+      await setDayLike(dateStr, u, !state[u]);
+      v22RenderDayLikes(dateStr);
+    };
+  });
+}
 
 async function renderCalendar(){
   document.getElementById('monthLabel').innerHTML = `${monthNamesEN[viewMonth]} ${viewYear}<span class="kr">${monthNamesKR[viewMonth]}</span>`;
@@ -4362,6 +4400,27 @@ async function renderFavorites(){
   list.innerHTML = favs.map(k=>`<div class="event-item" onclick="openModal('${k}')"><div><div class="t">${escapeHtml(EVENTS[k].title)}</div><div class="d">${k}</div></div><div>♥</div></div>`).join('');
 }
 
+/* ================= LIKED DAYS (per-person, mutual) ================= */
+let v22LikedTab = 'both';
+async function renderLikedDays(tab=v22LikedTab){
+  v22LikedTab = tab;
+  document.querySelectorAll('#likedTabs .tab-pill').forEach(p=>p.classList.toggle('active', p.dataset.tab===tab));
+  const list = document.getElementById('likedContent'); if(!list) return;
+  list.innerHTML = '<div class="desc">불러오는 중…</div>';
+  const keys = Object.keys(EVENTS);
+  const rows = [];
+  for(const k of keys){
+    const [sh,gw] = await Promise.all([getDayLike(k,'시현'), getDayLike(k,'강원')]);
+    if(tab==='both' && sh && gw) rows.push(k);
+    else if(tab==='시현' && sh) rows.push(k);
+    else if(tab==='강원' && gw) rows.push(k);
+  }
+  list.innerHTML = rows.length
+    ? rows.map(k=>`<div class="event-item" onclick="openModal('${k}')"><div><div class="t">${escapeHtml(EVENTS[k].title)}</div><div class="d">${k}</div></div><div>♥</div></div>`).join('')
+    : '<div class="desc">아직 이 조건에 맞는 날이 없어요. 날짜를 열어서 좋아요를 눌러보세요.</div>';
+}
+document.querySelectorAll('#likedTabs .tab-pill').forEach(p=>p.addEventListener('click', ()=>renderLikedDays(p.dataset.tab)));
+
 /* ================= REAL KAKAO IMPORT ================= */
 let importedMessages = []; // {date:'YYYY-MM-DD', speaker, text}
 function normalizeSpeaker(name){
@@ -4514,6 +4573,10 @@ async function openModal(dateStr){
       <div class="modal-title">${data ? escapeHtml(data.title) : '아직 채워지지 않은 하루'}</div>
     </div>
     <div class="modal-body">
+      <div class="v22-day-likes" id="v22DayLikes">
+        <button class="v22-like-pill" data-user="시현">시현 🤍</button>
+        <button class="v22-like-pill" data-user="강원">강원 🤍</button>
+      </div>
       ${v8SpecialLayout(dateStr)}
       ${data && data.story ? `<div class="story">${escapeHtml(data.story)}</div>` : `<div class="empty-day-note">이 날의 이야기를 아직 적지 않았어요. 아래에 직접 기록을 남겨보세요.</div>`}
       ${kakaoHtml}
@@ -4555,6 +4618,7 @@ async function openModal(dateStr){
   renderFrames(dateStr, photos);
   renderFullChatToggle(dateStr);
   v7RenderStoryLinks(dateStr);
+  v22RenderDayLikes(dateStr);
   document.querySelectorAll('.v8-identity button').forEach(b=>{b.classList.toggle('active',b.dataset.user===v8CommentUser);b.addEventListener('click',()=>{v8SetCommentUser(b.dataset.user);v8RenderComments(dateStr);});});
   document.getElementById('v8CommentSend')?.addEventListener('click',async()=>{
     const inp=document.getElementById('v8CommentInput'); const txt=inp.value.trim(); if(!txt)return;
