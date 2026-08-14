@@ -2053,6 +2053,34 @@ button,a,.day:not(.empty),.home-card,.event-item,.firsts-item,.result-item,nav.m
 }
 </style>
 
+<style id="v22-header-widget">
+.v22-reach-widget{position:relative; height:30px; width:130px; margin:0 auto 6px; display:flex; align-items:center; justify-content:center;}
+.v22-reach-dot{width:21px; height:21px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:9.5px; font-family:'Griun Mongtori','Gaegu',cursive; color:#fff8ef; position:absolute;
+  box-shadow:0 2px 5px rgba(51,43,34,.2);}
+.v22-reach-dot.sh{background:var(--rose); left:calc(50% - 32px); animation:v22ReachL 3.4s ease-in-out infinite;}
+.v22-reach-dot.gw{background:var(--clay); right:calc(50% - 32px); animation:v22ReachR 3.4s ease-in-out infinite;}
+@keyframes v22ReachL{0%,100%{transform:translateX(0)} 50%{transform:translateX(9px)}}
+@keyframes v22ReachR{0%,100%{transform:translateX(0)} 50%{transform:translateX(-9px)}}
+.v22-reach-spark{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) scale(.5); font-size:11px;
+  color:var(--gold); opacity:0; animation:v22Spark 3.4s ease-in-out infinite; pointer-events:none;}
+@keyframes v22Spark{
+  0%,38%,100%{opacity:0; transform:translate(-50%,-50%) scale(.5)}
+  50%{opacity:1; transform:translate(-50%,-50%) scale(1.2)}
+  62%{opacity:0; transform:translate(-50%,-50%) scale(.8)}
+}
+h1.site-title{animation:v22TitleIn 1.1s cubic-bezier(.22,.9,.25,1) both;}
+@keyframes v22TitleIn{from{opacity:0; transform:translateY(9px) scale(.98);} to{opacity:1; transform:none;}}
+@media (prefers-reduced-motion: reduce){
+  .v22-reach-dot,.v22-reach-spark,h1.site-title{animation:none !important;}
+}
+.v22-hero-slide{opacity:0; transition:opacity 1.1s ease; z-index:0;}
+.v22-hero-slide.active{opacity:1; z-index:1;}
+.v22-hero-dots{position:absolute; z-index:3; right:18px; bottom:16px; display:flex; gap:6px;}
+.v22-hero-dot{width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.45); cursor:pointer; transition:.25s;}
+.v22-hero-dot.active{background:#fffaf0; width:18px; border-radius:4px;}
+</style>
+
 </head>
 <body>
 <div class="bg-noise"></div>
@@ -2144,6 +2172,11 @@ button,a,.day:not(.empty),.home-card,.event-item,.firsts-item,.result-item,nav.m
     <div class="v10-head-widget left" id="togetherWidget"></div>
     <div class="v10-title-center">
       <div class="eyebrow" onclick="goHome()">시현 &amp; 강원</div>
+      <div class="v22-reach-widget" aria-hidden="true">
+        <span class="v22-reach-dot sh">시</span>
+        <span class="v22-reach-spark">✦</span>
+        <span class="v22-reach-dot gw">강</span>
+      </div>
       <h1 class="site-title" onclick="goHome()">300 Days With You</h1>
       <div class="subtitle">from New York to us</div>
       <div class="day-badge" id="dayBadge">DAY … / 300</div>
@@ -4724,6 +4757,48 @@ async function v7RenderHomeHero(){
     ? `<img class="hero-bg" src="${src}" alt="DAY 1 대표 사진">`
     : `<div class="v7-hero-empty">DAY 1에 대표 사진을 올리면 이곳이 실제 사진으로 바뀝니다.</div>`;
 }
+
+/* ================= V22 — HOME HERO AUTO-ADVANCING CAROUSEL ================= */
+async function v22CollectHomeCarouselPhotos(){
+  const dates = Object.keys(V10_SPECIAL_DAYS);
+  const out = [];
+  for(const date of dates){
+    try{
+      const [hero, photos] = await Promise.all([getHeroPhoto(date), getPhotos(date)]);
+      const src = hero || (photos && photos[0]);
+      if(src) out.push(src);
+    }catch(e){}
+  }
+  return out;
+}
+const _v22_renderHomeHero = v7RenderHomeHero;
+v7RenderHomeHero = async function(){
+  const media = document.getElementById('v7HomeHeroMedia');
+  if(!media) return;
+  const slides = await v22CollectHomeCarouselPhotos();
+  if(slides.length <= 1){
+    return _v22_renderHomeHero();
+  }
+  if(media.dataset.v22Rendered === slides.join('|')) return; // avoid restarting timer on repeat nav clicks
+  media.dataset.v22Rendered = slides.join('|');
+  media.innerHTML = slides.map((src,i)=>`<img class="hero-bg v22-hero-slide${i===0?' active':''}" src="${src}" alt="대표 사진">`).join('') +
+    `<div class="v22-hero-dots">${slides.map((_,i)=>`<span class="v22-hero-dot${i===0?' active':''}" data-i="${i}"></span>`).join('')}</div>`;
+  let idx = 0;
+  const imgEls = media.querySelectorAll('.v22-hero-slide');
+  const dotEls = media.querySelectorAll('.v22-hero-dot');
+  function show(i){
+    idx = (i+imgEls.length)%imgEls.length;
+    imgEls.forEach((el,j)=>el.classList.toggle('active', j===idx));
+    dotEls.forEach((el,j)=>el.classList.toggle('active', j===idx));
+  }
+  if(media._v22Timer) clearInterval(media._v22Timer);
+  media._v22Timer = setInterval(()=>show(idx+1), 4200);
+  dotEls.forEach(d=>d.addEventListener('click', ()=>{
+    clearInterval(media._v22Timer);
+    show(parseInt(d.dataset.i,10));
+    media._v22Timer = setInterval(()=>show(idx+1), 4200);
+  }));
+};
 
 /* Hook v7 rendering into navigation without disturbing existing storage logic */
 document.querySelectorAll('#mainnav button').forEach(btn=>{
