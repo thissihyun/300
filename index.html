@@ -4450,6 +4450,51 @@ function runCuratedSearch(query, targetId){
 }
 function highlight(text, query){ return escapeHtml(text).split(query).join('<mark>'+escapeHtml(query)+'</mark>'); }
 
+/* ================= V22 — FULL KAKAO EXPORT SEARCH ================= */
+let v22FullChatLoaded = false;
+let v22FullChatFailed = false;
+let v22FullChatLoading = null;
+function v22LoadFullChat(){
+  if(v22FullChatLoaded || v22FullChatFailed) return Promise.resolve();
+  if(v22FullChatLoading) return v22FullChatLoading;
+  v22FullChatLoading = new Promise((resolve)=>{
+    const s = document.createElement('script');
+    s.src = 'data/full-chat.js';
+    s.onload = ()=>{ v22FullChatLoaded = true; resolve(); };
+    s.onerror = ()=>{ v22FullChatFailed = true; resolve(); };
+    document.head.appendChild(s);
+  });
+  return v22FullChatLoading;
+}
+function v22CollectFullMessages(){
+  const data = window.FULL_CHAT_DATA;
+  const out = [];
+  Object.keys(data).forEach(date=>{
+    data[date].forEach(m=> out.push({date, speaker:m.s, text:m.t}));
+  });
+  return out.sort((a,b)=> a.date<b.date?-1:1);
+}
+const _v22_runCuratedSearch = runCuratedSearch;
+runCuratedSearch = function(query, targetId){
+  const target = document.getElementById(targetId);
+  if(!query){ target.innerHTML=''; return; }
+  if(window.FULL_CHAT_DATA){
+    const all = v22CollectFullMessages();
+    const matches = all.filter(m=> m.text.includes(query));
+    target.innerHTML = `<div class="result-count">${matches.length}개 결과 (실제 카톡 전체 기록 기준)</div>` +
+      matches.map(m=>`<div class="result-item" onclick="openModal('${m.date}')"><div class="meta">${m.date} · ${m.speaker}</div>${highlight(m.text,query)}</div>`).join('');
+    return;
+  }
+  if(v22FullChatFailed){ return _v22_runCuratedSearch(query, targetId); }
+  target.innerHTML = '<div class="desc">카톡 전체 기록을 불러오는 중…</div>';
+  v22LoadFullChat().then(()=> runCuratedSearch(query, targetId));
+};
+const _v22_renderWordCloud = renderWordCloud;
+renderWordCloud = function(){
+  _v22_renderWordCloud();
+  v22LoadFullChat();
+};
+
 document.getElementById('searchBtn').addEventListener('click', ()=>{
   runCuratedSearch(document.getElementById('searchInput').value.trim(), 'searchResults');
 });
