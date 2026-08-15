@@ -271,6 +271,16 @@
   .lock-panel{text-align:center; padding:40px 20px; font-family:'Cormorant Garamond','Griun Mongtori',serif; color:var(--ink-soft);}
   .lock-panel .big{font-size:40px; margin-bottom:10px;}
   .booth-strip{display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin-bottom:6px;}
+  .booth-strip.v22-print-out{opacity:0; animation:v22PrintOut .55s cubic-bezier(.22,.9,.25,1) both; transform-origin:top center;}
+  @keyframes v22PrintOut{from{opacity:0; transform:translateY(-22px);} to{opacity:1; transform:translateY(0);}}
+  @media (prefers-reduced-motion: reduce){
+    .booth-strip.v22-print-out{animation:none !important; opacity:1 !important; transform:none !important;}
+  }
+  .result-item.v22-reveal-up{opacity:0; animation:v22RevealUp .4s cubic-bezier(.22,.9,.25,1) both;}
+  @keyframes v22RevealUp{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;}}
+  @media (prefers-reduced-motion: reduce){
+    .result-item.v22-reveal-up{animation:none !important; opacity:1 !important; transform:none !important;}
+  }
   .booth-strip img{height:130px; border-radius:4px; border:1px solid var(--line); flex-shrink:0;}
   .booth-date-label{font-family:'Griun Mongtori','Gaegu',cursive; font-size:12px; color:var(--clay); margin-bottom:6px;}
   .word-chip{
@@ -1695,6 +1705,20 @@ body.theme-spring .calendar-wrap{background:linear-gradient(180deg,rgba(216,183,
 .v20-check-item.done span{
   color:var(--ink-soft);
   text-decoration:line-through;
+}
+.v22-did-it-stamp{
+  flex:none; display:inline-block; font-family:'Griun Mongtori','Gaegu',cursive; font-size:9.5px;
+  letter-spacing:.07em; color:#7a4526; border:2px solid var(--gold); border-radius:4px; padding:1px 6px;
+  background:rgba(184,146,63,.1); text-decoration:none !important;
+  animation:v22StampPop .4s cubic-bezier(.3,1.6,.6,1) both;
+}
+@keyframes v22StampPop{
+  0%{opacity:0; transform:rotate(-8deg) scale(2.2);}
+  60%{opacity:1; transform:rotate(-8deg) scale(.85);}
+  100%{opacity:1; transform:rotate(-8deg) scale(1);}
+}
+@media (prefers-reduced-motion: reduce){
+  .v22-did-it-stamp{animation:none !important; transform:rotate(-8deg) scale(1);}
 }
 .v20-check-item .del{
   border:none;
@@ -4336,13 +4360,14 @@ async function renderBooth(){
     const list = await window.storage.list('booth:', true);
     const keys = (list && list.keys) ? list.keys.sort() : [];
     if(!keys.length){ gallery.innerHTML = '<div class="desc">아직 업로드된 인생네컷이 없어요.</div>'; return; }
-    let html = '';
+    let html = ''; let gi = 0;
     for(const key of keys){
       const dateLabel = key.replace('booth:','');
       let photos = [];
       try{ const r = await window.storage.get(key, true); photos = r ? JSON.parse(r.value) : []; }catch(e){}
       if(!photos.length) continue;
-      html += `<div class="booth-date-label">${dateLabel}</div><div class="booth-strip">` +
+      const delay = Math.min(gi*180, 900); gi++;
+      html += `<div class="booth-date-label">${dateLabel}</div><div class="booth-strip v22-print-out" style="animation-delay:${delay}ms">` +
         photos.map(p=>`<img src="${p}">`).join('') + `</div>`;
     }
     gallery.innerHTML = html || '<div class="desc">아직 업로드된 인생네컷이 없어요.</div>';
@@ -4734,7 +4759,7 @@ runCuratedSearch = function(query, targetId){
     const all = v22CollectFullMessages();
     const matches = all.filter(m=> m.text.includes(query));
     target.innerHTML = `<div class="result-count">${matches.length}개 결과 (실제 카톡 전체 기록 기준)</div>` +
-      matches.map(m=>`<div class="result-item" onclick="openModal('${m.date}')"><div class="meta">${m.date} · ${m.speaker}</div>${highlight(m.text,query)}</div>`).join('');
+      matches.map((m,i)=>`<div class="result-item v22-reveal-up" style="animation-delay:${Math.min(i*35,420)}ms" onclick="openModal('${m.date}')"><div class="meta">${m.date} · ${m.speaker}</div>${highlight(m.text,query)}</div>`).join('');
     return;
   }
   if(v22FullChatFailed){ return _v22_runCuratedSearch(query, targetId); }
@@ -4848,6 +4873,23 @@ function renderStats(){
   document.getElementById('uploadStatus').insertAdjacentHTML('afterend', '');
   const noteEl = document.getElementById('statNote') || (()=>{ const d=document.createElement('div'); d.id='statNote'; d.className='stat-note'; grid.insertAdjacentElement('afterend', d); return d; })();
   noteEl.textContent = note;
+  v22CountUpStats(grid);
+}
+function v22CountUpStats(grid){
+  grid.querySelectorAll('.stat-card .num').forEach((el,i)=>{
+    const target = parseInt(el.textContent.replace(/[^0-9]/g,''),10) || 0;
+    const start = performance.now();
+    const duration = 800;
+    const delay = Math.min(i*60, 400);
+    function step(now){
+      const t = Math.max(0, Math.min(1, (now-start-delay)/duration));
+      if(now-start < delay){ requestAnimationFrame(step); return; }
+      const eased = 1 - Math.pow(1-t, 3);
+      el.textContent = Math.round(target*eased).toLocaleString();
+      if(t<1) requestAnimationFrame(step); else el.textContent = target.toLocaleString();
+    }
+    requestAnimationFrame(step);
+  });
 }
 function renderMonthlyChart(monthly){
   const wrap = document.getElementById('monthlyChart');
@@ -4855,8 +4897,17 @@ function renderMonthlyChart(monthly){
   const max = Math.max(...entries.map(e=>e[1]), 1);
   wrap.innerHTML = `<div class="section-label">월별 카톡량</div>` + entries.map(([m,c])=>{
     const pct = Math.round((c/max)*100);
-    return `<div class="bar-row"><div class="m">${m}</div><div class="track"><div class="fill" style="width:${pct}%"></div></div><div class="c">${c.toLocaleString()}</div></div>`;
+    return `<div class="bar-row"><div class="m">${m}</div><div class="track"><div class="fill" data-pct="${pct}" style="width:0%"></div></div><div class="c">${c.toLocaleString()}</div></div>`;
   }).join('');
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      wrap.querySelectorAll('.fill').forEach((el,i)=>{
+        el.style.transition = 'width .7s cubic-bezier(.22,.9,.25,1)';
+        el.style.transitionDelay = Math.min(i*35,300)+'ms';
+        el.style.width = el.dataset.pct+'%';
+      });
+    });
+  });
 }
 document.getElementById('importSearchBtn').addEventListener('click', ()=>{
   const q = document.getElementById('importSearchInput').value.trim();
@@ -5538,6 +5589,7 @@ function renderChecklist(container, items, storeKey, title, opts={}){
       <div class="v20-check-item ${it.done?'done':''}">
         <input type="checkbox" ${it.done?'checked':''} data-id="${it.id}">
         <span>${escapeHtml(it.text)}</span>
+        ${it.done?'<span class="v22-did-it-stamp">WE DID IT</span>':''}
         <button class="del" data-id="${it.id}">✕</button>
       </div>`).join('');
     listEl.querySelectorAll('input[type=checkbox]').forEach(cb=>{
