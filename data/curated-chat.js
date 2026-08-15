@@ -7,3 +7,4 @@ document.write('<script src="assets/v26-core.js"><\/script>');
 document.write('<script src="assets/v26-special.js"><\/script>');
 document.write('<script src="assets/v26-future.js"><\/script>');
 document.write('<script src="assets/v26-pwa.js"><\/script>');
+document.write('<script src="assets/v26-polish.js"><\/script>');
