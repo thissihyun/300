@@ -1,4 +1,9 @@
-/* V25 loader: keep original curated chat immutable, then enhance OUR DIARY + device identity. */
+/* V26 loader: keep the original Kakao source immutable, then layer the app experience on top. */
 document.write('<script src="https://cdn.jsdelivr.net/gh/thissihyun/300@f504a42c66b2d59521c6869713caf966d8ee33bc/data/curated-chat.js"><\/script>');
 document.write('<script src="assets/daily-us-v24.js"><\/script>');
 document.write('<script src="assets/identity-v25.js"><\/script>');
+document.write('<script src="assets/v26-bootstrap.js"><\/script>');
+document.write('<script src="assets/v26-core.js"><\/script>');
+document.write('<script src="assets/v26-special.js"><\/script>');
+document.write('<script src="assets/v26-future.js"><\/script>');
+document.write('<script src="assets/v26-pwa.js"><\/script>');
