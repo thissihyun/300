@@ -36,15 +36,15 @@ async function callOpen(date){
   try{
     let fn=window.openModal;
     if(typeof fn!=='function')fn=globalValue('openModal');
-    if(typeof fn==='function')await Promise.resolve(fn(date));
+    if(typeof fn==='function')await Promise.race([Promise.resolve().then(()=>fn(date)),sleep(650)]);
   }catch(e){console.warn('[V28 openModal]',e)}
-  await sleep(180);
+  await sleep(80);
   if(overlay?.classList.contains('open'))return true;
   try{
     const sheet=globalValue('v22OpenMemorySheet');
-    if(typeof sheet==='function')await Promise.resolve(sheet(date));
+    if(typeof sheet==='function')await Promise.race([Promise.resolve().then(()=>sheet(date)),sleep(350)]);
   }catch(e){}
-  await sleep(120);
+  await sleep(70);
   if(overlay?.classList.contains('open')||document.querySelector('.v22-memory-sheet.open,.v22-sheet.open,[data-date="'+date+'"].open'))return true;
   fallback(date);return false;
 }
@@ -56,7 +56,7 @@ function intercept(e){
   annotate();const date=targetDate(hit);if(!date)return;
   const now=Date.now();if(lastEl===hit&&now-lastAt<500){e.preventDefault();e.stopPropagation();return}
   lastAt=now;lastEl=hit;e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();
-  hit.animate?.([{opacity:.7,transform:getComputedStyle(hit).transform},{opacity:1,transform:getComputedStyle(hit).transform}],{duration:160});
+  hit.animate?.([{opacity:.7},{opacity:1}],{duration:160});
   callOpen(date);
 }
 document.addEventListener('click',intercept,true);
