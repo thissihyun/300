@@ -16,7 +16,8 @@ const CSS=`
 `;
 function addStyle(){if(document.getElementById('v27RepairStyle'))return;const s=document.createElement('style');s.id='v27RepairStyle';s.textContent=CSS;document.head.appendChild(s)}
 function wireClicks(){
-  document.querySelectorAll('.v26-landmark').forEach((btn,i)=>{if(btn.dataset.v27wired)return;btn.dataset.v27wired='1';const pin=(window.NYC_PINS||[])[i];if(pin?.dates?.[0])btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();openModal(pin.dates[0])},true)});
+  const pins=(typeof NYC_PINS!=='undefined'?NYC_PINS:[]);
+  document.querySelectorAll('.v26-landmark').forEach((btn,i)=>{if(btn.dataset.v27wired)return;btn.dataset.v27wired='1';const pin=pins[i];if(pin?.dates?.[0])btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();openModal(pin.dates[0])},true)});
   document.querySelectorAll('.v26-star[data-d],.v26-season-links [data-d]').forEach(btn=>{if(btn.dataset.v27wired)return;btn.dataset.v27wired='1';btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();openModal(btn.dataset.d)},true)})
 }
 const SHELF=[['timeline','🎬','Our Story','챕터 순서로 보는 전체 이야기'],['photoalbum','▣','Photo Album','모든 실제 사진을 다시 보기'],['firsts','💌','Our Firsts','처음이었던 순간들'],['posters','🎞','Dates I’d Live Again','다시 살고 싶은 날들'],['photobooth','▥','Photobooth Archive','인생네컷 아카이브'],['favorites','♡','Our Favorites','저장해둔 기억'],['liked','♥','Days We Both Loved','둘이 좋아한 날'],['funny','☺','Funny & Inside Jokes','웃긴 순간과 둘만의 말'],['thankyou','✦','300 Days of 고마워','과거 카톡 속 고마움'],['lookback','↗','Before / Came True','말했던 미래와 실제가 된 날'],['search','⌕','Search Our Story','날짜·장소·카톡 검색'],['places','🗽','Cities We Shared','뉴욕 밖의 도시까지']];
