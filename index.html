@@ -142,6 +142,11 @@
   .v22-firsts-thumb img{width:100%; height:100%; object-fit:cover;}
   .v22-firsts-noph{font-size:16px; opacity:.4;}
   .v22-firsts-text{display:flex; flex-direction:column;}
+  .firsts-item.v22-stamp-in{opacity:0; transform:scale(1.5) rotate(-9deg); transition:opacity .3s ease, transform .38s cubic-bezier(.32,1.5,.6,1);}
+  .firsts-item.v22-stamp-in.v22-stamped{opacity:1; transform:scale(1) rotate(0deg);}
+  @media (prefers-reduced-motion: reduce){
+    .firsts-item.v22-stamp-in{opacity:1 !important; transform:none !important; transition:none !important;}
+  }
   .firsts-line::before{content:""; position:absolute; left:8px; top:6px; bottom:6px; width:1.5px; background:var(--thread); opacity:.4;}
   .firsts-item{position:relative; margin-bottom:18px; cursor:pointer;}
   .firsts-item::before{content:"●"; position:absolute; left:-26px; top:2px; color:var(--rose-deep); font-size:11px;}
@@ -204,19 +209,34 @@
   .city-card{cursor:default;}
   .city-card.clickable{cursor:pointer;}
   .poster-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:16px; margin-top:6px;}
-  .poster-card{
-    aspect-ratio:2/3; border-radius:8px; position:relative; overflow:hidden; cursor:pointer;
+  .poster-card{aspect-ratio:2/3; position:relative; cursor:pointer; perspective:1200px;}
+  .poster-inner{position:relative; width:100%; height:100%; transition:transform .55s cubic-bezier(.4,.2,.2,1); transform-style:preserve-3d;}
+  .poster-card.flipped .poster-inner, .poster-card:hover .poster-inner{transform:rotateY(180deg);}
+  .poster-front, .poster-back{position:absolute; inset:0; border-radius:8px; overflow:hidden; backface-visibility:hidden; -webkit-backface-visibility:hidden;}
+  .poster-front{
     display:flex; flex-direction:column; justify-content:flex-end; padding:14px 12px; color:#fdf8ee;
-    box-shadow:0 12px 26px rgba(40,30,20,0.28); transition:.2s; border:1px solid rgba(255,255,255,0.15);
+    box-shadow:0 12px 26px rgba(40,30,20,0.28); border:1px solid rgba(255,255,255,0.15);
   }
-  .poster-card:hover{transform:translateY(-5px) scale(1.02); box-shadow:0 18px 34px rgba(40,30,20,0.38);}
-  .poster-card::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent 35%, rgba(20,14,8,0.75) 100%);}
-  .poster-card .p-content{position:relative; z-index:2;}
-  .poster-card .p-genre{font-family:'Griun Mongtori','Gaegu',cursive; font-size:9.5px; letter-spacing:.15em; opacity:.85; text-transform:uppercase;}
-  .poster-card .p-title{font-family:'Playfair Display','Griun Mongtori',serif; font-style:italic; font-weight:600; font-size:16px; line-height:1.15; margin:4px 0 6px;}
-  .poster-card .p-tagline{font-family:'Cormorant Garamond','Griun Mongtori',serif; font-style:italic; font-size:11px; opacity:.9; line-height:1.3; margin-bottom:8px;}
-  .poster-card .p-meta{font-family:'Griun Mongtori','Gaegu',cursive; font-size:9px; opacity:.8; border-top:1px solid rgba(255,255,255,0.25); padding-top:6px;}
-  .poster-card .p-stars{position:absolute; top:10px; right:10px; z-index:2; font-size:10px; opacity:.9;}
+  .poster-front::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent 35%, rgba(20,14,8,0.75) 100%);}
+  .poster-front .p-content{position:relative; z-index:2;}
+  .poster-front .p-genre{font-family:'Griun Mongtori','Gaegu',cursive; font-size:9.5px; letter-spacing:.15em; opacity:.85; text-transform:uppercase;}
+  .poster-front .p-title{font-family:'Playfair Display','Griun Mongtori',serif; font-style:italic; font-weight:600; font-size:16px; line-height:1.15; margin:4px 0 6px;}
+  .poster-front .p-tagline{font-family:'Cormorant Garamond','Griun Mongtori',serif; font-style:italic; font-size:11px; opacity:.9; line-height:1.3; margin-bottom:8px;}
+  .poster-front .p-meta{font-family:'Griun Mongtori','Gaegu',cursive; font-size:9px; opacity:.8; border-top:1px solid rgba(255,255,255,0.25); padding-top:6px;}
+  .poster-front .p-stars{position:absolute; top:10px; right:10px; z-index:2; font-size:10px; opacity:.9;}
+  .poster-back{
+    transform:rotateY(180deg); background:var(--paper-deep); border:1px solid var(--line);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    padding:16px; gap:7px; box-shadow:0 12px 26px rgba(40,30,20,0.2);
+  }
+  .poster-back .pb-date{font-family:'Griun Mongtori','Gaegu',cursive; color:var(--rose-deep); font-size:11px; letter-spacing:.1em;}
+  .poster-back .pb-loc{font-family:'Playfair Display','Griun Mongtori',serif; font-style:italic; font-size:16px; color:var(--ink);}
+  .poster-back .pb-line{font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:12px; color:var(--ink-soft); line-height:1.4;}
+  .poster-back .pb-play{margin-top:6px; border:1px solid var(--rose); background:var(--rose); color:#fff; border-radius:999px;
+    padding:6px 16px; font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:12.5px; cursor:pointer;}
+  @media (prefers-reduced-motion: reduce){
+    .poster-inner{transition:none !important;}
+  }
 
   .word-cloud{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:10px 0 20px;}
   .quote-card{background:rgba(255,255,255,0.5); border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:10px; cursor:pointer; transition:.15s;}
@@ -4188,9 +4208,11 @@ const POSTER_GRADIENTS = [
 ];
 async function renderPosters(){
   const grid = document.getElementById('posterGrid'); grid.innerHTML='';
+  const canHover = window.matchMedia && window.matchMedia('(hover:hover)').matches;
   for(let i=0; i<POSTERS.length; i++){
     const p = POSTERS[i];
     const card = document.createElement('div'); card.className='poster-card';
+    const front = document.createElement('div'); front.className='poster-front';
     let coverSrc = null;
     try{
       const hero = await getHeroPhoto(p.date);
@@ -4198,14 +4220,14 @@ async function renderPosters(){
       coverSrc = hero || (photos && photos[0]) || null;
     }catch(e){}
     if(coverSrc){
-      card.style.backgroundImage = `url('${coverSrc}')`;
-      card.style.backgroundSize = 'cover';
-      card.style.backgroundPosition = 'center';
+      front.style.backgroundImage = `url('${coverSrc}')`;
+      front.style.backgroundSize = 'cover';
+      front.style.backgroundPosition = 'center';
     } else {
-      card.style.background = POSTER_GRADIENTS[i % POSTER_GRADIENTS.length];
+      front.style.background = POSTER_GRADIENTS[i % POSTER_GRADIENTS.length];
     }
     const [y,m,d] = p.date.split('-');
-    card.innerHTML = `
+    front.innerHTML = `
       <div class="p-stars">${p.stars}</div>
       <div class="p-content">
         <div class="p-genre">${escapeHtml(p.genre)}</div>
@@ -4213,7 +4235,20 @@ async function renderPosters(){
         <div class="p-tagline">${escapeHtml(p.tagline)}</div>
         <div class="p-meta">starring 시현 &amp; 강원 · ${y}.${m}.${d}</div>
       </div>`;
-    card.addEventListener('click', ()=>openModal(p.date));
+    const back = document.createElement('div'); back.className='poster-back';
+    back.innerHTML = `
+      <div class="pb-date">${y}.${m}.${d}</div>
+      <div class="pb-loc">${escapeHtml(p.title)}</div>
+      <div class="pb-line">${escapeHtml(p.tagline)}</div>
+      <button type="button" class="pb-play">PLAY ▶</button>`;
+    const inner = document.createElement('div'); inner.className='poster-inner';
+    inner.appendChild(front); inner.appendChild(back);
+    card.appendChild(inner);
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.pb-play') || canHover){ openModal(p.date); return; }
+      if(!card.classList.contains('flipped')){ card.classList.add('flipped'); }
+      else{ openModal(p.date); }
+    });
     grid.appendChild(card);
   }
 }
@@ -4614,8 +4649,9 @@ function v22BindThreadScroll(wrap){
 /* ================= FIRSTS ================= */
 async function renderFirsts(){
   const wrap = document.getElementById('firstsWrap'); wrap.innerHTML='';
+  const items = [];
   for(const [k,label] of FIRSTS){
-    const item = document.createElement('div'); item.className='firsts-item';
+    const item = document.createElement('div'); item.className='firsts-item v22-stamp-in';
     let thumbSrc = null;
     try{
       const hero = await getHeroPhoto(k);
@@ -4627,6 +4663,17 @@ async function renderFirsts(){
       <div class="v22-firsts-text"><div class="label">${escapeHtml(label)}</div><div class="date">${k}</div></div>`;
     item.addEventListener('click', ()=>openModal(k));
     wrap.appendChild(item);
+    items.push(item);
+  }
+  if('IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(en=>{
+        if(en.isIntersecting){ en.target.classList.add('v22-stamped'); io.unobserve(en.target); }
+      });
+    }, {threshold:0.35});
+    items.forEach(el=>io.observe(el));
+  } else {
+    items.forEach(el=>el.classList.add('v22-stamped'));
   }
 }
 
