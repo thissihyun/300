@@ -1,4 +1,4 @@
-/* V29 loader: keep the original Kakao source immutable, then layer the app experience on top. */
+/* V30 loader: keep the original Kakao source immutable, then layer the app experience on top. */
 document.write('<script src="https://cdn.jsdelivr.net/gh/thissihyun/300@f504a42c66b2d59521c6869713caf966d8ee33bc/data/curated-chat.js"><\/script>');
 document.write('<script src="assets/daily-us-v24.js"><\/script>');
 document.write('<script src="assets/identity-v25.js"><\/script>');
@@ -11,3 +11,4 @@ document.write('<script src="assets/v26-polish.js"><\/script>');
 document.write('<script src="assets/v27-repair-restore.js"><\/script>');
 document.write('<script src="assets/v28-click-hotfix.js?build=20260816-0035"><\/script>');
 document.write('<script src="assets/v29-photo-first.js?build=20260816-0049"><\/script>');
+document.write('<script src="assets/v30-desktop-click.js?build=20260816-0054"><\/script>');
