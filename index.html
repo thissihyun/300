@@ -670,18 +670,37 @@
   body.theme-spring{--chapter-accent:#81966f}
   .panel::before{background:repeating-linear-gradient(90deg,var(--chapter-accent) 0 18px,transparent 18px 30px)}
 
+  .v22-bottom-tabs{display:none;}
   @media(max-width:640px){
-    nav.mainnav.v7-nav{
-      position:fixed;bottom:calc(10px + env(safe-area-inset-bottom));top:auto;left:50%;transform:translateX(-50%);
-      width:calc(100% - 20px);display:grid;grid-template-columns:repeat(6,1fr);gap:2px;
-      border-radius:18px;padding:5px;
+    nav.mainnav.v7-nav{display:none;}
+    .v22-bottom-tabs{
+      display:grid; grid-template-columns:repeat(5,1fr);
+      position:fixed; bottom:calc(10px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
+      width:calc(100% - 20px); max-width:440px; z-index:140; gap:2px;
+      background:rgba(246,241,230,.94); backdrop-filter:blur(12px);
+      border:1px solid rgba(217,203,176,.85); border-radius:18px; padding:5px;
+      box-shadow:0 8px 24px rgba(51,43,34,.14);
     }
-    nav.mainnav.v7-nav button{padding:8px 2px;font-size:9.5px;white-space:nowrap}
-    #app{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+    .v22-tab{
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+      border:none; background:transparent; padding:7px 2px; border-radius:13px; cursor:pointer;
+      color:var(--ink-soft); transition:background .2s ease, color .2s ease; min-height:44px;
+    }
+    .v22-tab svg{width:19px; height:19px; display:block;}
+    .v22-tab-label{font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:9px; letter-spacing:.01em;}
+    .v22-tab.active{background:var(--ink); color:#fff;}
+    #app{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
     .v7-home-hero,.v7-hero-copy{min-height:520px}
     .v7-hero-copy{padding:34px 24px}
     .v7-hero-note{right:12px;top:12px;font-size:11px}
   }
+  .v22-more-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding-top:2px;}
+  .v22-more-item{
+    display:flex; flex-direction:column; align-items:center; gap:6px; border:1px solid var(--line);
+    background:#fffdf8; border-radius:12px; padding:16px 8px; cursor:pointer;
+    font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:12.5px; color:var(--ink);
+  }
+  .v22-more-item .ic{font-size:20px;}
 
 
   /* =========================================================
@@ -2432,6 +2451,29 @@ h1.site-title{animation:v22TitleIn 1.1s cubic-bezier(.22,.9,.25,1) both;}
     <button data-view="photoalbum">ALBUM</button>
     <button data-view="specials">SPECIALS</button>
     <button data-view="future">OUR FUTURE</button>
+  </nav>
+
+  <nav class="v22-bottom-tabs" id="v22BottomTabs" aria-hidden="true">
+    <button type="button" class="v22-tab" data-view="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg>
+      <span class="v22-tab-label">Home</span>
+    </button>
+    <button type="button" class="v22-tab" data-view="calendar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
+      <span class="v22-tab-label">Calendar</span>
+    </button>
+    <button type="button" class="v22-tab" data-view="timeline">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="1.6"/><circle cx="18" cy="19" r="1.6"/><path d="M6 6.6V11a4 4 0 0 0 4 4h4a4 4 0 0 1 4 4"/></svg>
+      <span class="v22-tab-label">Story</span>
+    </button>
+    <button type="button" class="v22-tab" data-view="places">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg>
+      <span class="v22-tab-label">Map</span>
+    </button>
+    <button type="button" class="v22-tab" id="v22MoreTabBtn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+      <span class="v22-tab-label">More</span>
+    </button>
   </nav>
 
   <!-- HOME -->
@@ -6210,6 +6252,7 @@ const _v22_switchView = switchView;
 switchView = function(name){
   _v22_switchView(name);
   setTimeout(v22RevealActiveView, 70);
+  v22SyncBottomTabs(name);
 };
 v22RevealActiveView();
 
@@ -6298,6 +6341,39 @@ async function v22MaybeFireGratitudeReminder(){
     localStorage.setItem('v22_gratitude_last_notify', date);
   }catch(e){}
 }
+
+/* ================= V23 — MOBILE BOTTOM TAB BAR ================= */
+document.querySelectorAll('.v22-tab[data-view]').forEach(b=>{
+  b.addEventListener('click', ()=> switchView(b.dataset.view));
+});
+function v22SyncBottomTabs(name){
+  const primary = ['home','calendar','timeline','places'];
+  document.querySelectorAll('.v22-tab[data-view]').forEach(b=> b.classList.toggle('active', b.dataset.view===name));
+  document.getElementById('v22MoreTabBtn')?.classList.toggle('active', !primary.includes(name));
+}
+const V22_MORE_ITEMS = [
+  {view:'photoalbum', label:'Album', ic:'📷'},
+  {view:'specials', label:'Specials', ic:'✨'},
+  {view:'future', label:'Our Future', ic:'🔮'},
+  {view:'favorites', label:'Favorites', ic:'♥'},
+  {view:'liked', label:'Liked Days', ic:'💛'},
+  {view:'search', label:'Search', ic:'🔍'},
+];
+function v22OpenMoreSheet(){
+  const sheet = document.getElementById('v22MemorySheet');
+  const backdrop = document.getElementById('v22SheetBackdrop');
+  if(!sheet || !backdrop) return;
+  sheet.innerHTML = `<div class="handle"></div><div class="v22-more-grid">${V22_MORE_ITEMS.map(it=>
+    `<button type="button" class="v22-more-item" data-view="${it.view}"><span class="ic">${it.ic}</span><span>${it.label}</span></button>`
+  ).join('')}</div>`;
+  sheet.querySelectorAll('.v22-more-item').forEach(b=> b.addEventListener('click', ()=>{
+    v22CloseMemorySheet();
+    switchView(b.dataset.view);
+  }));
+  backdrop.classList.add('open');
+  requestAnimationFrame(()=> sheet.classList.add('open'));
+}
+document.getElementById('v22MoreTabBtn')?.addEventListener('click', v22OpenMoreSheet);
 
 /* ================= V23 — CALENDAR LIGHT SPREAD + MEMORY BOTTOM SHEET ================= */
 function v22LightSpread(cell){
