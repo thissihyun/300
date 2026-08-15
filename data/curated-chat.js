@@ -13,4 +13,4 @@ document.write('<script src="assets/v28-click-hotfix.js?build=20260816-0035"><\/
 document.write('<script src="assets/v29-photo-first.js?build=20260816-0049"><\/script>');
 document.write('<script src="assets/v30-desktop-click.js?build=20260816-0054"><\/script>');
 document.write('<script src="assets/v31-calendar-album.js?build=20260816-0108"><\/script>');
-document.write('<script src="assets/v31-polish.js?build=20260816-0116"><\/script>');
+document.write('<script src="assets/v31-polish.js?build=20260816-0124"><\/script>');
