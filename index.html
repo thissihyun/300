@@ -294,6 +294,28 @@
   .v22-gratitude-garden{font-size:17px; letter-spacing:2px; margin-top:12px; line-height:1.6; min-height:22px;}
   .v22-garden-empty{color:var(--ink-soft); opacity:.35; letter-spacing:6px;}
   .v22-gratitude-caption{font-family:'Griun Mongtori','Gaegu',cursive; font-size:11px; color:var(--ink-soft); margin-top:4px;}
+  .v22-ripple-host{position:relative !important;}
+  .v22-ripple-clip{overflow:hidden !important;}
+  .v22-ripple{position:absolute; border-radius:50%; background:rgba(193,123,127,.32); transform:scale(0);
+    animation:v22RippleAnim .55s ease-out forwards; pointer-events:none; z-index:8;}
+  @keyframes v22RippleAnim{to{transform:scale(1); opacity:0;}}
+  @media (prefers-reduced-motion: reduce){
+    .v22-ripple{display:none !important;}
+  }
+  .modal-fav{transition:transform .15s ease;}
+  .modal-fav.v22-fav-pop{animation:v22FavPop .4s cubic-bezier(.3,1.6,.5,1);}
+  @keyframes v22FavPop{0%{transform:scale(1);} 45%{transform:scale(1.4);} 100%{transform:scale(1);}}
+  .v22-fav-sparkle{position:fixed; z-index:500; color:var(--gold); font-size:11px; pointer-events:none;
+    transform:translate(-50%,-50%); animation:v22FavSparkle .6s ease-out forwards;}
+  @keyframes v22FavSparkle{
+    0%{opacity:0; transform:translate(-50%,-50%) scale(.4);}
+    25%{opacity:1;}
+    100%{opacity:0; transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .modal-fav.v22-fav-pop{animation:none !important;}
+    .v22-fav-sparkle{display:none !important;}
+  }
   .booth-strip img{height:130px; border-radius:4px; border:1px solid var(--line); flex-shrink:0;}
   .booth-date-label{font-family:'Griun Mongtori','Gaegu',cursive; font-size:12px; color:var(--clay); margin-bottom:6px;}
   .word-chip{
@@ -5043,10 +5065,18 @@ async function openModal(dateStr){
   modalEl.dataset.date = dateStr;
   overlay.classList.add('open');
   document.getElementById('closeBtn').addEventListener('click', closeModal);
-  document.getElementById('favBtn').addEventListener('click', async ()=>{
-    const newVal = !isFav;
+  document.getElementById('favBtn').addEventListener('click', async (e)=>{
+    const btn = e.currentTarget;
+    const newVal = !btn.classList.contains('active');
+    if(newVal){
+      btn.classList.add('active');
+      btn.classList.remove('v22-fav-pop'); void btn.offsetWidth; btn.classList.add('v22-fav-pop');
+      v22SparkleBurst(btn);
+      v8Toast('Favorite memory saved ♡');
+    } else {
+      btn.classList.remove('active');
+    }
     await setFav(dateStr, newVal);
-    openModal(dateStr);
   });
   if(prevKey) document.getElementById('prevEventBtn').addEventListener('click', ()=>openModal(prevKey));
   if(nextKey) document.getElementById('nextEventBtn').addEventListener('click', ()=>openModal(nextKey));
@@ -6237,6 +6267,47 @@ async function v22MaybeFireGratitudeReminder(){
     localStorage.setItem('v22_gratitude_last_notify', date);
   }catch(e){}
 }
+
+/* ================= V23 — FAVORITE SPARKLE ================= */
+function v22SparkleBurst(anchorEl){
+  const rect = anchorEl.getBoundingClientRect();
+  const cx = rect.left+rect.width/2, cy = rect.top+rect.height/2;
+  [-0.55, 0.55].forEach(offset=>{
+    const s = document.createElement('span');
+    s.className = 'v22-fav-sparkle';
+    s.textContent = '✦';
+    const angle = -Math.PI/2 + offset;
+    const dist = 20;
+    s.style.left = cx+'px'; s.style.top = cy+'px';
+    s.style.setProperty('--dx', (Math.cos(angle)*dist)+'px');
+    s.style.setProperty('--dy', (Math.sin(angle)*dist)+'px');
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(), 700);
+  });
+}
+
+/* ================= V23 — GLOBAL RIPPLE FEEDBACK ================= */
+const V23_RIPPLE_SELECTOR = 'button, .event-item, .stat-card, .award-card, .v15-photo-card, .quote-card, .home-card, .v7-hub-card, .tab-pill, .word-chip, .city-card';
+document.addEventListener('pointerdown', (e)=>{
+  if(e.button !== undefined && e.button > 0) return;
+  const el = e.target.closest(V23_RIPPLE_SELECTOR);
+  if(!el || el.closest('.poster-card') || el.closest('.day')) return;
+  const rect = el.getBoundingClientRect();
+  if(rect.width===0 || rect.height===0) return;
+  const size = Math.max(rect.width, rect.height) * 1.5;
+  const cx = (e.clientX!==undefined && e.clientX!==0) ? e.clientX : rect.left+rect.width/2;
+  const cy = (e.clientY!==undefined && e.clientY!==0) ? e.clientY : rect.top+rect.height/2;
+  const pos = getComputedStyle(el).position;
+  if(pos === 'static') el.classList.add('v22-ripple-host');
+  if(getComputedStyle(el).overflow === 'visible') el.classList.add('v22-ripple-clip');
+  const ripple = document.createElement('span');
+  ripple.className = 'v22-ripple';
+  ripple.style.width = ripple.style.height = size+'px';
+  ripple.style.left = (cx - rect.left - size/2)+'px';
+  ripple.style.top = (cy - rect.top - size/2)+'px';
+  el.appendChild(ripple);
+  setTimeout(()=>ripple.remove(), 600);
+}, {passive:true});
 
 </script>
 <div id="v7Lightbox" aria-hidden="true">
