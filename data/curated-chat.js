@@ -10,4 +10,4 @@ document.write('<script src="assets/v26-pwa.js"><\/script>');
 document.write('<script src="assets/v26-polish.js"><\/script>');
 document.write('<script src="assets/v27-repair-restore.js"><\/script>');
 document.write('<script src="assets/v28-click-hotfix.js?build=20260816-0035"><\/script>');
-document.write('<script src="assets/v29-photo-first.js?build=20260816-0045"><\/script>');
+document.write('<script src="assets/v29-photo-first.js?build=20260816-0049"><\/script>');
