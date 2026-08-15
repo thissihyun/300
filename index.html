@@ -307,6 +307,34 @@
   @media (prefers-reduced-motion: reduce){
     .v22-gratitude-reveal.v22-just-revealed .v22-reveal-card{animation:none !important; opacity:1 !important;}
   }
+  .v22-today-hub{padding:2px 2px 10px;}
+  .v22-today-title{font-family:'Griun Mongtori','Gaegu',cursive; font-size:11.5px; color:var(--rose-deep); letter-spacing:.08em; margin-bottom:6px;}
+  .v22-today-big{font-family:'Playfair Display','Griun Mongtori',serif; font-style:italic; font-size:19px; color:var(--ink); margin-bottom:14px;}
+  .v22-today-table{width:100%; border-collapse:collapse; margin-bottom:16px; font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:13px;}
+  .v22-today-table tr:first-child{color:var(--ink-soft); font-size:11px;}
+  .v22-today-table td{padding:7px 6px; border-bottom:1px solid var(--line); text-align:center;}
+  .v22-today-table td:first-child{text-align:left; font-family:'Nanum Myeongjo',serif;}
+  .v22-today-cta{display:flex; gap:8px; margin-bottom:14px;}
+  .v22-today-cta button{
+    flex:1; border:1px solid var(--rose); background:var(--rose); color:#fff; border-radius:999px; padding:9px 10px;
+    font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:12.5px; cursor:pointer; min-height:40px;
+  }
+  .v22-today-cta button#v22TodayRecordBtn{background:#fff; color:var(--rose);}
+  .v22-today-streak{font-family:'Griun Mongtori','Gaegu',cursive; font-size:12.5px; color:var(--clay); margin-bottom:12px;}
+  .v22-today-jar{border-top:1px dashed var(--line); padding-top:12px;}
+  .v22-thanks-search input{
+    width:100%; box-sizing:border-box; border:1px solid var(--line); border-radius:999px; padding:9px 14px;
+    font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:13px; margin-bottom:12px; background:#fffdf8;
+  }
+  .v22-teaser{margin-top:16px; background:rgba(255,253,248,.6); border:1px solid var(--line); border-radius:12px; padding:11px 16px;}
+  .v22-teaser-row{display:flex; align-items:center; flex-wrap:wrap; gap:8px 12px; font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:13px;}
+  .v22-teaser-label{font-family:'Griun Mongtori','Gaegu',cursive; color:var(--rose-deep); font-size:12.5px;}
+  .v22-teaser-status{color:var(--ink-soft);}
+  .v22-teaser-row button{
+    margin-left:auto; border:none; background:none; color:var(--rose); cursor:pointer;
+    font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:13px; text-decoration:underline;
+  }
+  .v22-teaser-streak{font-family:'Griun Mongtori','Gaegu',cursive; font-size:11px; color:var(--clay); margin-top:5px;}
   .v22-gratitude-garden{font-size:17px; letter-spacing:2px; margin-top:12px; line-height:1.6; min-height:22px;}
   .v22-garden-empty{color:var(--ink-soft); opacity:.35; letter-spacing:6px;}
   .v22-gratitude-caption{font-family:'Griun Mongtori','Gaegu',cursive; font-size:11px; color:var(--ink-soft); margin-top:4px;}
@@ -2399,11 +2427,13 @@ h1.site-title{animation:v22TitleIn 1.1s cubic-bezier(.22,.9,.25,1) both;}
 <div id="v10ArchiveDrawer">
   <div class="v10-drawer-head"><h3>OUR DIARY</h3><button id="v10ArchiveClose">✕</button></div>
   <div class="v10-drawer-tabs">
-    <button data-tab="records" class="active">기록</button>
+    <button data-tab="today" class="active">TODAY</button>
+    <button data-tab="records">기록</button>
     <button data-tab="notes">메모</button>
     <button data-tab="comments">댓글</button>
     <button data-tab="chats">♥ 카톡</button>
     <button data-tab="questions">질문</button>
+    <button data-tab="thanks">THANKS</button>
     <button data-tab="stats">통계</button>
   </div>
   <div class="v10-drawer-body" id="v10ArchiveBody"></div>
@@ -2524,6 +2554,7 @@ h1.site-title{animation:v22TitleIn 1.1s cubic-bezier(.22,.9,.25,1) both;}
         </div>
       </div>
     </div>
+    <div class="v22-teaser" id="v22HomeTeaser"></div>
     <div class="panel v9-today">
       <h2>OUR TODAY</h2>
       <div class="desc">오늘의 연애 감정, 함께한 활동, 그리고 서로에게 하루 한 질문.</div>
@@ -3751,7 +3782,13 @@ async function v10RenderArchive(tab='records'){
   const body=document.getElementById('v10ArchiveBody');if(!body)return;
   body.innerHTML='<div class="v8-comment-empty">불러오는 중…</div>';
   document.querySelectorAll('.v10-drawer-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
-  if(tab==='records'){
+  if(tab==='today'){
+    await v22RenderTodayHub(body);
+    return;
+  }else if(tab==='thanks'){
+    await v22RenderThanksArchive(body);
+    return;
+  }else if(tab==='records'){
     const rows=(await v10AllCheckins()).sort((a,b)=>b.date.localeCompare(a.date));
     body.innerHTML=rows.length?rows.map(r=>`<div class="v10-archive-item" data-date="${r.date}"><div class="meta">${r.date} · ${escapeHtml(r.user)}</div><div class="text">${r.mood?v10MoodChip(r.mood):'감정 미선택'}</div><div class="tags">${(r.activities||[]).map(x=>`<span class="tag">${escapeHtml(x)}</span>`).join('')}</div></div>`).join(''):'<div class="v8-comment-empty">아직 저장한 하루 기록이 없어요.</div>';
   }else if(tab==='notes'){
@@ -3827,7 +3864,7 @@ function goHome(){ switchView('home'); }
 document.querySelectorAll('#mainnav button').forEach(b=> b.addEventListener('click', ()=>switchView(b.dataset.view)));
 
 
-document.getElementById('v10ArchiveBtn')?.addEventListener('click',()=>{document.getElementById('v10ArchiveDrawer').classList.add('open');v10RenderArchive('records')});
+document.getElementById('v10ArchiveBtn')?.addEventListener('click',()=>{document.getElementById('v10ArchiveDrawer').classList.add('open');v10RenderArchive('today')});
 document.getElementById('v10ArchiveClose')?.addEventListener('click',()=>document.getElementById('v10ArchiveDrawer').classList.remove('open'));
 document.querySelectorAll('.v10-drawer-tabs button').forEach(b=>b.addEventListener('click',()=>v10RenderArchive(b.dataset.tab)));
 
@@ -4077,6 +4114,7 @@ function renderHome(){
   renderTogetherWidget();
   renderReunionWidget(false);
   v22RenderGratitude();
+  v22RenderHomeTeaser();
   document.getElementById('homeQuote').textContent = HOME_QUOTES[Math.floor(Math.random()*HOME_QUOTES.length)];
   const today = new Date();
   const mmdd = String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
@@ -6286,6 +6324,127 @@ switchView = function(name){
   v22SyncBottomTabs(name);
 };
 v22RevealActiveView();
+
+/* ================= V22 — HOME TEASER ================= */
+async function v22RenderHomeTeaser(){
+  const wrap = document.getElementById('v22HomeTeaser');
+  if(!wrap) return;
+  const date = v9ISODate();
+  const [shG, gwG, streak] = await Promise.all([
+    getGratitude(date,'시현'), getGratitude(date,'강원'), v22GetGratitudeStreak()
+  ]);
+  const shDone = !!(shG && shG.text && shG.text.trim());
+  const gwDone = !!(gwG && gwG.text && gwG.text.trim());
+  wrap.innerHTML = `
+    <div class="v22-teaser-row">
+      <span class="v22-teaser-label">♡ Today's gratitude</span>
+      <span class="v22-teaser-status">시현 ${shDone?'✓':'○'} · 강원 ${gwDone?'✓':'○'}</span>
+      <button type="button" id="v22TeaserWriteBtn">Write yours →</button>
+    </div>
+    ${streak>0?`<div class="v22-teaser-streak">🔥 ${streak} DAY STREAK</div>`:''}`;
+  document.getElementById('v22TeaserWriteBtn')?.addEventListener('click', ()=>{
+    document.getElementById('v22GratitudeInput')?.scrollIntoView({behavior:'smooth', block:'center'});
+    setTimeout(()=> document.getElementById('v22GratitudeInput')?.focus(), 350);
+  });
+}
+
+/* ================= V22 — TODAY HUB + THANKS ARCHIVE ================= */
+async function v22GetGratitudeStreak(){
+  let streak = 0;
+  const d = new Date();
+  for(let i=0;i<60;i++){
+    const dateStr = v9ISODate(d);
+    const sh = await getGratitude(dateStr,'시현');
+    const gw = await getGratitude(dateStr,'강원');
+    const done = !!(sh && sh.text && sh.text.trim() && gw && gw.text && gw.text.trim());
+    if(i===0 && !done){ d.setDate(d.getDate()-1); continue; }
+    if(!done) break;
+    streak++;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+async function v22RenderTodayHub(body){
+  const date = v9ISODate();
+  const [shG, gwG, shC, gwC, shQ, gwQ, streak, gratCount] = await Promise.all([
+    getGratitude(date,'시현'), getGratitude(date,'강원'),
+    v10GetCheckin(date,'시현'), v10GetCheckin(date,'강원'),
+    v9AnswerGet(date,'시현'), v9AnswerGet(date,'강원'),
+    v22GetGratitudeStreak(), v22CountGratitude()
+  ]);
+  const rows = [
+    {label:'♡ 오늘의 감사', sh: !!(shG && shG.text && shG.text.trim()), gw: !!(gwG && gwG.text && gwG.text.trim())},
+    {label:'✎ 오늘의 기록', sh: !!shC, gw: !!gwC},
+    {label:'? 오늘의 질문', sh: !!(shQ && shQ.text && shQ.text.trim()), gw: !!(gwQ && gwQ.text && gwQ.text.trim())},
+  ];
+  const doneCount = rows.filter(r=>r.sh && r.gw).length;
+  const flowers = Math.min(20, Math.floor(gratCount/2));
+  body.innerHTML = `
+    <div class="v22-today-hub">
+      <div class="v22-today-title">${date} · DAY ${dayCount(new Date())}</div>
+      <div class="v22-today-big">오늘 우리 둘 다 ${doneCount} / ${rows.length} 완료</div>
+      <table class="v22-today-table">
+        <tr><td></td><td>시현</td><td>강원</td></tr>
+        ${rows.map(r=>`<tr><td>${r.label}</td><td>${r.sh?'✓':'—'}</td><td>${r.gw?'✓':'—'}</td></tr>`).join('')}
+      </table>
+      <div class="v22-today-cta">
+        <button type="button" id="v22TodayGratBtn">♡ 감사 남기기</button>
+        <button type="button" id="v22TodayRecordBtn">✎ 오늘 기록하기</button>
+      </div>
+      <div class="v22-today-streak">🔥 ${streak}일째 함께 기록 중</div>
+      <div class="v22-today-jar">
+        <div class="v22-gratitude-garden">${flowers?'🌷'.repeat(flowers):''}</div>
+        <div class="v22-gratitude-caption">THANK-YOU JAR · ${gratCount} thank-yous</div>
+      </div>
+    </div>`;
+  document.getElementById('v22TodayGratBtn')?.addEventListener('click', ()=>{
+    document.getElementById('v10ArchiveDrawer')?.classList.remove('open');
+    switchView('home');
+    setTimeout(()=> document.getElementById('v22GratitudeInput')?.focus(), 250);
+  });
+  document.getElementById('v22TodayRecordBtn')?.addEventListener('click', ()=>{
+    document.getElementById('v10ArchiveDrawer')?.classList.remove('open');
+    switchView('home');
+    setTimeout(()=> document.getElementById('v10MoodCard')?.scrollIntoView({behavior:'smooth', block:'center'}), 250);
+  });
+}
+async function v22RenderThanksArchive(body){
+  let allItems = [];
+  try{
+    const l = await window.storage.list('gratitude:', true);
+    for(const k of (l.keys||[])){
+      try{
+        const r = await window.storage.get(k,true);
+        const v = JSON.parse(r.value);
+        if(v.text && v.text.trim()){
+          const parts = k.split(':');
+          allItems.push({date:parts[1], user:parts.slice(2).join(':'), text:v.text});
+        }
+      }catch(e){}
+    }
+  }catch(e){}
+  allItems.sort((a,b)=> b.date.localeCompare(a.date));
+  body.innerHTML = `
+    <div class="v22-thanks-search"><input id="v22ThanksSearch" placeholder="감사 내용 검색 (예: 공부, 기다려줘서)"></div>
+    <div id="v22ThanksResults"></div>`;
+  function draw(query){
+    const resultsEl = document.getElementById('v22ThanksResults');
+    if(!resultsEl) return;
+    const items = query ? allItems.filter(it=>it.text.includes(query)) : allItems;
+    resultsEl.innerHTML = items.length
+      ? items.map(it=>`<div class="v10-archive-item" data-date="${it.date}"><div class="meta">${it.date} · FROM ${escapeHtml(it.user)}</div><div class="text">${escapeHtml(it.text)}</div></div>`).join('')
+      : '<div class="v8-comment-empty">아직 저장된 감사가 없어요.</div>';
+    resultsEl.querySelectorAll('.v10-archive-item[data-date]').forEach(el=> el.addEventListener('click', ()=>{
+      document.getElementById('v10ArchiveDrawer')?.classList.remove('open');
+      openModal(el.dataset.date);
+    }));
+  }
+  draw('');
+  document.getElementById('v22ThanksSearch')?.addEventListener('input', (e)=>{
+    clearTimeout(window._v22ThanksSearchT);
+    window._v22ThanksSearchT = setTimeout(()=> draw(e.target.value.trim()), 200);
+  });
+}
 
 /* ================= V22 — DAILY GRATITUDE JOURNAL ================= */
 function v22GratitudeRevealSparkles(anchorEl){
