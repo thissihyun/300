@@ -291,6 +291,22 @@
     font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:12px; cursor:pointer;
   }
   .v22-gratitude-other{margin-top:4px;}
+  .v22-gratitude-locked{
+    margin-top:14px; padding:12px 14px; background:rgba(184,146,63,.1); border:1px dashed var(--gold);
+    border-radius:10px; font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:13px; color:var(--gold-text); text-align:center;
+  }
+  .v22-gratitude-locked span{display:block; font-size:11.5px; opacity:.8; margin-top:3px;}
+  .v22-gratitude-reveal{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;}
+  .v22-reveal-card{background:#fffdf8; border:1px solid var(--line); border-radius:10px; padding:12px;}
+  .v22-reveal-card .who{font-family:'Griun Mongtori','Gaegu',cursive; font-size:10.5px; color:var(--rose-deep); margin-bottom:5px; letter-spacing:.06em;}
+  .v22-reveal-card .txt{font-family:'Nanum Myeongjo',serif; font-size:12.5px; line-height:1.55; color:var(--ink); white-space:pre-wrap;}
+  .v22-gratitude-reveal.v22-just-revealed .v22-reveal-card{opacity:0; animation:v22RevealCardIn .5s cubic-bezier(.22,.9,.25,1) both;}
+  .v22-gratitude-reveal.v22-just-revealed .v22-reveal-card.right{animation-delay:.18s;}
+  @keyframes v22RevealCardIn{from{opacity:0; transform:translateY(10px) scale(.96);} to{opacity:1; transform:none;}}
+  @media (max-width:520px){ .v22-gratitude-reveal{grid-template-columns:1fr;} }
+  @media (prefers-reduced-motion: reduce){
+    .v22-gratitude-reveal.v22-just-revealed .v22-reveal-card{animation:none !important; opacity:1 !important;}
+  }
   .v22-gratitude-garden{font-size:17px; letter-spacing:2px; margin-top:12px; line-height:1.6; min-height:22px;}
   .v22-garden-empty{color:var(--ink-soft); opacity:.35; letter-spacing:6px;}
   .v22-gratitude-caption{font-family:'Griun Mongtori','Gaegu',cursive; font-size:11px; color:var(--ink-soft); margin-top:4px;}
@@ -6272,6 +6288,22 @@ switchView = function(name){
 v22RevealActiveView();
 
 /* ================= V22 — DAILY GRATITUDE JOURNAL ================= */
+function v22GratitudeRevealSparkles(anchorEl){
+  const rect = anchorEl.getBoundingClientRect();
+  const cx = rect.left+rect.width/2, cy = rect.top+8;
+  [-1.1,-0.45,0.45,1.1].forEach(offset=>{
+    const s = document.createElement('span');
+    s.className = 'v22-fav-sparkle';
+    s.textContent = '✦';
+    const angle = -Math.PI/2 + offset;
+    const dist = 28;
+    s.style.left = cx+'px'; s.style.top = cy+'px';
+    s.style.setProperty('--dx', (Math.cos(angle)*dist)+'px');
+    s.style.setProperty('--dy', (Math.sin(angle)*dist)+'px');
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(), 700);
+  });
+}
 async function getGratitude(dateStr,user){ try{ const r=await window.storage.get('gratitude:'+dateStr+':'+user,true); return r?JSON.parse(r.value):null; }catch(e){return null;} }
 async function setGratitude(dateStr,user,text){ try{ await window.storage.set('gratitude:'+dateStr+':'+user, JSON.stringify({text,savedAt:Date.now()}), true); }catch(e){} }
 async function v22CountGratitude(){ try{ const l=await window.storage.list('gratitude:',true); let n=0; for(const k of (l.keys||[])){ try{ const r=await window.storage.get(k,true); if(r && JSON.parse(r.value).text?.trim()) n++; }catch(e){} } return n; }catch(e){return 0;} }
@@ -6292,10 +6324,24 @@ async function v22RenderGratitude(){
   document.getElementById('v22GratitudeWho').textContent = `${me}으로 작성 중`;
   const mine = await getGratitude(date, me);
   const other = await getGratitude(date, otherUser);
+  const bothDone = !!(mine && mine.text && mine.text.trim() && other && other.text && other.text.trim());
+  const wasBothDone = wrap.dataset.v22WasBoth === '1';
+  wrap.dataset.v22WasBoth = bothDone ? '1' : '0';
+
+  let statusHtml = '';
+  if(bothDone){
+    statusHtml = `<div class="v22-gratitude-reveal${(!wasBothDone)?' v22-just-revealed':''}" id="v22GratitudeReveal">
+      <div class="v22-reveal-card left"><div class="who">FROM ${escapeHtml(me)}</div><div class="txt">${escapeHtml(mine.text)}</div></div>
+      <div class="v22-reveal-card right"><div class="who">FROM ${escapeHtml(otherUser)}</div><div class="txt">${escapeHtml(other.text)}</div></div>
+    </div>`;
+  } else if(other && other.text && other.text.trim()){
+    statusHtml = `<div class="v22-gratitude-locked">💌 ${escapeHtml(otherUser)}의 감사가 도착했어요<span>내가 오늘의 감사를 남기면 함께 열 수 있어요.</span></div>`;
+  }
+
   wrap.innerHTML = `
-    <textarea class="note-area" id="v22GratitudeInput" placeholder="오늘 상대방에게 고마웠던 순간을 적어보세요.">${escapeHtml(mine?.text||'')}</textarea>
+    <textarea class="note-area" id="v22GratitudeInput" placeholder="오늘 ${escapeHtml(otherUser)}에게 고마웠던 순간을 적어보세요.">${escapeHtml(mine?.text||'')}</textarea>
     <div class="save-hint" id="v22GratitudeHint">자동 저장돼요.</div>
-    ${other && other.text && other.text.trim() ? `<div class="section-label" style="margin-top:14px">${escapeHtml(otherUser)}이 남긴 감사</div><div class="story">${escapeHtml(other.text)}</div>` : ''}
+    ${statusHtml}
     <div class="v22-gratitude-garden" id="v22GratitudeGarden"></div>
     <div class="v22-gratitude-caption" id="v22GratitudeCaption"></div>`;
   const input = document.getElementById('v22GratitudeInput');
@@ -6310,9 +6356,14 @@ async function v22RenderGratitude(){
         hint.textContent = '저장됨 ✓'; hint.classList.add('ok');
         v22UpdateGratitudeGarden();
         v22CheckGratitudeReminder();
+        v22RenderGratitude();
       }catch(e){ hint.textContent = '저장 실패'; }
     }, 600);
   });
+  if(bothDone && !wasBothDone){
+    const reveal = document.getElementById('v22GratitudeReveal');
+    if(reveal) setTimeout(()=> v22GratitudeRevealSparkles(reveal), 180);
+  }
   v22UpdateGratitudeGarden();
   v22CheckGratitudeReminder();
   v22NotifySetup();
