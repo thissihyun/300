@@ -165,6 +165,34 @@
   .pin .dot{width:12px;height:12px; border-radius:50% 50% 50% 0; background:var(--rose-deep); transform:rotate(-45deg); margin:0 auto; box-shadow:0 2px 4px rgba(0,0,0,0.25);}
   .pin .lbl{font-family:'Griun Mongtori','Gaegu',cursive; font-size:10px; background:rgba(255,253,248,0.92); border:1px solid var(--line); border-radius:4px; padding:1px 5px; margin-top:3px; white-space:nowrap; display:inline-block;}
   .pin:hover .dot{background:var(--gold);}
+  .v22-map-thread{stroke:#b23b3b; stroke-width:1; stroke-linecap:round; stroke-linejoin:round; opacity:.75;}
+  .v22-visited-stamp{display:inline-block; font-family:'Griun Mongtori','Gaegu',cursive; font-size:7px; letter-spacing:.06em;
+    color:var(--sage-text); border:1px solid var(--sage); border-radius:3px; padding:0 3px; transform:rotate(-6deg);
+    vertical-align:middle; margin-left:2px; opacity:.85;}
+  .v22-pin-card{position:absolute; z-index:5; width:132px; background:#fffdf8; border:1px solid var(--line);
+    border-radius:8px; box-shadow:0 10px 22px rgba(40,30,20,.28); padding:8px; text-align:left;
+    opacity:0; transform:translateY(8px) scale(.92); pointer-events:none; transition:opacity .22s ease, transform .22s ease;}
+  .v22-pin-card.open{opacity:1; transform:translateY(0) scale(1); pointer-events:auto;}
+  .v22-pin-card img{width:100%; height:70px; object-fit:cover; border-radius:5px; margin-bottom:6px; display:block;}
+  .v22-pin-card .t{font-family:'Griun Mongtori','Gaegu',cursive; font-size:11px; color:var(--clay); margin-bottom:5px;}
+  .v22-pin-card button{width:100%; border:1px solid var(--line); background:var(--rose); color:#fff; border-radius:999px;
+    padding:5px 8px; font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:11px; cursor:pointer;}
+  .v22-pin-thumb{width:100%; height:76px; object-fit:cover; border-radius:6px; margin-bottom:6px; display:block;}
+  @media (prefers-reduced-motion: reduce){
+    .v22-map-thread{transition:none !important;}
+  }
+  .v22-thread-wrap{position:relative; padding-left:26px;}
+  .v22-thread-line{position:absolute; left:8px; top:2px; width:2px; background:var(--thread); height:0;
+    transition:height .12s linear; z-index:0; border-radius:2px;}
+  .event-item.v22-thread-knot{position:relative;}
+  .v22-knot-dot{position:absolute; left:-28px; top:50%; transform:translateY(-50%); width:22px; height:22px;
+    border-radius:50%; background:#fff8ec; border:2px solid var(--thread); display:flex; align-items:center;
+    justify-content:center; font-size:11px; z-index:1; box-shadow:0 2px 4px rgba(51,43,34,.22);}
+  @media (max-width:640px){
+    .v22-thread-wrap{padding-left:22px;}
+    .v22-thread-line{left:6px;}
+    .v22-knot-dot{left:-24px; width:19px; height:19px; font-size:9.5px;}
+  }
   .v22-leaflet-map{width:100%; max-width:560px; height:420px; margin:0 auto; border-radius:10px; overflow:hidden;
     border:1px solid var(--line); box-shadow:var(--shadow); filter:saturate(.85) sepia(.08);}
   .v22-leaflet-pin span{display:block; width:16px; height:16px; border-radius:50% 50% 50% 0; transform:rotate(-45deg);
@@ -4038,24 +4066,64 @@ const CITIES = [
   {icon:"🎓", name:"Daejeon · KAIST", date:"2026-01-09"},
   {icon:"🌆", name:"Busan", date:"2026-03-18"},
 ];
-function renderIllustrativeMap(mapWrap){
-  let pinsHtml = NYC_PINS.map(p=>`
-    <div class="pin" style="left:${p.x}%; top:${p.y}%;" onclick="openModal('${p.dates[0]}')">
-      <div class="dot"></div><div class="lbl">${escapeHtml(p.name)}</div>
+async function v22CollectPinThumbs(pins){
+  return Promise.all(pins.map(async p=>{
+    let thumb = null;
+    try{
+      const hero = await getHeroPhoto(p.dates[0]);
+      const photos = await getPhotos(p.dates[0]);
+      thumb = hero || (photos && photos[0]) || null;
+    }catch(e){}
+    return thumb;
+  }));
+}
+function renderIllustrativeMap(mapWrap, thumbs){
+  let pinsHtml = NYC_PINS.map((p,i)=>`
+    <div class="pin" style="left:${p.x}%; top:${p.y}%;" data-idx="${i}">
+      <div class="dot"></div><div class="lbl">${escapeHtml(p.name)} <span class="v22-visited-stamp">VISITED</span></div>
     </div>`).join('');
+  const points = NYC_PINS.map(p=>`${p.x},${p.y*1.25}`).join(' ');
   mapWrap.innerHTML = `<div class="mapstage">
     <svg viewBox="0 0 100 125" preserveAspectRatio="none">
       <path d="M35,0 L45,0 L48,15 L42,40 L50,60 L45,90 L55,125 L38,125 L30,90 L34,55 L28,30 Z" fill="#e3d5b8" stroke="#c9b98f" stroke-width="0.6"/>
       <path d="M0,45 L100,45 M0,65 L100,65 M20,0 L20,125 M65,0 L65,125" stroke="#d9cba7" stroke-width="0.4" opacity="0.6"/>
+      <polyline id="v22MapThread" class="v22-map-thread" points="${points}" fill="none" vector-effect="non-scaling-stroke"/>
     </svg>
     ${pinsHtml}
+    <div class="v22-pin-card" id="v22PinCard"></div>
   </div>`;
+  const threadEl = document.getElementById('v22MapThread');
+  if(threadEl && threadEl.getTotalLength){
+    const len = threadEl.getTotalLength();
+    threadEl.style.strokeDasharray = String(len);
+    threadEl.style.strokeDashoffset = String(len);
+    requestAnimationFrame(()=>{
+      threadEl.style.transition = 'stroke-dashoffset 1.8s ease';
+      threadEl.style.strokeDashoffset = '0';
+    });
+  }
+  const card = document.getElementById('v22PinCard');
+  mapWrap.querySelectorAll('.pin').forEach(pinEl=>{
+    pinEl.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const idx = Number(pinEl.dataset.idx);
+      const p = NYC_PINS[idx];
+      const thumb = thumbs && thumbs[idx];
+      card.innerHTML = `${thumb?`<img src="${thumb}" alt="${escapeHtml(p.name)}">`:''}<div class="t">${escapeHtml(p.name)}</div><button type="button">기억 열어보기 →</button>`;
+      card.style.left = Math.min(p.x,72)+'%';
+      card.style.top = Math.max(p.y-6,4)+'%';
+      card.classList.add('open');
+      card.querySelector('button').onclick = ()=> openModal(p.dates[0]);
+    });
+  });
+  mapWrap.querySelector('.mapstage').addEventListener('click', ()=> card.classList.remove('open'));
 }
-function renderPlaces(){
+async function renderPlaces(){
   const mapWrap = document.getElementById('nycMapWrap');
   const geoPins = NYC_PINS.filter(p=>typeof p.lat==='number' && typeof p.lng==='number');
+  const thumbs = await v22CollectPinThumbs(NYC_PINS);
   if(typeof L === 'undefined' || !geoPins.length){
-    renderIllustrativeMap(mapWrap);
+    renderIllustrativeMap(mapWrap, thumbs);
   } else {
     mapWrap.innerHTML = `<div id="v22LeafletMap" class="v22-leaflet-map"></div>`;
     try{
@@ -4066,17 +4134,29 @@ function renderPlaces(){
       }).addTo(map);
       const bounds = L.latLngBounds(geoPins.map(p=>[p.lat,p.lng]));
       map.fitBounds(bounds, {padding:[28,28]});
+      const thread = L.polyline(geoPins.map(p=>[p.lat,p.lng]), {color:'#b23b3b', weight:3, opacity:.85, lineJoin:'round'}).addTo(map);
+      requestAnimationFrame(()=>{
+        const pathEl = thread.getElement && thread.getElement();
+        if(pathEl && pathEl.getTotalLength){
+          const len = pathEl.getTotalLength();
+          pathEl.style.strokeDasharray = String(len);
+          pathEl.style.strokeDashoffset = String(len);
+          pathEl.style.transition = 'stroke-dashoffset 1.8s ease';
+          requestAnimationFrame(()=>{ pathEl.style.strokeDashoffset = '0'; });
+        }
+      });
       const pinIcon = L.divIcon({className:'v22-leaflet-pin', html:'<span></span>', iconSize:[16,16]});
-      geoPins.forEach(p=>{
+      geoPins.forEach((p,i)=>{
         const marker = L.marker([p.lat,p.lng], {icon:pinIcon}).addTo(map);
+        const thumb = thumbs[NYC_PINS.indexOf(p)];
         const popupEl = document.createElement('div');
         popupEl.className = 'v22-leaflet-popup';
-        popupEl.innerHTML = `<div class="t">${escapeHtml(p.name)}</div><button type="button">기억 열어보기 →</button>`;
+        popupEl.innerHTML = `${thumb?`<img src="${thumb}" class="v22-pin-thumb" alt="${escapeHtml(p.name)}">`:''}<div class="t">${escapeHtml(p.name)}</div><div class="v22-visited-stamp">VISITED</div><button type="button">기억 열어보기 →</button>`;
         popupEl.querySelector('button').addEventListener('click', ()=>openModal(p.dates[0]));
         marker.bindPopup(popupEl);
       });
     }catch(e){
-      renderIllustrativeMap(mapWrap);
+      renderIllustrativeMap(mapWrap, thumbs);
     }
   }
   const citiesWrap = document.getElementById('citiesWrap');
@@ -4491,7 +4571,8 @@ async function renderDay500(container){
 
 /* ================= CHAPTERS / TIMELINE ================= */
 function renderChapters(){
-  const wrap = document.getElementById('chaptersWrap'); wrap.innerHTML='';
+  const wrap = document.getElementById('chaptersWrap'); wrap.innerHTML=''; wrap.classList.add('v22-thread-wrap');
+  wrap.innerHTML = `<div class="v22-thread-line" id="v22ThreadLine"></div>`;
   const byChapter = {};
   Object.entries(EVENTS).sort((a,b)=>a[0]<b[0]?-1:1).forEach(([k,v])=>{
     (byChapter[v.chapter] = byChapter[v.chapter]||[]).push([k,v]);
@@ -4502,14 +4583,32 @@ function renderChapters(){
     block.innerHTML = `<h3>${ch}</h3>`;
     const list = document.createElement('div'); list.className='event-list';
     byChapter[ch].forEach(([k,v])=>{
-      const item = document.createElement('div'); item.className='event-item';
-      item.innerHTML = `<div><div class="t">${escapeHtml(v.title)}</div><div class="d">${k}</div></div><div>→</div>`;
+      const isMilestone = !!V10_SPECIAL_DAYS[k];
+      const item = document.createElement('div'); item.className='event-item' + (isMilestone?' v22-thread-knot':'');
+      item.innerHTML = `${isMilestone?`<span class="v22-knot-dot" title="${escapeHtml(V10_SPECIAL_DAYS[k].label)}">${V10_SPECIAL_DAYS[k].icon}</span>`:''}<div><div class="t">${escapeHtml(v.title)}</div><div class="d">${k}</div></div><div>→</div>`;
       item.addEventListener('click', ()=>openModal(k));
       list.appendChild(item);
     });
     block.appendChild(list);
     wrap.appendChild(block);
   });
+  v22BindThreadScroll(wrap);
+}
+function v22BindThreadScroll(wrap){
+  const line = document.getElementById('v22ThreadLine');
+  if(!line) return;
+  function update(){
+    const rect = wrap.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    const total = rect.height || 1;
+    const visibleBottom = Math.min(vh*0.8, rect.bottom);
+    const progressPx = Math.max(0, Math.min(total, visibleBottom - rect.top));
+    line.style.height = progressPx+'px';
+  }
+  update();
+  window.removeEventListener('scroll', window._v22ThreadScrollHandler || (()=>{}));
+  window._v22ThreadScrollHandler = update;
+  window.addEventListener('scroll', update, {passive:true});
 }
 
 /* ================= FIRSTS ================= */
