@@ -1,0 +1,7 @@
+/* V31 small polish: remove legacy calendar legend and surface Photo Album */
+(function(){
+'use strict';
+const css=`#view-calendar #calendarWrap>.legend{display:none!important}.v31-album-jump{border:1px solid var(--line);border-radius:999px;background:#fffdf8;color:var(--ink);padding:8px 12px;font:700 9.5px 'Gaegu',sans-serif;cursor:pointer;white-space:nowrap}.v31-album-jump:hover{background:var(--ink);color:#fff;border-color:var(--ink)}@media(max-width:720px){.v31-cal-toolbar{display:grid!important;grid-template-columns:1fr auto!important}.v31-view-switch{max-width:none!important}.v31-album-jump{padding:8px 10px}.v31-cal-hint{display:none!important}}`;
+function add(){if(!document.getElementById('v31PolishStyle')){const s=document.createElement('style');s.id='v31PolishStyle';s.textContent=css;document.head.appendChild(s)}const tb=document.querySelector('#view-calendar .v31-cal-toolbar');if(tb&&!tb.querySelector('.v31-album-jump')){const b=document.createElement('button');b.className='v31-album-jump';b.textContent='PHOTO ALBUM →';b.onclick=()=>{try{switchView('photoalbum')}catch(e){}};const hint=tb.querySelector('.v31-cal-hint');if(hint)hint.replaceWith(b);else tb.appendChild(b)}}
+const mo=new MutationObserver(add);mo.observe(document.documentElement,{childList:true,subtree:true});setTimeout(add,500);window.addEventListener('v26:view',e=>{if(e.detail==='calendar')setTimeout(add,60)});
+})();
