@@ -1,0 +1,8 @@
+/* 300 DAYS WITH YOU — V26 PWA service worker */
+const CACHE='300-days-v26-1';
+const CORE=['./','./index.html','./manifest.webmanifest','./assets/daily-us-v24.js','./assets/identity-v25.js','./assets/v26-core.js','./assets/v26-special.js','./assets/v26-future.js','./assets/v26-pwa.js','./assets/app-icon-v26.svg'];
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}));self.skipWaiting()});
+self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE&&k.startsWith('300-days-')).map(k=>caches.delete(k)))));self.clients.claim()});
+self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;event.respondWith(fetch(event.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(c=>c.put(event.request,copy)).catch(()=>{});return res}).catch(()=>caches.match(event.request).then(r=>r||caches.match('./index.html'))))});
+self.addEventListener('push',event=>{let data={};try{data=event.data?event.data.json():{}}catch(e){data={body:event.data?event.data.text():''}}const title=data.title||'300 DAYS WITH YOU';const options={body:data.body||'새로운 우리 기록이 도착했어요.',icon:'assets/app-icon-v26.svg',badge:'assets/app-icon-v26.svg',tag:data.tag||'300-days-activity',data:data.data||{}};event.waitUntil(self.registration.showNotification(title,options))});
+self.addEventListener('notificationclick',event=>{event.notification.close();const date=event.notification.data&&event.notification.data.date;event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const c of list){if('focus'in c){c.postMessage({type:'OPEN_DATE',date});return c.focus()}}return clients.openWindow('./')}))});
