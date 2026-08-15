@@ -701,6 +701,21 @@
     font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:12.5px; color:var(--ink);
   }
   .v22-more-item .ic{font-size:20px;}
+  .home-card.v22-shuffling{animation:v22ShuffleShake .08s linear infinite;}
+  @keyframes v22ShuffleShake{0%{transform:translateX(0);} 50%{transform:translateX(-2px);} 100%{transform:translateX(2px);}}
+  .home-card.v22-shuffle-land{animation:v22ShuffleLand .26s cubic-bezier(.3,1.6,.5,1);}
+  @keyframes v22ShuffleLand{0%{transform:scale(1.08);} 100%{transform:scale(1);}}
+  .v22-modal-burst-star{position:fixed; z-index:500; color:var(--gold); pointer-events:none; transform:translate(-50%,-50%);
+    animation:v22ModalBurst .6s ease-out forwards;}
+  @keyframes v22ModalBurst{
+    0%{opacity:0; transform:translate(-50%,-50%) scale(.3);}
+    20%{opacity:1;}
+    100%{opacity:0; transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .home-card.v22-shuffling, .home-card.v22-shuffle-land{animation:none !important;}
+    .v22-modal-burst-star{display:none !important;}
+  }
 
 
   /* =========================================================
@@ -6341,6 +6356,66 @@ async function v22MaybeFireGratitudeReminder(){
     localStorage.setItem('v22_gratitude_last_notify', date);
   }catch(e){}
 }
+
+/* ================= V23 — RANDOM MEMORY SHUFFLE ================= */
+const _v22_randomCard = document.getElementById('randomCard');
+if(_v22_randomCard){
+  const freshRandomCard = _v22_randomCard.cloneNode(true);
+  _v22_randomCard.replaceWith(freshRandomCard);
+  freshRandomCard.addEventListener('click', async ()=>{
+    const keys = Object.keys(EVENTS);
+    if(!keys.length) return;
+    const card = document.getElementById('randomCard');
+    const titleEl = card.querySelector('.title');
+    const subEl = card.querySelector('.sub');
+    const originalTitle = titleEl.textContent, originalSub = subEl.textContent;
+    card.classList.add('v22-shuffling');
+    for(let i=0;i<8;i++){
+      const k = keys[Math.floor(Math.random()*keys.length)];
+      titleEl.textContent = EVENTS[k].title;
+      subEl.textContent = k;
+      await new Promise(r=>setTimeout(r, 65 + i*10));
+    }
+    const finalKey = keys[Math.floor(Math.random()*keys.length)];
+    titleEl.textContent = EVENTS[finalKey].title;
+    subEl.textContent = finalKey;
+    card.classList.remove('v22-shuffling');
+    card.classList.add('v22-shuffle-land');
+    await new Promise(r=>setTimeout(r, 260));
+    card.classList.remove('v22-shuffle-land');
+    titleEl.textContent = originalTitle; subEl.textContent = originalSub;
+    openModal(finalKey);
+  });
+}
+
+/* ================= V23 — MILESTONE MODAL MICRO-BURST ================= */
+function v22MilestoneModalBurst(){
+  const head = document.querySelector('.modal-head');
+  if(!head) return;
+  const rect = head.getBoundingClientRect();
+  const count = 4 + Math.floor(Math.random()*3);
+  for(let i=0;i<count;i++){
+    const star = document.createElement('span');
+    star.className = 'v22-modal-burst-star';
+    star.textContent = '✦';
+    const angle = Math.random()*Math.PI*2;
+    const dist = 26 + Math.random()*38;
+    star.style.left = (rect.left + rect.width*(0.2 + Math.random()*0.6))+'px';
+    star.style.top = (rect.top + rect.height*0.5)+'px';
+    star.style.setProperty('--dx', (Math.cos(angle)*dist)+'px');
+    star.style.setProperty('--dy', (Math.sin(angle)*dist)+'px');
+    star.style.fontSize = (10+Math.random()*8)+'px';
+    star.style.animationDelay = (Math.random()*0.12)+'s';
+    document.body.appendChild(star);
+    setTimeout(()=>star.remove(), 750);
+  }
+}
+const _v22_openModal = openModal;
+openModal = async function(dateStr){
+  await _v22_openModal(dateStr);
+  const sp = V10_SPECIAL_DAYS[dateStr];
+  if(sp && /^DAY \d+$/.test(sp.label)) v22MilestoneModalBurst();
+};
 
 /* ================= V23 — MOBILE BOTTOM TAB BAR ================= */
 document.querySelectorAll('.v22-tab[data-view]').forEach(b=>{
