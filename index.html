@@ -316,6 +316,36 @@
     .modal-fav.v22-fav-pop{animation:none !important;}
     .v22-fav-sparkle{display:none !important;}
   }
+  .v22-light-spread{
+    position:absolute; inset:0; border-radius:5px; pointer-events:none; z-index:4;
+    background:radial-gradient(circle, rgba(255,250,230,.9) 0%, rgba(255,250,230,0) 70%);
+    opacity:0; animation:v22LightSpread .5s ease-out forwards;
+  }
+  @keyframes v22LightSpread{0%{opacity:0; transform:scale(.3);} 40%{opacity:1;} 100%{opacity:0; transform:scale(1.9);}}
+  .v22-sheet-backdrop{position:fixed; inset:0; background:rgba(20,16,12,.4); z-index:250; opacity:0; pointer-events:none; transition:opacity .25s ease;}
+  .v22-sheet-backdrop.open{opacity:1; pointer-events:auto;}
+  .v22-memory-sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:251; max-width:640px; margin:0 auto;
+    background:var(--paper); border-radius:18px 18px 0 0; box-shadow:0 -14px 34px rgba(0,0,0,.28);
+    padding:16px 20px calc(20px + env(safe-area-inset-bottom));
+    transform:translateY(105%); transition:transform .32s cubic-bezier(.22,.9,.25,1);
+    max-height:64vh; overflow-y:auto;
+  }
+  .v22-memory-sheet.open{transform:translateY(0);}
+  .v22-memory-sheet .handle{width:36px; height:4px; background:var(--line); border-radius:3px; margin:0 auto 12px;}
+  .v22-memory-sheet .hero{display:block; width:100%; height:150px; object-fit:cover; border-radius:10px; margin-bottom:12px; background:var(--paper-deep);}
+  .v22-memory-sheet .date{font-family:'Griun Mongtori','Gaegu',cursive; color:var(--rose-deep); font-size:12px; letter-spacing:.08em;}
+  .v22-memory-sheet .title{font-family:'Playfair Display','Griun Mongtori',serif; font-style:italic; font-size:21px; margin:4px 0 6px; color:var(--ink);}
+  .v22-memory-sheet .meta{font-family:'Cormorant Garamond','Griun Mongtori',serif; color:var(--ink-soft); font-size:13px; margin-bottom:16px;}
+  .v22-memory-sheet .actions{display:flex; gap:10px;}
+  .v22-memory-sheet .fav-btn{border:1px solid var(--line); background:#fff; border-radius:999px; padding:9px 16px; cursor:pointer; font-size:16px; color:var(--line); flex:none; min-height:44px;}
+  .v22-memory-sheet .fav-btn.active{color:var(--thread); border-color:var(--thread);}
+  .v22-memory-sheet .view-btn{flex:1; border:none; background:var(--rose); color:#fff; border-radius:999px; padding:10px 16px;
+    font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:14px; cursor:pointer; min-height:44px;}
+  @media (prefers-reduced-motion: reduce){
+    .v22-light-spread{display:none !important;}
+    .v22-memory-sheet, .v22-sheet-backdrop{transition:none !important;}
+  }
   .booth-strip img{height:130px; border-radius:4px; border:1px solid var(--line); flex-shrink:0;}
   .booth-date-label{font-family:'Griun Mongtori','Gaegu',cursive; font-size:12px; color:var(--clay); margin-bottom:6px;}
   .word-chip{
@@ -4051,7 +4081,8 @@ async function renderCalendar(){
     }
     cell.addEventListener('click', ()=>{
       cell.classList.remove('v22-bounce'); void cell.offsetWidth; cell.classList.add('v22-bounce');
-      openModal(dateStr);
+      v22LightSpread(cell);
+      v22OpenMemorySheet(dateStr);
     });
     grid.appendChild(cell);
   }
@@ -6268,6 +6299,54 @@ async function v22MaybeFireGratitudeReminder(){
   }catch(e){}
 }
 
+/* ================= V23 — CALENDAR LIGHT SPREAD + MEMORY BOTTOM SHEET ================= */
+function v22LightSpread(cell){
+  const glow = document.createElement('div');
+  glow.className = 'v22-light-spread';
+  cell.appendChild(glow);
+  setTimeout(()=>glow.remove(), 550);
+}
+async function v22OpenMemorySheet(dateStr){
+  const sheet = document.getElementById('v22MemorySheet');
+  const backdrop = document.getElementById('v22SheetBackdrop');
+  if(!sheet || !backdrop) return;
+  const built = EVENTS[dateStr];
+  const [hero, photos, isFav, customEntry] = await Promise.all([
+    getHeroPhoto(dateStr), getPhotos(dateStr), getFav(dateStr), built ? Promise.resolve(null) : getCustomEntry(dateStr)
+  ]);
+  const curated = CURATED_CHAT[dateStr] || [];
+  const heroSrc = hero || (photos && photos[0]);
+  const title = built ? built.title : (customEntry && customEntry.title) ? customEntry.title : dateStr;
+  sheet.innerHTML = `
+    <div class="handle"></div>
+    ${heroSrc?`<img class="hero" src="${heroSrc}" alt="${escapeHtml(title)}">`:''}
+    <div class="date">${dateStr}</div>
+    <div class="title">${escapeHtml(title)}</div>
+    <div class="meta">${photos.length} photos · ${curated.length} chats${built && built.chapter?` · ${escapeHtml(built.chapter)}`:''}</div>
+    <div class="actions">
+      <button type="button" class="fav-btn ${isFav?'active':''}" id="v22SheetFavBtn">♥</button>
+      <button type="button" class="view-btn" id="v22SheetViewBtn">View full story →</button>
+    </div>`;
+  document.getElementById('v22SheetFavBtn').addEventListener('click', async (e)=>{
+    const btn = e.currentTarget;
+    const newVal = !btn.classList.contains('active');
+    btn.classList.toggle('active', newVal);
+    if(newVal){ v22SparkleBurst(btn); v8Toast('Favorite memory saved ♡'); }
+    await setFav(dateStr, newVal);
+  });
+  document.getElementById('v22SheetViewBtn').addEventListener('click', ()=>{
+    v22CloseMemorySheet();
+    openModal(dateStr);
+  });
+  backdrop.classList.add('open');
+  requestAnimationFrame(()=> sheet.classList.add('open'));
+}
+function v22CloseMemorySheet(){
+  document.getElementById('v22MemorySheet')?.classList.remove('open');
+  document.getElementById('v22SheetBackdrop')?.classList.remove('open');
+}
+document.getElementById('v22SheetBackdrop')?.addEventListener('click', v22CloseMemorySheet);
+
 /* ================= V23 — FAVORITE SPARKLE ================= */
 function v22SparkleBurst(anchorEl){
   const rect = anchorEl.getBoundingClientRect();
@@ -6315,6 +6394,9 @@ document.addEventListener('pointerdown', (e)=>{
   <img id="v7LightboxImg" alt="원본 비율 사진 확대">
   <div class="lb-note">사진은 원본 비율을 유지해 표시됩니다 · ESC to close</div>
 </div>
+
+<div class="v22-sheet-backdrop" id="v22SheetBackdrop"></div>
+<div class="v22-memory-sheet" id="v22MemorySheet"></div>
 
 </body>
 </html>
