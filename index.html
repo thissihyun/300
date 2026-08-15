@@ -739,7 +739,42 @@
 .v10-special{position:absolute; right:-9px; top:-9px; z-index:6; width:29px; height:29px; border-radius:50%;
   background:radial-gradient(circle at 34% 30%, #fffaf0, #f6dfa0); border:2px solid var(--gold);
   display:flex; align-items:center; justify-content:center;
-  font-size:15px; box-shadow:0 2px 6px rgba(51,43,34,.28); animation:v22BadgePulse 2.1s ease-in-out infinite;}
+  font-size:15px; box-shadow:0 2px 6px rgba(51,43,34,.28);
+  animation:v22BadgePulse 2.1s ease-in-out infinite, v22BadgeWiggle 4.2s ease-in-out infinite;}
+@keyframes v22BadgeWiggle{
+  0%,90%,100%{transform:rotate(0deg);}
+  92%{transform:rotate(-7deg);} 95%{transform:rotate(6deg);} 98%{transform:rotate(-3deg);}
+}
+@keyframes v22DayBounce{
+  0%{transform:scale(1);} 35%{transform:scale(.88);} 65%{transform:scale(1.07);} 100%{transform:scale(1);}
+}
+.day.v22-bounce{animation:v22DayBounce .38s ease;}
+.v22-polaroid{opacity:0; animation:v22PolaroidIn .42s cubic-bezier(.22,.9,.25,1) both;}
+@keyframes v22PolaroidIn{from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:none;}}
+.msg-row.v22-msg-in{opacity:0; animation:v22MsgIn .38s cubic-bezier(.22,.9,.25,1) both;}
+@keyframes v22MsgIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+.v7-home-hero .hero-bg:not(.v22-hero-slide){animation:v22HeroPhotoIn .8s cubic-bezier(.22,.9,.25,1) both;}
+@keyframes v22HeroPhotoIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+@media (prefers-reduced-motion: reduce){
+  .v22-polaroid, .msg-row.v22-msg-in, .v7-home-hero .hero-bg:not(.v22-hero-slide){animation:none !important; opacity:1 !important; transform:none !important;}
+}
+.msg{cursor:pointer; transition:transform .18s ease;}
+.msg.v22-msg-open{transform:scale(1.035);}
+.msg[data-meta]::after{
+  content:attr(data-meta); display:block; font-family:'Cormorant Garamond','Griun Mongtori',serif;
+  font-size:10px; color:var(--ink-soft); opacity:0; max-height:0; overflow:hidden;
+  transition:opacity .25s ease, max-height .25s ease, margin-top .25s ease; margin-top:0;
+}
+.msg.v22-msg-open[data-meta]::after{opacity:.85; max-height:20px; margin-top:5px;}
+.v22-key-word{position:relative;}
+.v22-key-word::after{
+  content:''; position:absolute; left:0; right:100%; bottom:-2px; height:2px; background:var(--rose);
+  transition:right .35s ease .1s;
+}
+.msg.v22-msg-open .v22-key-word::after{right:0;}
+@media (prefers-reduced-motion: reduce){
+  .msg, .msg.v22-msg-open, .msg[data-meta]::after, .v22-key-word::after{transition:none !important;}
+}
 .day.v22-special-day{
   border-width:2px !important; border-style:solid !important; border-color:var(--gold) !important;
   background:linear-gradient(155deg, rgba(184,146,63,.24), rgba(184,146,63,.08)) !important;
@@ -751,7 +786,7 @@
   50%{box-shadow:0 2px 6px rgba(51,43,34,.28), 0 0 0 6px rgba(184,146,63,0);}
 }
 @media (prefers-reduced-motion: reduce){
-  .v10-special{animation:none !important;}
+  .v10-special, .day.v22-bounce{animation:none !important;}
 }
 .v22-reveal{opacity:0; transform:translateY(16px); transition:opacity .5s ease, transform .5s cubic-bezier(.22,.9,.25,1);}
 .v22-reveal.v22-reveal-in{opacity:1; transform:none;}
@@ -761,6 +796,27 @@ nav.mainnav button:active, .v7-hub-card:active, .home-card:active, .poster-card:
 }
 @media (prefers-reduced-motion: reduce){
   .v22-reveal{opacity:1 !important; transform:none !important; transition:none !important;}
+}
+@keyframes v22GrainShift{
+  0%{transform:translate(0,0);} 25%{transform:translate(-1%,1%);}
+  50%{transform:translate(1%,-1%);} 75%{transform:translate(-1%,-1%);} 100%{transform:translate(0,0);}
+}
+.bg-noise{animation:v22GrainShift 9s steps(4) infinite;}
+.v7-hero-title{animation:v22HeroTitleIn .7s cubic-bezier(.22,.9,.25,1) both;}
+.v7-hero-sub{animation:v22HeroSubIn .6s cubic-bezier(.22,.9,.25,1) .38s both;}
+@keyframes v22HeroTitleIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;}}
+@keyframes v22HeroSubIn{from{opacity:0; transform:translateY(9px) rotate(-.6deg);} to{opacity:1; transform:none;}}
+@media (prefers-reduced-motion: reduce){
+  .bg-noise, .v7-hero-title, .v7-hero-sub{animation:none !important;}
+}
+.rw-count{position:relative;}
+.v22-milestone-pop{position:absolute; top:-4px; right:-18px; font-size:15px; color:var(--gold);
+  animation:v22MilestonePop 1.3s ease-out forwards; pointer-events:none;}
+@keyframes v22MilestonePop{
+  0%{opacity:0; transform:scale(.3) rotate(-15deg);}
+  30%{opacity:1; transform:scale(1.3) rotate(8deg);}
+  55%{transform:scale(1) rotate(-4deg);}
+  100%{opacity:0; transform:scale(1) translateY(-14px) rotate(0);}
 }
 .v10-mood-row{position:absolute;left:3px;right:3px;bottom:27px;z-index:5;display:flex;gap:3px;justify-content:center;pointer-events:none}
 .v10-mood-dot{font-size:8px;background:rgba(255,253,248,.92);border:1px solid rgba(217,203,176,.8);border-radius:999px;padding:1px 3px;white-space:nowrap}
@@ -3877,7 +3933,10 @@ async function renderCalendar(){
       cell.classList.add('has-event');
       const t=document.createElement('div'); t.className='dtitle'; t.textContent=built.title; cell.appendChild(t);
     }
-    cell.addEventListener('click', ()=> openModal(dateStr));
+    cell.addEventListener('click', ()=>{
+      cell.classList.remove('v22-bounce'); void cell.offsetWidth; cell.classList.add('v22-bounce');
+      openModal(dateStr);
+    });
     grid.appendChild(cell);
   }
   markCustomDays(daysInMonth);
@@ -3920,15 +3979,37 @@ async function markCustomDays(daysInMonth){
   }
   await v10RenderMonthReport();
 }
+function v22SlideCalendar(direction){
+  const grid = document.getElementById('daysGrid');
+  if(!grid){ renderCalendar(); return; }
+  grid.style.transition = 'transform .18s ease, opacity .18s ease';
+  grid.style.transform = direction==='next' ? 'translateX(-18px)' : 'translateX(18px)';
+  grid.style.opacity = '0';
+  setTimeout(()=>{
+    renderCalendar();
+    const g2 = document.getElementById('daysGrid');
+    if(!g2) return;
+    g2.style.transition = 'none';
+    g2.style.transform = direction==='next' ? 'translateX(18px)' : 'translateX(-18px)';
+    g2.style.opacity = '0';
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        g2.style.transition = 'transform .26s cubic-bezier(.22,.9,.25,1), opacity .26s ease';
+        g2.style.transform = 'translateX(0)';
+        g2.style.opacity = '1';
+      });
+    });
+  }, 160);
+}
 document.getElementById('prevMonth').addEventListener('click', ()=>{
   viewMonth--; if(viewMonth<0){viewMonth=11; viewYear--;}
   if(viewYear<MIN.getFullYear()||(viewYear===MIN.getFullYear()&&viewMonth<MIN.getMonth())){viewYear=MIN.getFullYear();viewMonth=MIN.getMonth();}
-  renderCalendar();
+  v22SlideCalendar('prev');
 });
 document.getElementById('nextMonth').addEventListener('click', ()=>{
   viewMonth++; if(viewMonth>11){viewMonth=0; viewYear++;}
   if(viewYear>MAX.getFullYear()||(viewYear===MAX.getFullYear()&&viewMonth>MAX.getMonth())){viewYear=MAX.getFullYear();viewMonth=MAX.getMonth();}
-  renderCalendar();
+  v22SlideCalendar('next');
 });
 
 /* ================= PLACES (illustrative map, with real coords for the Leaflet layer) ================= */
@@ -4688,9 +4769,10 @@ async function openModal(dateStr){
   let kakaoHtml = '';
   if(data && data.kakao && data.kakao.length){
     kakaoHtml = `<div class="section-label">우리 카톡</div><div class="kakao">` +
-      data.kakao.map(([sp,txt])=>{
+      data.kakao.map(([sp,txt],i)=>{
         const side = sp==='강원' ? 'left':'right';
-        return `<div class="msg-row ${side}"><div class="msg"><span class="speaker">${sp}</span>${escapeHtml(txt)}</div></div>`;
+        const delay = Math.min(i*160, 960);
+        return `<div class="msg-row ${side} v22-msg-in" style="animation-delay:${delay}ms"><div class="msg" data-meta="${dateStr}"><span class="speaker">${sp}</span>${v22WrapKeyWords(txt)}</div></div>`;
       }).join('') + `</div>`;
   }
 
@@ -4805,7 +4887,7 @@ function renderFullChatToggle(dateStr){
         const side = m.s==='강원' ? 'left':'right';
         const time = `${m.ap} ${m.h}:${String(m.m).padStart(2,'0')}`;
         const idx=curated.indexOf(m), key=v10ChatLikeKey(dateStr,'curated',idx,m.t);
-        return `<div class="msg-row ${side}"><div class="msg"><span class="speaker">${escapeHtml(m.s)} · ${time}</span>${escapeHtml(m.t)}<button class="v10-like" data-key="${key}" data-date="${dateStr}" data-source="curated" data-index="${idx}" data-speaker="${escapeHtml(m.s)}" data-text="${encodeURIComponent(m.t)}" data-time="${time}">♡</button></div></div>`;
+        return `<div class="msg-row ${side}"><div class="msg" data-meta="${dateStr} · ${time}"><span class="speaker">${escapeHtml(m.s)}</span>${v22WrapKeyWords(m.t)}<button class="v10-like" data-key="${key}" data-date="${dateStr}" data-source="curated" data-index="${idx}" data-speaker="${escapeHtml(m.s)}" data-text="${encodeURIComponent(m.t)}" data-time="${time}">♡</button></div></div>`;
       }).join('') + `</div>`;
       list.querySelectorAll('.v10-like').forEach(b=>b.onclick=()=>v10ToggleChatLike(b,b.dataset.date,b.dataset.source,Number(b.dataset.index),b.dataset.speaker,decodeURIComponent(b.dataset.text),b.dataset.time||''));
       v10HydrateLikeButtons(list);
@@ -4820,7 +4902,7 @@ function renderFullChatToggle(dateStr){
       list.innerHTML = `<div class="kakao">` + dayMsgs.map(m=>{
         const side = m.speaker==='강원' ? 'left':'right';
         const idx=dayMsgs.indexOf(m), key=v10ChatLikeKey(dateStr,'full',idx,m.text);
-        return `<div class="msg-row ${side}"><div class="msg"><span class="speaker">${escapeHtml(m.speaker)}</span>${escapeHtml(m.text)}<button class="v10-like" data-key="${key}" data-date="${dateStr}" data-source="full" data-index="${idx}" data-speaker="${escapeHtml(m.speaker)}" data-text="${encodeURIComponent(m.text)}">♡</button></div></div>`;
+        return `<div class="msg-row ${side}"><div class="msg" data-meta="${dateStr}"><span class="speaker">${escapeHtml(m.speaker)}</span>${v22WrapKeyWords(m.text)}<button class="v10-like" data-key="${key}" data-date="${dateStr}" data-source="full" data-index="${idx}" data-speaker="${escapeHtml(m.speaker)}" data-text="${encodeURIComponent(m.text)}">♡</button></div></div>`;
       }).join('') + `</div>`;
       list.querySelectorAll('.v10-like').forEach(b=>b.onclick=()=>v10ToggleChatLike(b,b.dataset.date,b.dataset.source,Number(b.dataset.index),b.dataset.speaker,decodeURIComponent(b.dataset.text),b.dataset.time||''));
       v10HydrateLikeButtons(list);
@@ -4833,7 +4915,8 @@ async function renderFrames(dateStr, photos){
   const heroUrl = await getHeroPhoto(dateStr);
   const slots = Math.max(3, photos.length+1);
   for(let i=0;i<slots;i++){
-    const frame = document.createElement('div'); frame.className='frame';
+    const frame = document.createElement('div'); frame.className='frame v22-polaroid';
+    frame.style.animationDelay = Math.min(i*130, 900)+'ms';
     if(photos[i]){
       const isHero = heroUrl === photos[i];
       if(isHero) frame.classList.add('is-hero');
@@ -5042,6 +5125,47 @@ function renderTogetherWidget(){
     <div class="v8-progress"><i style="width:${pct}%"></i></div>
     <div class="v8-counter-caption">${d>=300?'300 days, and still counting.':Math.max(0,300-d)+' days to DAY 300'}</div>`;
 }
+
+/* ================= V22 — FIRST-VISIT DAY COUNT-UP + MILESTONE POP ================= */
+const V22_MILESTONE_DAYS = [1,50,100,150,300];
+function v22PopMilestone(anchorEl){
+  const pop = document.createElement('span');
+  pop.className = 'v22-milestone-pop';
+  pop.textContent = '✦';
+  anchorEl.appendChild(pop);
+  setTimeout(()=>pop.remove(), 1400);
+}
+const _v22_renderTogetherWidget = renderTogetherWidget;
+renderTogetherWidget = function(){
+  _v22_renderTogetherWidget();
+  const wrap = document.getElementById('togetherWidget');
+  if(!wrap) return;
+  const countEl = wrap.querySelector('.rw-count');
+  if(!countEl) return;
+  const d = dayCount(new Date());
+  let seen = false;
+  try{ seen = localStorage.getItem('v22_dayCounterSeen') === '1'; }catch(e){}
+  if(seen || d < 1){
+    if(!seen){ try{ localStorage.setItem('v22_dayCounterSeen','1'); }catch(e){} }
+    return;
+  }
+  try{ localStorage.setItem('v22_dayCounterSeen','1'); }catch(e){}
+  const from = Math.max(0, d-6);
+  const start = performance.now();
+  const duration = 900;
+  function step(now){
+    const t = Math.min(1, (now-start)/duration);
+    const eased = 1 - Math.pow(1-t, 3);
+    const val = Math.round(from + (d-from)*eased);
+    countEl.textContent = `DAY ${val}`;
+    if(t<1) requestAnimationFrame(step);
+    else{
+      countEl.textContent = `DAY ${d}`;
+      if(V22_MILESTONE_DAYS.includes(d)) v22PopMilestone(countEl);
+    }
+  }
+  requestAnimationFrame(step);
+};
 
 /* ================= REUNION COUNTDOWN ================= */
 function getReunionDate(){ try{ return localStorage.getItem('reunionDate') || ''; }catch(e){ return ''; } }
@@ -5767,6 +5891,23 @@ renderDay500 = async function(container){
     if(opened && !wasOpen) v22HeartBurst(env);
   });
 };
+
+/* ================= V22 — KAKAO BUBBLE TAP: EXPAND + META + KEY WORDS ================= */
+function v22WrapKeyWords(text){
+  let html = escapeHtml(text);
+  WORDS.forEach(w=>{
+    if(!w) return;
+    const esc = escapeHtml(w);
+    html = html.split(esc).join(`<span class="v22-key-word">${esc}</span>`);
+  });
+  return html;
+}
+document.addEventListener('click', (e)=>{
+  const msg = e.target.closest('.msg');
+  if(!msg || e.target.closest('button')) return;
+  document.querySelectorAll('.msg.v22-msg-open').forEach(m=>{ if(m!==msg) m.classList.remove('v22-msg-open'); });
+  msg.classList.toggle('v22-msg-open');
+});
 
 /* ================= V22 — VIEW-ENTER REVEAL + PRESS FEEDBACK ================= */
 function v22RevealActiveView(){
