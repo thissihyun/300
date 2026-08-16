@@ -10,7 +10,7 @@ const SELECTOR=[
   '.event-item','.firsts-item','.poster-card','.award-card','.v7-story-link',
   '.v15-photo-card','.result-item','.quote-card','.day:not(.empty)',
   '.v26-star[data-d]','.v26-season-links [data-d]','.v26-landmark',
-  '[data-v28-date]','[data-v39-date]'
+  '[data-v28-date]','[data-v39-date]','[data-v40-date]'
 ].join(',');
 
 function globalValue(name){
@@ -38,15 +38,12 @@ function dateFrom(el){
   return '';
 }
 function eventFor(date){
-  try{
-    const E=globalValue('EVENTS');
-    return E && E[date] ? E[date] : null;
-  }catch(e){ return null; }
+  try{ const E=globalValue('EVENTS'); return E && E[date] ? E[date] : null; }
+  catch(e){ return null; }
 }
 function esc(s){return String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))}
 function emergencyOpen(date){
-  const overlay=document.getElementById('overlay');
-  const modal=document.getElementById('modal');
+  const overlay=document.getElementById('overlay'),modal=document.getElementById('modal');
   if(!overlay||!modal) return false;
   const ev=eventFor(date)||{};
   modal.dataset.date=date;
@@ -100,8 +97,6 @@ style.textContent=`
 `;
 document.head.appendChild(style);
 
-/* Desktop/mouse: pointerdown is early enough to beat later capture bridges.
-   Touch/pen: pointerup avoids opening while the user is only trying to scroll. */
 document.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'&&e.pointerType!=='pen')processEvent(e)},true);
 document.addEventListener('pointerup',e=>{if(e.pointerType==='touch'||e.pointerType==='pen')processEvent(e)},true);
 document.addEventListener('click',e=>{if(!e.detail)processEvent(e)},true);
