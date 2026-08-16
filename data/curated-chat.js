@@ -1,4 +1,4 @@
-/* V39 loader — data + app layers + universal card router. */
+/* V40 loader — data + app layers + universal page and memory-card routers. */
 document.write('<script src="https://cdn.jsdelivr.net/gh/thissihyun/300@f504a42c66b2d59521c6869713caf966d8ee33bc/data/curated-chat.js"><\/script>');
 document.write('<script src="assets/daily-us-v24.js"><\/script>');
 document.write('<script src="assets/identity-v25.js"><\/script>');
@@ -17,5 +17,7 @@ document.write('<script src="assets/v31-polish.js?build=20260816-0124"><\/script
 document.write('<script src="assets/v32-readable-structure.js?build=20260816-1014"><\/script>');
 document.write('<script src="assets/v33-calendar-special-future.js?build=20260816-1026"><\/script>');
 document.write('<script src="assets/v34-special-shelf-restore.js?build=20260816-2234"><\/script>');
-/* Load first so it gets capture priority over later visual click layers. */
+/* Page routing. */
 document.write('<script src="assets/v39-universal-card-router.js?build=20260816-2247"><\/script>');
+/* Date/memory cards inside Story, Firsts, Posters, Awards, album, etc. */
+document.write('<script src="assets/v40-memory-card-click-fix.js?build=20260816-2257"><\/script>');
