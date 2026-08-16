@@ -17,7 +17,7 @@
         <div>
           <div class="hero-eyebrow">SIHYUN &amp; GANGWON · OUR DIGITAL MEMORY ARCHIVE</div>
           <h1 class="hero-title">300 DAYS<br>WITH YOU</h1>
-          <div class="hero-sub">New York, 2025 — and somehow, we met here.</div>
+          <div class="hero-sub" id="homeQuote">New York, 2025 — and somehow, we met here.</div>
           <div class="hero-actions">
             <button class="btn" data-action="view" data-target="ourdays">OPEN OUR DAYS</button>
             <button class="btn btn-outline" data-action="memory" data-date="2025-10-01">START FROM THE BEGINNING → 2025-10-01</button>
@@ -65,6 +65,11 @@
         <div id="recentActivity"><div class="empty-frame">아직 새 활동이 없어요.</div></div>
       </section>
     `;
+
+    const quoteEl = container.querySelector('#homeQuote');
+    if(quoteEl && window.HOME_QUOTES && window.HOME_QUOTES.length){
+      quoteEl.textContent = window.HOME_QUOTES[Math.floor(Math.random()*window.HOME_QUOTES.length)];
+    }
 
     container.querySelector('#movieStrip').innerHTML = window.MOVIE_CHAPTERS.map(c=>`
       <button class="card card-btn" data-action="memory" data-date="${c.date}">

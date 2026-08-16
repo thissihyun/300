@@ -60,9 +60,22 @@
 
       ${ev.story ? `<div class="story-text">${escapeHtml(ev.story)}</div>` : `<div class="empty-frame">${escapeHtml(ev.title)}</div>`}
 
+      ${(window.STORY_LINKS[date]||[]).map(([linkDate,label])=>`
+        <button class="card card-btn" style="display:flex; align-items:center; gap:8px; margin-bottom:10px; padding:10px 14px;" data-action="memory" data-date="${linkDate}">
+          <span style="color:var(--gold);">↳</span>
+          <span style="font-family:var(--hand); font-size:14px;">${escapeHtml(label)}</span>
+        </button>`).join('')}
+
       ${ev.kakao && ev.kakao.length ? `
         <div class="kakao-block" id="kakaoBlock">
-          ${ev.kakao.map(([who,text])=>`<div class="kakao-msg from-${escapeHtml(who)}">${escapeHtml(text)}</div>`).join('')}
+          ${ev.kakao.map(([who,text],i)=>`
+            <div class="kakao-msg from-${escapeHtml(who)}" style="position:relative;">
+              ${escapeHtml(text)}
+              <span class="kakao-like-row" data-kakao-idx="${i}">
+                <button class="kakao-like-btn" data-kakao-heart="${i}" title="저장">♡</button>
+                <button class="kakao-best-btn" data-kakao-best="${i}" title="BEST" style="display:none;">★</button>
+              </span>
+            </div>`).join('')}
         </div>` : ''}
 
       <div class="section-head" style="margin-top:20px;"><div class="section-title" style="font-size:16px;">사진</div></div>
@@ -99,6 +112,39 @@
   function wireInteractions(date, ev){
     const panel = document.getElementById('memoryPanel');
     const me = myName();
+
+    // per-message kakao like / best (Section: liked kakao messages archive)
+    if(ev.kakao && ev.kakao.length){
+      unsub.push(DB.onAllChatLikes(rows=>{
+        const mine = {};
+        rows.filter(r=>r.date===date).forEach(r=>{ mine[r.msgIndex] = r; });
+        ev.kakao.forEach((msg,i)=>{
+          const heartBtn = panel.querySelector(`[data-kakao-heart="${i}"]`);
+          const bestBtn = panel.querySelector(`[data-kakao-best="${i}"]`);
+          if(!heartBtn) return;
+          const liked = !!mine[i];
+          heartBtn.classList.toggle('is-liked', liked);
+          heartBtn.textContent = liked ? '♥' : '♡';
+          bestBtn.style.display = liked ? '' : 'none';
+          bestBtn.classList.toggle('is-best', liked && mine[i].best);
+        });
+      }));
+      panel.querySelectorAll('[data-kakao-heart]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const i = +btn.dataset.kakaoHeart;
+          const liked = btn.classList.contains('is-liked');
+          if(liked) await DB.deleteChatLike(date, i);
+          else await DB.setChatLike(date, i, {speaker:ev.kakao[i][0], text:ev.kakao[i][1], best:false, savedBy:me});
+        });
+      });
+      panel.querySelectorAll('[data-kakao-best]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const i = +btn.dataset.kakaoBest;
+          const nowBest = btn.classList.contains('is-best');
+          await DB.setChatLike(date, i, {speaker:ev.kakao[i][0], text:ev.kakao[i][1], best:!nowBest, savedBy:me});
+        });
+      });
+    }
 
     // favorite
     let favVal = false;

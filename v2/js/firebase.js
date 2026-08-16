@@ -92,6 +92,7 @@
     // Free-form note per date (Memory Detail "나의 한 줄")
     setNote: (date, text) => setDoc('notes', date, {date, text}),
     onNote: (date, cb) => onDoc('notes', date, cb),
+    onAllNotes: (cb) => onCollection('notes', cb),
 
     // Photos
     addPhoto: (data) => addDoc('photos', data),
@@ -112,6 +113,15 @@
 
     addLetter: (data) => addDoc('future_letters', data),
     onLetters: (cb) => onCollection('future_letters', cb, {orderBy:'createdAt', dir:'asc'}),
+
+    // DAY 500 canonical time-capsule letter — one shared doc, auto-locked
+    setDay500Letter: (text) => setDoc('future_day500', 'letter', {text}),
+    onDay500Letter: (cb) => onDoc('future_day500', 'letter', cb),
+
+    // Per-message Kakao likes/BEST (Section within Memory Detail kakao block)
+    setChatLike: (date, msgIndex, data) => setDoc('chatlikes', `${date}_${msgIndex}`, {date, msgIndex, ...data}),
+    deleteChatLike: (date, msgIndex) => deleteDoc('chatlikes', `${date}_${msgIndex}`),
+    onAllChatLikes: (cb) => onCollection('chatlikes', cb),
 
     // Mini awards votes
     setAwardVote: (awardId, user, candidate) => setDoc('awards', `${awardId}_${user}`, {awardId, user, candidate}),

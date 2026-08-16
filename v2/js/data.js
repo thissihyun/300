@@ -250,24 +250,35 @@ window.QUESTIONS = [
 window.PHOTO_TYPES = ["셀카","커플사진","인물","풍경","음식","티켓/물건","스크린샷","네컷"];
 window.PHOTO_MOODS = ["설렘","다정함","웃김","평범한 일상","여행","뉴욕 감성","따뜻함","겨울","여름","밤","노을","기념일","보고싶은 순간","최애"];
 
-/* Places we can pin on OUR NEW YORK / CITIES WE SHARED, tied to a real dated memory */
+/* Places we can pin on OUR NEW YORK — real lat/lng, ported verbatim from the
+   prior site's NYC_PINS (the old app rendered these on an actual Leaflet map). */
 window.PLACES = [
-  {name:"NYU / Washington Square", date:"2025-12-11"},
-  {name:"MoMA", date:"2025-10-04"},
-  {name:"Central Park Zoo", date:"2025-10-04"},
-  {name:"Beacon · 20 km", date:"2025-11-01"},
-  {name:"Brooklyn / DUMBO", date:"2025-11-09"},
-  {name:"Central Park", date:"2025-11-14"},
-  {name:"Bryant Park", date:"2025-11-19"},
-  {name:"Rockefeller Center", date:"2025-12-04"},
+  {name:"NYU / Washington Sq", lat:40.7308, lng:-73.9973, dates:["2025-10-01","2025-12-11"]},
+  {name:"MoMA", lat:40.7614, lng:-73.9776, dates:["2025-10-04","2025-12-20"]},
+  {name:"Central Park Zoo", lat:40.7678, lng:-73.9718, dates:["2025-10-04"]},
+  {name:"Governors Island", lat:40.6895, lng:-74.0165, dates:["2025-10-22","2025-10-23"]},
+  {name:"Beacon · 20km", lat:41.5048, lng:-73.9678, dates:["2025-11-01"]},
+  {name:"Brooklyn / DUMBO", lat:40.7033, lng:-73.9894, dates:["2025-11-09"]},
+  {name:"Central Park", lat:40.7736, lng:-73.9712, dates:["2025-11-14","2025-11-15"]},
+  {name:"Bryant Park", lat:40.7536, lng:-73.9832, dates:["2025-11-19"]},
+  {name:"Rockefeller Ctr", lat:40.7587, lng:-73.9787, dates:["2025-12-04"]},
+  {name:"Broom", lat:40.7223, lng:-74.0027, dates:["2025-12-17"]},
 ];
+
+/* Cities We Shared — ported verbatim from the prior site's CITIES list.
+   Entries with date:null still show (no exact single day tied to them). */
 window.CITIES = [
-  {name:"New York", filter:d=>d < "2025-12-21"},
-  {name:"Los Angeles", filter:d=>d==="2025-12-22"||d==="2026-01-01"},
-  {name:"Grand Canyon", filter:d=>d==="2025-12-25"},
-  {name:"San Diego", filter:d=>d==="2025-12-30"},
-  {name:"Suwon / Seoul / KAIST", filter:d=>d>="2026-01-04"&&d<="2026-01-19"},
-  {name:"Busan", filter:d=>d>="2026-03-16"&&d<="2026-03-22"},
+  {icon:"🌴", name:"LA", date:"2025-12-21"},
+  {icon:"🏜", name:"Grand Canyon", date:"2025-12-25"},
+  {icon:"🌊", name:"San Diego", date:"2025-12-30"},
+  {icon:"🌵", name:"Joshua Tree", date:"2025-12-31"},
+  {icon:"🎰", name:"Las Vegas", date:null},
+  {icon:"🌉", name:"San Francisco", date:null},
+  {icon:"🌲", name:"Yosemite", date:null},
+  {icon:"🇰🇷", name:"Suwon", date:"2026-01-04"},
+  {icon:"🏙", name:"Seoul · Jongno", date:"2026-01-10"},
+  {icon:"🎓", name:"Daejeon · KAIST", date:"2026-01-09"},
+  {icon:"🌆", name:"Busan", date:"2026-03-18"},
 ];
 
 /* Food archive (Section 51) — drawn from real event titles/stories */
@@ -278,18 +289,35 @@ window.FOOD_ENTRIES = [
   {date:"2026-03-22", food:"샌드위치", place:"부산역 카페"},
 ];
 
-/* Before / Came True (Section 61) — real foreshadowing pulled from EVENTS */
+/* Before / Came True (Section 61) — ported verbatim from the prior site's FUTURE_PAIRS */
 window.BEFORE_CAME_TRUE = [
-  {beforeDate:"2025-11-17", beforeQuote:"이왕 온거 동부 서부 다 투어하는거지", trueDate:"2025-12-21", trueLabel:"West Coast trip"},
+  {beforeDate:"2025-11-17", beforeQuote:"이왕 온거 동부 서부 다 투어하는거지", trueDate:"2025-12-21", trueLabel:"West Coast 여정 시작"},
+  {beforeDate:"2026-01-19", beforeQuote:"끝까지 손 놓지 말기", trueDate:"2026-08-19", trueLabel:"DAY 300 — and I'd still say yes."},
+  {beforeDate:"2025-11-01", beforeQuote:"우리 오늘 20키로 걸었더라", trueDate:"2026-03-21", trueLabel:"DAY 150 — 광안리 + 드론쇼, 함께 걸어온 만큼"},
 ];
 
-/* Mini Awards (Section 55) — candidate dates drawn from real events, no invented content */
+/* Mini Awards (Section 55) — the 4 real curated categories from the prior site's
+   AWARDS array. Each already has one real winning date; the app lets both people
+   mark whether they agree with the pick rather than inventing extra candidates. */
 window.AWARDS = [
-  {id:"mostRomantic", title:"Most romantic day", candidates:["2025-11-09","2025-12-14","2025-12-17"]},
-  {id:"mostNY", title:"Most New York day", candidates:["2025-10-04","2025-11-01","2025-11-14"]},
-  {id:"funniest", title:"Funniest day", candidates:["2025-12-22","2025-11-30"]},
-  {id:"mostUs", title:"Most “us” day", candidates:["2025-12-23","2026-01-17"]},
+  {id:"mostLaugh", trophy:"😂", title:"가장 많이 웃은 날", date:"2025-11-30"},
+  {id:"mostPhotos", trophy:"📸", title:"사진 제일 많이 찍은 날", date:"2025-12-10"},
+  {id:"mostWalked", trophy:"🥾", title:"가장 많이 걸은 날", date:"2025-11-01"},
+  {id:"mostTogether", trophy:"🫂", title:"가장 오래 붙어있던 날", date:"2026-03-18"},
 ];
+/* Bonus "most New York" plaque shown alongside the awards grid (old site's mostNYWrap) */
+window.MOST_NY_DAY = {date:"2025-12-20", note:"MoMA, 장미, Macy's, 시현 생일 — We came back to where it began."};
+
+/* Cross-referenced memory links (Section 26 "V7_STORY_LINKS") — shown inside
+   Memory Detail for the dates that have a meaningful related-day callback. */
+window.STORY_LINKS = {
+  "2025-10-01":[["2026-01-19","From “학식 먹자” to “끝까지 손 놓지 말기”"]],
+  "2025-10-04":[["2025-12-20","We came back to where it began."]],
+  "2025-11-13":[["2026-01-19","First hand-holding → 끝까지 손 놓지 말기"]],
+  "2025-11-17":[["2026-01-24","Future talk → learning how to protect that future"]],
+  "2025-12-20":[["2025-10-04","Remember the first MoMA?"]],
+  "2026-01-19":[["2025-11-13","The first time we held hands"]],
+};
 
 /* Relationship Pulse baseline (Section 54) — [month, affection‰, tension‰],
    ported verbatim from the prior site's own KakaoTalk-derived numbers.
@@ -302,5 +330,59 @@ window.PULSE_BASELINE = [
 ];
 window.AFFECTION_WORDS = ['사랑해','보고싶','여보','아가','고마워','행복'];
 window.TENSION_WORDS = ['서운','미안','화나','싸우','속상','힘들'];
+
+/* THE DATES I'D LIVE AGAIN (Section 48) — ported verbatim from the prior
+   site's curated POSTERS array (movie-poster treatment per real date). */
+window.POSTERS = [
+  {date:"2025-10-04", title:"MoMA + Zoo", genre:"Romance · Slice of Life", tagline:"처음 둘이 보낸 하루, 그리고 “다음에 또.”", stars:"♥♥♥♥"},
+  {date:"2025-11-01", title:"Beacon — 20 KM", genre:"Adventure", tagline:"still not tired of you.", stars:"♥♥♥♥♥"},
+  {date:"2025-11-11", title:"NBA Date Night", genre:"Sports · Comedy", tagline:"나는 너랑 카톡만해도 행복한가봐.", stars:"♥♥♥"},
+  {date:"2025-11-14", title:"Central Park", genre:"Autumn Romance", tagline:"뉴욕에서 너를 만나 참 감사해.", stars:"♥♥♥♥"},
+  {date:"2025-11-19", title:"Ice Skating", genre:"Winter Feature", tagline:"겨울 영화 같았던 하루.", stars:"♥♥♥♥"},
+  {date:"2025-12-06", title:"Jazz Bar", genre:"Drama · Night", tagline:"조용한 밤, 재즈 그리고 우리.", stars:"♥♥♥"},
+  {date:"2025-12-08", title:"강원 생일", genre:"Anniversary Special", tagline:"시현아 너한테만 해.", stars:"♥♥♥♥♥"},
+  {date:"2025-12-11", title:"Raku · DAY 50", genre:"Romance", tagline:"오래오래 좋아해달라구~", stars:"♥♥♥♥♥"},
+  {date:"2025-12-30", title:"San Diego", genre:"Sunset Romance", tagline:"Kiss Statue + sunset.", stars:"♥♥♥♥"},
+  {date:"2026-01-10", title:"종로 · DAY 80", genre:"City Walk", tagline:"80일, 종로 거리에서.", stars:"♥♥♥"},
+  {date:"2026-03-18", title:"부산", genre:"Reunion Drama", tagline:"오랜만의 재회, 부산에서.", stars:"♥♥♥♥♥"},
+];
+
+/* FUNNY US + INSIDE JOKES (Section 49/57) — ported verbatim */
+window.FUNNY_MOMENTS = [
+  {date:"2025-11-30", quote:"말을 그렇게 해도 카톡 하나도 없으면 속상할걸??? / 넘 귀여운데 놓고 왔어", note:"소호에서 선물 고르다 나온, 은근 진심인 투닥거림."},
+  {date:"2025-12-10", quote:"이러려고 너 남자친구 있는거 아니야!! / 진리에게 다음에 보자는 말은 정말 선택지에 있으면 안되겠다", note:"할리우드 숙박 예약하며 웃음 터진 밤."},
+  {date:"2025-10-04", quote:"오늘 덕분에 동물원도 가고 모마도 가고~ / 정말…?", note:"별거 아닌 되물음 하나에도 설렜던 초반."},
+];
+window.INSIDE_JOKES = [
+  {phrase:"아가", count:722, example:"아가 잘 잤어??"},
+  {phrase:"여보", count:708, example:"울 여보 일어났는가"},
+  {phrase:"아이구", count:165, example:"아이구.. 자바 언어 빡세긴해"},
+  {phrase:"힝", count:133, example:"힝… 진짜 미안해"},
+  {phrase:"당근이지", count:100, example:"당근이지! 하은이랑 재밌게 보고 와"},
+  {phrase:"뿌엥", count:72, example:"뿌엥… 진짜 10분만..."},
+  {phrase:"감자", count:70, example:"감자 보고 싶긴한데"},
+  {phrase:"까비", count:26, example:"까비 까비, 다음에 기회되면 같이 먹는걸로"},
+];
+
+/* Future — extra tabs ported from the old app (Section 67 backlog) */
+window.NEWPLACES_SEED = [
+  {id:'n1', text:'Tokyo'}, {id:'n2', text:'Banff'}, {id:'n3', text:'Aurora (아이슬란드/노르웨이)'},
+];
+window.PROMISES_SEED = [
+  {id:'p1', text:'서로에게 편지 쓰기', done:false}, {id:'p2', text:'끝까지 손 놓지 않기', done:false},
+  {id:'p3', text:'같이 여행 많이 다니기', done:false}, {id:'p4', text:'오래오래 좋아하기', done:false},
+];
+
+/* Special-day icons for calendar/stats badges (V10_SPECIAL_DAYS, ported) */
+window.SPECIAL_DAYS = {
+  "2025-10-23":{icon:"♥",label:"DAY 1"},
+  "2025-12-08":{icon:"🎂",label:"강원 생일"},
+  "2025-12-11":{icon:"♥",label:"DAY 50"},
+  "2025-12-20":{icon:"🎂",label:"시현 생일"},
+  "2026-01-30":{icon:"💯",label:"DAY 100"},
+  "2026-02-06":{icon:"💊",label:"약대 합격"},
+  "2026-03-21":{icon:"♥",label:"DAY 150"},
+  "2026-08-19":{icon:"♥",label:"DAY 300"},
+};
 
 window.PASSCODE = "1023";
