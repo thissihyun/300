@@ -1,0 +1,12 @@
+{
+  "name": "300 Days With You",
+  "short_name": "300 Days",
+  "description": "Sihyun & Gangwon — our private daily couple archive",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f1e6",
+  "theme_color": "#b25c61",
+  "orientation": "portrait-primary",
+  "icons": [{"src":"../assets/app-icon-v26.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
