@@ -89,6 +89,101 @@
     }));
   }
 
+  function renderNewPlaces(panel){
+    panel.innerHTML = `
+      <div class="section-note">아직 못 가봤지만 언젠가 같이 가고 싶은 곳.</div>
+      <div style="display:flex; gap:8px; margin:12px 0;">
+        <input class="field" id="npNew" placeholder="가보고 싶은 곳">
+        <button class="btn btn-sm" id="npAddBtn">추가</button>
+      </div>
+      <div id="npSeeds" class="mood-grid" style="margin-bottom:14px;"></div>
+      <div id="npList" class="card"></div>
+    `;
+    panel.querySelector('#npSeeds').innerHTML = window.NEWPLACES_SEED.map(s=>`<button class="chip" data-seed="${escapeHtml(s.text)}">+ ${escapeHtml(s.text)}</button>`).join('');
+    panel.querySelector('#npAddBtn').addEventListener('click', async ()=>{
+      const val = panel.querySelector('#npNew').value.trim();
+      if(!val) return;
+      await DB.addBucketItem({type:'newplaces', text:val, done:false, author:me()});
+      panel.querySelector('#npNew').value='';
+    });
+    panel.querySelectorAll('#npSeeds [data-seed]').forEach(b=>b.addEventListener('click', ()=> DB.addBucketItem({type:'newplaces', text:b.dataset.seed, done:false, author:me()})));
+    unsub.push(DB.onBucketItems(rows=>{
+      const list = panel.querySelector('#npList');
+      if(!list) return;
+      const items = rows.filter(r=>r.type==='newplaces');
+      list.innerHTML = items.length ? items.map(it=>`
+        <div class="bucket-item"><div class="bucket-text" style="flex:1;">${escapeHtml(it.text)}</div>
+          <button class="icon-btn" data-del-np="${it.id}" style="width:30px;height:30px;">✕</button></div>`).join('')
+        : '<div class="section-note">가보고 싶은 곳을 추가해보세요.</div>';
+      list.querySelectorAll('[data-del-np]').forEach(b=> b.addEventListener('click', ()=> DB.deleteBucketItem(b.dataset.delNp)));
+    }));
+  }
+
+  function renderPromises(panel){
+    panel.innerHTML = `
+      <div class="section-note">서로에게 하는 작은 약속들.</div>
+      <div style="display:flex; gap:8px; margin:12px 0;">
+        <input class="field" id="prNew" placeholder="우리의 약속">
+        <button class="btn btn-sm" id="prAddBtn">추가</button>
+      </div>
+      <div id="prSeeds" class="mood-grid" style="margin-bottom:14px;"></div>
+      <div id="prList" class="card"></div>
+    `;
+    panel.querySelector('#prSeeds').innerHTML = window.PROMISES_SEED.map(s=>`<button class="chip" data-seed="${escapeHtml(s.text)}">+ ${escapeHtml(s.text)}</button>`).join('');
+    panel.querySelector('#prAddBtn').addEventListener('click', async ()=>{
+      const val = panel.querySelector('#prNew').value.trim();
+      if(!val) return;
+      await DB.addBucketItem({type:'promises', text:val, done:false, author:me()});
+      panel.querySelector('#prNew').value='';
+    });
+    panel.querySelectorAll('#prSeeds [data-seed]').forEach(b=>b.addEventListener('click', ()=> DB.addBucketItem({type:'promises', text:b.dataset.seed, done:false, author:me()})));
+    unsub.push(DB.onBucketItems(rows=>{
+      const list = panel.querySelector('#prList');
+      if(!list) return;
+      const items = rows.filter(r=>r.type==='promises');
+      list.innerHTML = items.length ? items.map(it=>`
+        <div class="bucket-item ${it.done?'is-done':''}">
+          <input type="checkbox" data-toggle-pr="${it.id}" ${it.done?'checked':''}>
+          <div class="bucket-text" style="flex:1;">${escapeHtml(it.text)}</div>
+          <button class="icon-btn" data-del-pr="${it.id}" style="width:30px;height:30px;">✕</button>
+        </div>`).join('') : '<div class="section-note">약속을 추가해보세요.</div>';
+      list.querySelectorAll('[data-toggle-pr]').forEach(cb=> cb.addEventListener('change', ()=> DB.updateBucketItem(cb.dataset.togglePr, {done:cb.checked})));
+      list.querySelectorAll('[data-del-pr]').forEach(b=> b.addEventListener('click', ()=> DB.deleteBucketItem(b.dataset.delPr)));
+    }));
+  }
+
+  function renderDay500(panel){
+    const target = new Date(window.DAY1); target.setDate(target.getDate()+499);
+    const targetStr = `${target.getFullYear()}.${String(target.getMonth()+1).padStart(2,'0')}.${String(target.getDate()).padStart(2,'0')}`;
+    const dNum = dayNumber(todayISO());
+    if(dNum < 500){
+      const daysLeft = 500 - dNum;
+      panel.innerHTML = `
+        <div class="envelope" style="text-align:center;">
+          <div style="font-size:34px;">🔒</div>
+          <div style="font-family:var(--serif); margin-top:6px;">DAY 500 (${targetStr})에 다시 열어볼 수 있어요.</div>
+          <div class="section-note">앞으로 ${daysLeft}일 남았어요. 지금은 계속 수정할 수 있어요.</div>
+        </div>
+        <textarea class="field" id="day500Area" style="margin-top:12px; min-height:160px;" placeholder="DAY 500에 열어볼 편지를 지금 써두세요."></textarea>
+        <div class="section-note" id="day500Hint" style="margin-top:6px;">자동 저장돼요.</div>`;
+      const area = panel.querySelector('#day500Area');
+      let t;
+      unsub.push(DB.onDay500Letter(d=>{ if(document.activeElement !== area) area.value = (d && d.text) || ''; }));
+      area.addEventListener('input', ()=>{
+        clearTimeout(t);
+        const hint = panel.querySelector('#day500Hint');
+        hint.textContent = '저장 중…';
+        t = setTimeout(async ()=>{ await DB.setDay500Letter(area.value); hint.textContent = '저장됨 ✓'; }, 600);
+      });
+    } else {
+      panel.innerHTML = `<div class="eyebrow">DAY 500 — 이제 열어볼 수 있어요</div><div class="story-text" id="day500Text">아직 쓰인 편지가 없어요.</div>`;
+      unsub.push(DB.onDay500Letter(d=>{
+        const el = panel.querySelector('#day500Text');
+        if(el) el.textContent = (d && d.text) ? d.text : '아직 쓰인 편지가 없어요.';
+      }));
+    }
+  }
+
   function renderLetters(panel){
     panel.innerHTML = `
       <div class="envelope">
@@ -132,15 +227,24 @@
       <div class="future-tabs">
         <button data-action="tab" data-group="future" data-target="postcards" data-tabbtn="future" class="is-active">POSTCARDS TO US AGAIN</button>
         <button data-action="tab" data-group="future" data-target="bucket" data-tabbtn="future">SOMEDAY, WITH YOU</button>
+        <button data-action="tab" data-group="future" data-target="newplaces" data-tabbtn="future">HAVEN'T BEEN YET</button>
+        <button data-action="tab" data-group="future" data-target="promises" data-tabbtn="future">OUR SMALL PROMISES</button>
         <button data-action="tab" data-group="future" data-target="letter" data-tabbtn="future">LETTER TO FUTURE US</button>
+        <button data-action="tab" data-group="future" data-target="day500" data-tabbtn="future">OPEN ON DAY 500</button>
       </div>
       <div data-tabpanel="future" data-panel="postcards" class="tab-panel is-active"></div>
       <div data-tabpanel="future" data-panel="bucket" class="tab-panel"></div>
+      <div data-tabpanel="future" data-panel="newplaces" class="tab-panel"></div>
+      <div data-tabpanel="future" data-panel="promises" class="tab-panel"></div>
       <div data-tabpanel="future" data-panel="letter" class="tab-panel"></div>
+      <div data-tabpanel="future" data-panel="day500" class="tab-panel"></div>
     `;
     renderPostcards(container.querySelector('[data-panel="postcards"]'));
     renderBucket(container.querySelector('[data-panel="bucket"]'));
+    renderNewPlaces(container.querySelector('[data-panel="newplaces"]'));
+    renderPromises(container.querySelector('[data-panel="promises"]'));
     renderLetters(container.querySelector('[data-panel="letter"]'));
+    renderDay500(container.querySelector('[data-panel="day500"]'));
   }
 
   Router.registerView('future', {render});

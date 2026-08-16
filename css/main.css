@@ -262,6 +262,10 @@ body.modal-open{ overflow:hidden; }
 .kakao-msg{ max-width:78%; margin:6px 0; padding:9px 12px; border-radius:14px; font-size:13.5px; line-height:1.4; }
 .kakao-msg.from-시현{ background:#fff; margin-right:auto; border-bottom-left-radius:4px; }
 .kakao-msg.from-강원{ background:#fef01b; margin-left:auto; border-bottom-right-radius:4px; text-align:right; }
+.kakao-like-row{ display:inline-flex; gap:4px; margin-left:6px; vertical-align:middle; }
+.kakao-like-btn, .kakao-best-btn{ border:none; background:none; font-size:12px; padding:0 2px; opacity:.55; cursor:pointer; }
+.kakao-like-btn.is-liked{ opacity:1; color:var(--red); }
+.kakao-best-btn.is-best{ opacity:1; color:var(--gold); }
 
 .photo-gallery{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:14px 0; }
 .photo-frame{ position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; background:#111; }
@@ -347,6 +351,32 @@ body.modal-open{ overflow:hidden; }
 .notif-item:last-child{ border-bottom:none; }
 .notif-author{ font-weight:700; margin-right:4px; }
 .notif-empty{ padding:24px; text-align:center; color:var(--ink-soft); font-size:13px; }
+
+/* ---------- OUR STATS (streak rings / mood donut / activity bars / heatmap) ---------- */
+.stats-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+@media (max-width:600px){ .stats-grid{ grid-template-columns:1fr; } }
+.stats-card{ background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:16px; }
+.stats-card.full{ grid-column:1/-1; }
+.stats-card-title{ font-size:12px; letter-spacing:.08em; font-weight:700; color:var(--kraft); margin-bottom:10px; }
+.ring-row{ display:flex; gap:20px; justify-content:center; }
+.ring-item{ text-align:center; }
+.ring{ width:74px; height:74px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:conic-gradient(var(--gold) calc(var(--p)*1%), var(--line) 0); margin:0 auto; }
+.ring-inside{ width:56px; height:56px; border-radius:50%; background:var(--paper); display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:18px; }
+.ring-label{ font-size:11px; color:var(--ink-soft); margin-top:6px; }
+.donut-wrap{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; justify-content:center; }
+.donut{ width:100px; height:100px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+.donut-center{ width:66px; height:66px; border-radius:50%; background:var(--paper); display:flex; align-items:center; justify-content:center; text-align:center; font-size:11px; color:var(--ink-soft); }
+.donut-legend{ font-size:12px; display:flex; flex-direction:column; gap:4px; }
+.donut-legend i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
+.stat-bar-row{ display:flex; align-items:center; gap:8px; margin:6px 0; font-size:12px; }
+.stat-bar-row .lbl{ width:64px; flex:0 0 auto; }
+.stat-bar-row .track{ flex:1; height:8px; background:var(--line); border-radius:999px; overflow:hidden; }
+.stat-bar-row .fill{ height:100%; background:var(--red); }
+.heatmap{ display:grid; grid-template-columns:repeat(10,1fr); gap:4px; }
+.heat-cell{ aspect-ratio:1; border-radius:3px; background:var(--line); }
+.heat-cell.one{ background:#e6c3b6; }
+.heat-cell.two{ background:var(--red); }
 
 .report-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px; }
 @media (max-width:600px){ .report-grid{ grid-template-columns:repeat(2,1fr); } }

@@ -331,4 +331,58 @@ window.PULSE_BASELINE = [
 window.AFFECTION_WORDS = ['사랑해','보고싶','여보','아가','고마워','행복'];
 window.TENSION_WORDS = ['서운','미안','화나','싸우','속상','힘들'];
 
+/* THE DATES I'D LIVE AGAIN (Section 48) — ported verbatim from the prior
+   site's curated POSTERS array (movie-poster treatment per real date). */
+window.POSTERS = [
+  {date:"2025-10-04", title:"MoMA + Zoo", genre:"Romance · Slice of Life", tagline:"처음 둘이 보낸 하루, 그리고 “다음에 또.”", stars:"♥♥♥♥"},
+  {date:"2025-11-01", title:"Beacon — 20 KM", genre:"Adventure", tagline:"still not tired of you.", stars:"♥♥♥♥♥"},
+  {date:"2025-11-11", title:"NBA Date Night", genre:"Sports · Comedy", tagline:"나는 너랑 카톡만해도 행복한가봐.", stars:"♥♥♥"},
+  {date:"2025-11-14", title:"Central Park", genre:"Autumn Romance", tagline:"뉴욕에서 너를 만나 참 감사해.", stars:"♥♥♥♥"},
+  {date:"2025-11-19", title:"Ice Skating", genre:"Winter Feature", tagline:"겨울 영화 같았던 하루.", stars:"♥♥♥♥"},
+  {date:"2025-12-06", title:"Jazz Bar", genre:"Drama · Night", tagline:"조용한 밤, 재즈 그리고 우리.", stars:"♥♥♥"},
+  {date:"2025-12-08", title:"강원 생일", genre:"Anniversary Special", tagline:"시현아 너한테만 해.", stars:"♥♥♥♥♥"},
+  {date:"2025-12-11", title:"Raku · DAY 50", genre:"Romance", tagline:"오래오래 좋아해달라구~", stars:"♥♥♥♥♥"},
+  {date:"2025-12-30", title:"San Diego", genre:"Sunset Romance", tagline:"Kiss Statue + sunset.", stars:"♥♥♥♥"},
+  {date:"2026-01-10", title:"종로 · DAY 80", genre:"City Walk", tagline:"80일, 종로 거리에서.", stars:"♥♥♥"},
+  {date:"2026-03-18", title:"부산", genre:"Reunion Drama", tagline:"오랜만의 재회, 부산에서.", stars:"♥♥♥♥♥"},
+];
+
+/* FUNNY US + INSIDE JOKES (Section 49/57) — ported verbatim */
+window.FUNNY_MOMENTS = [
+  {date:"2025-11-30", quote:"말을 그렇게 해도 카톡 하나도 없으면 속상할걸??? / 넘 귀여운데 놓고 왔어", note:"소호에서 선물 고르다 나온, 은근 진심인 투닥거림."},
+  {date:"2025-12-10", quote:"이러려고 너 남자친구 있는거 아니야!! / 진리에게 다음에 보자는 말은 정말 선택지에 있으면 안되겠다", note:"할리우드 숙박 예약하며 웃음 터진 밤."},
+  {date:"2025-10-04", quote:"오늘 덕분에 동물원도 가고 모마도 가고~ / 정말…?", note:"별거 아닌 되물음 하나에도 설렜던 초반."},
+];
+window.INSIDE_JOKES = [
+  {phrase:"아가", count:722, example:"아가 잘 잤어??"},
+  {phrase:"여보", count:708, example:"울 여보 일어났는가"},
+  {phrase:"아이구", count:165, example:"아이구.. 자바 언어 빡세긴해"},
+  {phrase:"힝", count:133, example:"힝… 진짜 미안해"},
+  {phrase:"당근이지", count:100, example:"당근이지! 하은이랑 재밌게 보고 와"},
+  {phrase:"뿌엥", count:72, example:"뿌엥… 진짜 10분만..."},
+  {phrase:"감자", count:70, example:"감자 보고 싶긴한데"},
+  {phrase:"까비", count:26, example:"까비 까비, 다음에 기회되면 같이 먹는걸로"},
+];
+
+/* Future — extra tabs ported from the old app (Section 67 backlog) */
+window.NEWPLACES_SEED = [
+  {id:'n1', text:'Tokyo'}, {id:'n2', text:'Banff'}, {id:'n3', text:'Aurora (아이슬란드/노르웨이)'},
+];
+window.PROMISES_SEED = [
+  {id:'p1', text:'서로에게 편지 쓰기', done:false}, {id:'p2', text:'끝까지 손 놓지 않기', done:false},
+  {id:'p3', text:'같이 여행 많이 다니기', done:false}, {id:'p4', text:'오래오래 좋아하기', done:false},
+];
+
+/* Special-day icons for calendar/stats badges (V10_SPECIAL_DAYS, ported) */
+window.SPECIAL_DAYS = {
+  "2025-10-23":{icon:"♥",label:"DAY 1"},
+  "2025-12-08":{icon:"🎂",label:"강원 생일"},
+  "2025-12-11":{icon:"♥",label:"DAY 50"},
+  "2025-12-20":{icon:"🎂",label:"시현 생일"},
+  "2026-01-30":{icon:"💯",label:"DAY 100"},
+  "2026-02-06":{icon:"💊",label:"약대 합격"},
+  "2026-03-21":{icon:"♥",label:"DAY 150"},
+  "2026-08-19":{icon:"♥",label:"DAY 300"},
+};
+
 window.PASSCODE = "1023";

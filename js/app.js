@@ -125,6 +125,26 @@
     window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{}));
   }
 
+  /* ---------- ADD TO HOME SCREEN ---------- */
+  let deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e)=>{
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    const btn = document.getElementById('installBtn');
+    if(btn) btn.style.display = '';
+  });
+  window.RouterActions['install-app'] = async function(){
+    if(!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    document.getElementById('installBtn').style.display = 'none';
+  };
+  window.addEventListener('appinstalled', ()=>{
+    const btn = document.getElementById('installBtn');
+    if(btn) btn.style.display = 'none';
+  });
+
   /* ---------- DAILY REMINDER (Section 71) — best-effort while the app/tab is open ---------- */
   let reminderFiredFor = null;
   function checkReminder(){

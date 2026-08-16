@@ -19,6 +19,8 @@
     {key:'pulse', n:'13', t:'RELATIONSHIP PULSE', s:'월별 애정/긴장 표현 그래프.'},
     {key:'kakao', n:'14', t:'KAKAO IMPORT', s:'카톡 .txt를 올려서 통계를 갱신해요.'},
     {key:'thanksarchive', n:'15', t:'300 DAYS OF 고마워', s:'우리가 남긴 모든 감사를 검색해요.'},
+    {key:'stats', n:'16', t:'OUR STATS', s:'연속 기록, 감정 믹스, 30일 히트맵.'},
+    {key:'likedkakao', n:'17', t:'LIKED KAKAO MESSAGES', s:'저장해둔 카톡 한 줄들.'},
   ];
   const MORE = [
     {key:'funny', t:'Funny & Inside Jokes'},
@@ -87,19 +89,16 @@
 
   /* ---- THE DATES I'D LIVE AGAIN (favorited days as posters) ---- */
   Router.registerSpecial('liveagain', {render(host){
-    host.innerHTML = subHeader("THE DATES I'D LIVE AGAIN") + '<div id="liveAgainGrid" class="grid grid-3"></div>';
-    DB.onAllFavorites(rows=>{
-      const favDates = rows.filter(r=>r.value).map(r=>r.date).filter(d=>window.EVENTS[d]);
-      const grid = host.querySelector('#liveAgainGrid');
-      if(!grid) return;
-      if(!favDates.length){ grid.innerHTML = '<div class="empty-frame" style="grid-column:1/-1;">아직 다시 살고 싶은 날로 표시한 기억이 없어요. Memory Detail에서 ♥ Favorite을 눌러보세요.</div>'; return; }
-      grid.innerHTML = favDates.map(d=>`
-        <button class="card card-btn" style="background:#1c1712; color:#f6f1e6; text-align:center;" data-action="memory" data-date="${d}">
+    host.innerHTML = subHeader("THE DATES I'D LIVE AGAIN", '다시 살고 싶은 날들을 영화 포스터처럼.') +
+      `<div class="grid grid-3">${window.POSTERS.map(p=>`
+        <button class="card card-btn" style="background:#1c1712; color:#f6f1e6; text-align:center;" data-action="memory" data-date="${p.date}">
           <div class="empty-frame" style="height:140px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; border-color:#5a4c33;">▣</div>
-          <div style="font-family:var(--serif); font-size:16px;">${escapeHtml(window.EVENTS[d].title)}</div>
-          <div style="font-size:11px; color:#c8a24a; margin-top:4px;">${d}</div>
-        </button>`).join('');
-    });
+          <div style="font-size:11px; color:#c8a24a; letter-spacing:.08em;">${escapeHtml(p.genre)}</div>
+          <div style="font-family:var(--serif); font-size:17px; margin:4px 0;">${escapeHtml(p.title)}</div>
+          <div style="font-family:var(--hand); font-size:12px; opacity:.85;">${escapeHtml(p.tagline)}</div>
+          <div style="margin-top:6px; color:#e0917a;">${p.stars}</div>
+          <div style="font-size:11px; color:#a99; margin-top:4px;">${p.date}</div>
+        </button>`).join('')}</div>`;
   }});
 
   /* ---- OUR NEW YORK / PLACES ---- */
@@ -382,11 +381,158 @@
 
   /* ---- FUNNY & INSIDE JOKES ---- */
   Router.registerSpecial('funny', {render(host){
-    const funny = Object.entries(window.EVENTS).filter(([,ev])=>(ev.kakao||[]).some(([,t])=>t.includes('ㅋㅋ')));
-    host.innerHTML = subHeader('Funny & Inside Jokes') + (funny.length ? `<div class="card">${funny.map(([d,ev])=>`
-      <button class="list-row card-btn" style="width:100%;background:none;border:none;border-bottom:1px solid var(--line);" data-action="memory" data-date="${d}">
-        <div class="list-date">${d.slice(5)}</div><div style="flex:1;text-align:left;margin-left:14px;">${escapeHtml(ev.title)}</div>
-      </button>`).join('')}</div>` : '<div class="empty-frame">아직 없어요.</div>');
+    host.innerHTML = subHeader('Funny & Inside Jokes') + `
+      <div class="grid grid-2">${window.FUNNY_MOMENTS.map(f=>`
+        <button class="card card-btn" data-action="memory" data-date="${f.date}">
+          <div class="section-note">${f.date}</div>
+          <div style="font-family:var(--serif); font-style:italic; margin:6px 0;">“${escapeHtml(f.quote)}”</div>
+          <div class="section-note">${escapeHtml(f.note)}</div>
+        </button>`).join('')}</div>
+      <div class="section-head" style="margin-top:24px;"><div class="section-title" style="font-size:16px;">INSIDE JOKES</div></div>
+      <div class="mood-grid">${window.INSIDE_JOKES.map(j=>`
+        <span class="chip" title="${escapeHtml(j.example)}">${escapeHtml(j.phrase)} <span class="section-note">×${j.count}</span></span>
+      `).join('')}</div>
+      <div class="section-note" style="margin-top:10px;">예시: ${window.INSIDE_JOKES.slice(0,3).map(j=>`"${escapeHtml(j.example)}"`).join(' · ')}</div>`;
+  }});
+
+  /* ---- OUR STATS ---- */
+  const MOOD_COLORS = ['#a5372c','#c8a24a','#5f6b3f','#3f5a72','#8a6a4b','#b25c61','#6b5f4f','#c17b7f','#7a4526'];
+  function moodColor(mood){
+    const idx = window.MOODS.findIndex(m=>m[0]===mood);
+    return MOOD_COLORS[(idx<0?0:idx) % MOOD_COLORS.length];
+  }
+  function computeStreaks(rows, user){
+    const dates = new Set(rows.filter(r=>r.user===user).map(r=>r.date));
+    // current streak ending today
+    let current = 0, cursor = new Date();
+    while(dates.has(todayISO(cursor))){ current++; cursor.setDate(cursor.getDate()-1); }
+    // best streak over all recorded dates
+    const sorted = [...dates].sort();
+    let best = 0, run = 0, prev = null;
+    sorted.forEach(d=>{
+      if(prev){
+        const diff = Math.round((new Date(d) - new Date(prev))/86400000);
+        run = diff===1 ? run+1 : 1;
+      } else run = 1;
+      best = Math.max(best, run);
+      prev = d;
+    });
+    return {current, best};
+  }
+  Router.registerSpecial('stats', {render(host){
+    host.innerHTML = subHeader('OUR STATS') + '<div class="stats-grid" id="statsGrid"></div>';
+    DB.onAllDailyRecords(rows=>{
+      const grid = host.querySelector('#statsGrid');
+      if(!grid) return;
+      const sName = Identity.displayName('sihyun'), gName = Identity.displayName('gangwon');
+      const sStreak = computeStreaks(rows, sName), gStreak = computeStreaks(rows, gName);
+      const maxStreak = Math.max(sStreak.best, gStreak.best, 1);
+
+      const moodCounts = {};
+      rows.forEach(r=>{ if(r.mood) moodCounts[r.mood] = (moodCounts[r.mood]||0)+1; });
+      const topMood = Object.entries(moodCounts).sort((a,b)=>b[1]-a[1]);
+      const totalMood = topMood.reduce((a,[,n])=>a+n,0) || 1;
+      let acc = 0;
+      const segments = topMood.map(([m,n])=>{
+        const a = acc/totalMood*360; acc += n; const b = acc/totalMood*360;
+        return `${moodColor(m)} ${a.toFixed(1)}deg ${b.toFixed(1)}deg`;
+      });
+
+      const actCounts = {};
+      rows.forEach(r=>{ (r.activities||[]).forEach(a=>actCounts[a]=(actCounts[a]||0)+1); });
+      const topActs = Object.entries(actCounts).sort((a,b)=>b[1]-a[1]).slice(0,7);
+      const maxAct = topActs[0]?.[1] || 1;
+
+      const sDates = new Set(rows.filter(r=>r.user===sName).map(r=>r.date));
+      const gDates = new Set(rows.filter(r=>r.user===gName).map(r=>r.date));
+      const heat = [];
+      let d = new Date(); d.setDate(d.getDate()-29);
+      for(let i=0;i<30;i++){
+        const k = todayISO(d);
+        const c = (sDates.has(k)?1:0) + (gDates.has(k)?1:0);
+        heat.push([k,c]);
+        d.setDate(d.getDate()+1);
+      }
+
+      grid.innerHTML = `
+        <div class="stats-card">
+          <div class="stats-card-title">RECORDING STREAK</div>
+          <div class="ring-row">
+            <div class="ring-item"><div class="ring" style="--p:${Math.min(100, sStreak.current/Math.max(7,maxStreak)*100)}"><div class="ring-inside">${sStreak.current}</div></div><div class="ring-label">${escapeHtml(sName)} 현재 연속</div></div>
+            <div class="ring-item"><div class="ring" style="--p:${Math.min(100, gStreak.current/Math.max(7,maxStreak)*100)}"><div class="ring-inside">${gStreak.current}</div></div><div class="ring-label">${escapeHtml(gName)} 현재 연속</div></div>
+          </div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-card-title">OUR MOOD MIX</div>
+          <div class="donut-wrap">
+            <div class="donut" style="background:conic-gradient(${segments.length?segments.join(','):'#eee 0 360deg'})"><div class="donut-center">${rows.length}<br>records</div></div>
+            <div class="donut-legend">${topMood.slice(0,6).map(([m,n])=>`<span><i style="background:${moodColor(m)}"></i>${escapeHtml(m)} ${n}</span>`).join('') || '<span class="section-note">기록이 쌓이면 보여요</span>'}</div>
+          </div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-card-title">FAVORITE DATE TYPES</div>
+          ${topActs.length ? topActs.map(([a,n])=>`<div class="stat-bar-row"><div class="lbl">${escapeHtml(a)}</div><div class="track"><div class="fill" style="width:${n/maxAct*100}%"></div></div><div>${n}</div></div>`).join('') : '<div class="section-note">아직 활동 기록이 없어요.</div>'}
+        </div>
+        <div class="stats-card">
+          <div class="stats-card-title">TOTAL ARCHIVE</div>
+          <div class="report-grid" style="margin-top:0;">
+            <div class="report-tile"><div class="val">${sDates.size}</div><div class="lbl">${escapeHtml(sName)} 기록</div></div>
+            <div class="report-tile"><div class="val">${gDates.size}</div><div class="lbl">${escapeHtml(gName)} 기록</div></div>
+            <div class="report-tile"><div class="val">${sStreak.best}</div><div class="lbl">${escapeHtml(sName)} 최고 연속</div></div>
+            <div class="report-tile"><div class="val">${gStreak.best}</div><div class="lbl">${escapeHtml(gName)} 최고 연속</div></div>
+          </div>
+        </div>
+        <div class="stats-card full">
+          <div class="stats-card-title">LAST 30 DAYS · 둘이 기록한 날</div>
+          <div class="heatmap">${heat.map(([k,c])=>`<div class="heat-cell ${c===1?'one':c===2?'two':''}" title="${k} · ${c===0?'기록 없음':c===1?'한 명 기록':'둘 다 기록'}"></div>`).join('')}</div>
+          <div class="section-note" style="margin-top:8px;">연한 칸 = 한 명 기록 · 진한 칸 = 둘 다 기록.</div>
+        </div>`;
+    });
+  }});
+
+  /* ---- LIKED KAKAO MESSAGES ---- */
+  Router.registerSpecial('likedkakao', {render(host){
+    host.innerHTML = subHeader('LIKED KAKAO MESSAGES', '♡는 저장, ★는 정말 다시 보고 싶은 BEST예요.') + `
+      <input class="field" id="lkSearch" placeholder="카톡 검색…" style="margin-bottom:10px;">
+      <div class="album-toolbar" id="lkFilters">
+        <button data-filter="best" class="is-active">★ BEST</button>
+        <button data-filter="all">전체</button>
+        <button data-filter="${Identity.displayName('sihyun')}">${escapeHtml(Identity.displayName('sihyun'))}</button>
+        <button data-filter="${Identity.displayName('gangwon')}">${escapeHtml(Identity.displayName('gangwon'))}</button>
+      </div>
+      <div id="lkResults"></div>`;
+    let all = [], filter = 'best', q = '';
+    function draw(){
+      const results = host.querySelector('#lkResults');
+      if(!results) return;
+      let items = all;
+      if(filter==='best') items = items.filter(x=>x.best);
+      else if(filter!=='all') items = items.filter(x=>x.speaker===filter);
+      if(q) items = items.filter(x=>((x.text||'')+(x.speaker||'')+(x.date||'')).toLowerCase().includes(q.toLowerCase()));
+      if(!items.length){ results.innerHTML = '<div class="empty-frame">조건에 맞는 저장 카톡이 없어요.</div>'; return; }
+      const groups = {};
+      items.forEach(x=>{ const m=(x.date||'기타').slice(0,7); (groups[m]=groups[m]||[]).push(x); });
+      results.innerHTML = Object.entries(groups).sort((a,b)=>b[0]<a[0]?-1:1).map(([m,arr])=>`
+        <div class="section">
+          <div class="eyebrow">${m} · ${arr.length} messages</div>
+          <div class="card">${arr.map(x=>`
+            <button class="list-row card-btn" style="width:100%;background:none;border:none;border-bottom:1px solid var(--line);" data-action="memory" data-date="${x.date}">
+              <div style="flex:1; text-align:left;">
+                <div class="section-note">${x.date} · ${escapeHtml(x.speaker||'')} ${x.best?'★':''}</div>
+                <div>${escapeHtml(x.text||'')}</div>
+              </div>
+            </button>`).join('')}</div>
+        </div>`).join('');
+    }
+    host.querySelector('#lkSearch').addEventListener('input', e=>{ q = e.target.value; draw(); });
+    host.querySelectorAll('#lkFilters button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        filter = btn.dataset.filter;
+        host.querySelectorAll('#lkFilters button').forEach(b=>b.classList.toggle('is-active', b===btn));
+        draw();
+      });
+    });
+    DB.onAllChatLikes(rows=>{ all = rows.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')); draw(); });
   }});
 
   /* ---- 300 DAYS OF 고마워 ---- */

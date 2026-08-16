@@ -89,6 +89,22 @@ Special 15개 하위 화면 / Our Future 3탭 / 알림)은 모두 이 새 아키
   **Before/Came True** 3쌍 전부, **Cities We Shared** 11개 전체(날짜 없는 곳 포함),
   **300 DAYS OF 고마워** 검색 가능한 감사 아카이브.
 
+한 번 더 예전 사이트와 대조해서 (에이전트 감사 포함) 마저 옮긴 것들:
+
+- **THE DATES I'D LIVE AGAIN**: 즐겨찾기 기반 목록 대신 예전 사이트의 실제 큐레이션
+  POSTERS 11개(장르/tagline/별점 포함)로 교체.
+- **Funny & Inside Jokes**: ㅋㅋ 자동 필터 대신 실제 큐레이션된 FUNNY_MOMENTS 3개 +
+  INSIDE_JOKES 8개(등장 횟수·예문 포함)를 그대로 이관.
+- **OUR FUTURE**에 3개 탭 추가: HAVEN'T BEEN YET(가보고 싶은 곳), OUR SMALL
+  PROMISES(작은 약속 체크리스트), OPEN ON DAY 500(DAY1+499일에 자동으로 잠금 해제되는
+  단일 타임캡슐 편지 — 그 전까지는 🔒 D-day 카운트다운과 함께 계속 수정 가능).
+- **OUR STATS** (Special 신규): 연속 기록 링, 감정 믹스 도넛, 활동 막대그래프, 최근
+  30일 둘이 함께 기록한 날 히트맵 — 모두 실시간 Diary 기록에서 계산.
+- **LIKED KAKAO MESSAGES** (Special 신규): Memory Detail의 카톡 말풍선마다 ♡ 저장 /
+  ★ BEST 버튼을 달았고, 저장한 말풍선만 모아서 검색·화자별 필터로 다시 볼 수 있는
+  아카이브 화면을 추가.
+- **홈 화면에 추가** 설치 버튼: `beforeinstallprompt`를 감지해 헤더에 버튼으로 노출.
+
 ## 모바일
 
 뷰포트 메타, 반응형 그리드/모달, 44px 이상 터치 영역, iOS 자동 확대 방지(입력창 16px),
