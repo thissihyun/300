@@ -291,4 +291,16 @@ window.AWARDS = [
   {id:"mostUs", title:"Most “us” day", candidates:["2025-12-23","2026-01-17"]},
 ];
 
+/* Relationship Pulse baseline (Section 54) — [month, affection‰, tension‰],
+   ported verbatim from the prior site's own KakaoTalk-derived numbers.
+   Used until someone imports a fresh .txt export (js/kakaoparse.js). */
+window.PULSE_BASELINE = [
+  ['2025.10',9.6,3.5],['2025.11',20.4,7.0],['2025.12',31.0,14.1],
+  ['2026.01',55.0,13.7],['2026.02',98.5,6.6],['2026.03',91.0,7.6],
+  ['2026.04',76.5,12.8],['2026.05',40.2,11.6],['2026.06',23.1,19.0],
+  ['2026.07',29.3,13.6],['2026.08',32.0,10.5],
+];
+window.AFFECTION_WORDS = ['사랑해','보고싶','여보','아가','고마워','행복'];
+window.TENSION_WORDS = ['서운','미안','화나','싸우','속상','힘들'];
+
 window.PASSCODE = "1023";

@@ -273,12 +273,22 @@ body.modal-open{ overflow:hidden; }
 .comment-author{ font-weight:700; margin-right:6px; }
 .nav-row{ display:flex; justify-content:space-between; margin-top:24px; }
 
-/* Chapter theme accents on the modal panel */
-.modal-panel.theme-nyc{ border-top:6px solid var(--red); }
-.modal-panel.theme-park{ border-top:6px solid var(--olive); }
-.modal-panel.theme-west{ border-top:6px solid var(--gold); }
-.modal-panel.theme-korea{ border-top:6px solid var(--blue); }
-.modal-panel.theme-distance{ border-top:6px solid var(--red); }
+/* Chapter theme accents on the modal panel (Section 27/84) — each chapter
+   reads like a different travel-magazine issue: distinct wash + masthead. */
+.issue-masthead{
+  display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px;
+  font-family:var(--serif); font-size:11px; letter-spacing:.14em; font-weight:700;
+  padding-bottom:8px; margin-bottom:12px; border-bottom:2px solid currentColor;
+}
+.issue-tagline{ font-family:var(--hand); letter-spacing:0; font-weight:400; font-size:13px; opacity:.8; }
+
+.modal-panel.theme-nyc{ --accent:var(--red); border-top:6px solid var(--accent); background:linear-gradient(180deg,#fdf3ee,var(--paper) 220px); }
+.modal-panel.theme-park{ --accent:var(--olive); border-top:6px solid var(--accent); background:linear-gradient(180deg,#f2f4e8,var(--paper) 220px); }
+.modal-panel.theme-west{ --accent:#8a6a1f; border-top:6px solid var(--gold); background:linear-gradient(180deg,#fbf1da,var(--paper) 220px); }
+.modal-panel.theme-korea{ --accent:var(--blue); border-top:6px solid var(--accent); background:linear-gradient(180deg,#eef3f7,var(--paper) 220px); }
+.modal-panel.theme-distance{ --accent:var(--red); border-top:6px solid var(--accent); background:linear-gradient(180deg,#f6eee0,var(--paper) 220px); }
+.modal-panel .issue-masthead{ color:var(--accent, var(--kraft)); }
+.modal-panel.theme-distance .issue-tagline{ color:var(--blue); }
 
 /* ---------- LIGHTBOX ---------- */
 #lightboxModal .modal-panel{ background:transparent; box-shadow:none; max-width:96vw; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; }

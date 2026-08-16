@@ -8,8 +8,19 @@
   let currentDate = null;
 
   function sortedDates(){ return Object.keys(window.EVENTS).sort(); }
-  function themeForChapter(chapter){
-    if(!chapter) return 'theme-korea';
+
+  // Section 27/84 — each chapter reads like a different travel-magazine issue,
+  // not just a different accent color.
+  const THEME_META = {
+    'theme-nyc':      {masthead:'NEW YORK FIELD NOTES',   tagline:'NEW YORK, WHERE WE STARTED'},
+    'theme-park':     {masthead:'CENTRAL PARK ISSUE',      tagline:'AUTUMN IN CENTRAL PARK'},
+    'theme-west':     {masthead:'WEST COAST ROAD BOOK',    tagline:'GO WEST, TOGETHER'},
+    'theme-korea':    {masthead:'KOREA EDITION',           tagline:'BACK HOME, STILL US'},
+    'theme-distance': {masthead:'LONG DISTANCE ISSUE',     tagline:'SAME US, TWO PLACES'},
+  };
+  function themeForEvent(ev){
+    const chapter = ev.chapter||'';
+    if(/central park/i.test(ev.title||'')) return 'theme-park';
     if(chapter.startsWith('CHAPTER 6')) return 'theme-west';
     if(chapter.startsWith('CHAPTER 7')) return 'theme-korea';
     if(chapter.startsWith('CHAPTER 8')) return 'theme-distance';
@@ -25,9 +36,15 @@
     clearSub();
     const ev = window.EVENTS[date] || {chapter:'', title:'This day is still being written', story:'', kakao:[]};
     const panel = document.getElementById('memoryPanel');
-    panel.className = 'modal-panel ' + themeForChapter(ev.chapter);
+    const theme = themeForEvent(ev);
+    const meta = THEME_META[theme];
+    panel.className = 'modal-panel ' + theme;
 
     panel.innerHTML = `
+      <div class="issue-masthead">
+        <span>${escapeHtml(meta.masthead)}</span>
+        <span class="issue-tagline">${escapeHtml(meta.tagline)}</span>
+      </div>
       <div class="modal-top">
         <button class="icon-btn" data-action="close-modal">✕</button>
         <button class="like-btn" id="favBtn">♥ Favorite</button>

@@ -12,6 +12,7 @@ index.html              앱 셸 (마크업만 — 로직/스타일 없음)
 css/main.css             디자인 시스템 전체
 js/
   data.js                 실제 연애 기록 데이터 (EVENTS, FIRSTS, WORDS, 질문 등)
+  kakaoparse.js            카카오톡 .txt export 파서 (브라우저에서만 동작, 집계만 저장)
   firebase.js              공용 데이터 계층 — 모든 화면이 이 모듈로만 Firestore에 접근
   store.js                  로컬 identity/PIN/설정 (localStorage)
   router.js                  단일 delegated click 라우터 (data-action 기반, inline onclick 없음)
@@ -59,13 +60,22 @@ Firestore 보안 규칙은 두 사람 모두 읽기/쓰기가 가능하게 열�
 ## 지금 구현된 범위 / 백로그
 
 핵심 화면(잠금 → identity → Home / Our Days / Diary / Memory Detail / Photo Album /
-Special 12개 하위 화면 / Our Future 3탭 / 알림)은 모두 이 새 아키텍처 위에서 동작합니다.
-아직 손대지 않은 것들 (다음 세션에서 같은 아키텍처로 이어서 만들면 됩니다):
+Special 14개 하위 화면 / Our Future 3탭 / 알림)은 모두 이 새 아키텍처 위에서 동작합니다.
 
-- 실제 카카오톡 `.txt` export 업로드 → 파싱 → 월별/키워드 통계 (`data/full-chat.js`는
-  원본 export가 보관돼 있을 뿐, 아직 파서가 없습니다)
-- Relationship Pulse 그래프, 챕터별로 완전히 다른 매거진 비주얼 테마
-- 채팅봇(토심이 & 깜자) — 원래도 비활성화 상태였습니다
+- **카카오톡 `.txt` import** (Special → KAKAO IMPORT): 카카오톡 채팅방 설정 →
+  대화 내용 내보내기로 받은 `.txt`를 올리면 브라우저에서만 파싱합니다. 원문 메시지는
+  어디에도 업로드하지 않고, 월별/화자별/단어별 집계 숫자만 Firestore `kakao_stats`
+  문서에 저장해서 US BY THE NUMBERS와 RELATIONSHIP PULSE가 그 값을 씁니다. 업로드
+  전에는 예전 사이트에서 이관한 기준값(`BASELINE_STATS`/`PULSE_BASELINE`)을 보여줍니다.
+  두 가지 내보내기 형식(모바일 `[이름] [오후 3:45] 텍스트` + 날짜 헤더, 데스크톱
+  `2025. 1. 1. 오후 3:45, 이름 : 텍스트`)을 인식합니다.
+- **RELATIONSHIP PULSE**: 월별 애정 표현 / 긴장 표현(‰) SVG 라인 그래프. 긴장 지표는
+  실제 다툰 횟수가 아니라 heuristic이라고 화면에 명시했습니다.
+- **챕터별 매거진 테마**: Memory Detail이 뉴욕/센트럴파크/서부/한국/롱디 5개 챕터마다
+  다른 배경 색조 + masthead 문구("NEW YORK FIELD NOTES" 등) + tagline을 보여줍니다.
+
+아직 손대지 않은 것 (의도적으로 제외): 챗봇(토심이 & 깜자) — 원본 기획서에서도
+"새 rebuild 기본 기능에서 제외, 나중에 검색 기반 Ask Our Archive로" 라고 명시돼 있습니다.
 
 ## 모바일
 
