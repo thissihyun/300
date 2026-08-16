@@ -2,7 +2,7 @@
 const CACHE = 'days300-v1';
 const CORE = [
   './', './index.html', './css/main.css',
-  './js/data.js', './js/firebase.js', './js/store.js', './js/router.js', './js/app.js',
+  './js/data.js', './js/kakaoparse.js', './js/firebase.js', './js/store.js', './js/router.js', './js/app.js',
   './js/views/home.js', './js/views/ourdays.js', './js/views/diary.js', './js/views/memory.js',
   './js/views/ourstory.js', './js/views/album.js', './js/views/special.js', './js/views/future.js',
   './js/views/notifications.js', './manifest.webmanifest',

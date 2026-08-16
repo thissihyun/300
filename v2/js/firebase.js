@@ -126,6 +126,10 @@
     // PIN hashes (Section 4) — salted PBKDF2, never the raw PIN
     getPinDoc: (userId) => getDoc('pins', userId),
     setPinDoc: (userId, data) => setDoc('pins', userId, data),
+
+    // Kakao import aggregates (Section 53/54) — counts only, never raw text
+    setKakaoStats: (data) => setDoc('kakao_stats', 'summary', data),
+    onKakaoStats: (cb) => onDoc('kakao_stats', 'summary', cb),
   };
 
   window.DB = DB;

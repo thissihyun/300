@@ -16,11 +16,18 @@
     {key:'awards', n:'10', t:'OUR MINI AWARDS', s:'둘만의 시상식.'},
     {key:'favorites', n:'11', t:'OUR FAVORITES ♥', s:'즐겨찾기한 기억들.'},
     {key:'liked', n:'12', t:'DAYS WE BOTH LOVED', s:'각자, 그리고 함께 좋아한 날.'},
+    {key:'pulse', n:'13', t:'RELATIONSHIP PULSE', s:'월별 애정/긴장 표현 그래프.'},
+    {key:'kakao', n:'14', t:'KAKAO IMPORT', s:'카톡 .txt를 올려서 통계를 갱신해요.'},
   ];
   const MORE = [
     {key:'funny', t:'Funny & Inside Jokes'},
     {key:'beforecame', t:'Before / Came True'},
   ];
+
+  // Live Kakao import stats (Section 53/54), once uploaded, override the
+  // ported BASELINE_STATS/PULSE_BASELINE everywhere they're shown.
+  let liveKakaoStats = null;
+  if(window.DB) DB.onKakaoStats(d=>{ liveKakaoStats = d; });
 
   function renderHub(){
     const hub = document.getElementById('specialHub');
@@ -158,17 +165,85 @@
   Router.registerSpecial('numbers', {render(host){
     const days = Object.keys(window.EVENTS).length;
     const firsts = window.FIRSTS.length;
-    const stats = window.BASELINE_STATS;
+    const stats = liveKakaoStats || window.BASELINE_STATS;
+    const total = liveKakaoStats ? liveKakaoStats.total : window.BASELINE_STATS.total;
+    const words = liveKakaoStats ? liveKakaoStats.words : window.BASELINE_STATS.words;
     host.innerHTML = subHeader('US, BY THE NUMBERS') + `<div class="report-grid">
       ${[
         [dayNumber(todayISO()), 'days together'],
         [days, 'recorded days'],
         [firsts, 'firsts'],
-        [stats.total.toLocaleString(), 'kakao messages'],
-        [stats.words['사랑해'], '“사랑해”'],
-        [stats.words['보고싶어'], '“보고싶어”'],
+        [total.toLocaleString(), 'kakao messages'],
+        [words['사랑해']||0, '“사랑해”'],
+        [words['보고싶어']||0, '“보고싶어”'],
       ].map(([v,l])=>`<div class="report-tile"><div class="val">${v}</div><div class="lbl">${escapeHtml(l)}</div></div>`).join('')}
-    </div><div class="section-note" style="margin-top:10px;">카카오톡 통계는 ${stats.asOf} 업로드 기준이에요.</div>`;
+    </div><div class="section-note" style="margin-top:10px;">
+      카카오톡 통계는 ${escapeHtml(stats.asOf)} ${liveKakaoStats?'업로드':'기준 값'}이에요.
+      ${liveKakaoStats ? '' : '<button class="btn btn-sm btn-outline" style="margin-left:8px;" data-action="special" data-target="kakao">최신 카톡으로 갱신 →</button>'}
+    </div>`;
+  }});
+
+  /* ---- RELATIONSHIP PULSE (Section 54) ---- */
+  Router.registerSpecial('pulse', {render(host){
+    const rows = (liveKakaoStats && liveKakaoStats.pulse && liveKakaoStats.pulse.length) ? liveKakaoStats.pulse : window.PULSE_BASELINE;
+    const W = 760, H = 320, PAD = 36;
+    const maxV = Math.max(...rows.map(r=>Math.max(r[1],r[2]))) * 1.15 || 1;
+    const stepX = rows.length>1 ? (W-PAD*2)/(rows.length-1) : 0;
+    const toPt = (i,v)=> [PAD+i*stepX, H-PAD-(v/maxV)*(H-PAD*2)];
+    const pathFor = (idx)=> rows.map((r,i)=>{ const [x,y]=toPt(i,r[idx]); return (i===0?'M':'L')+x.toFixed(1)+','+y.toFixed(1); }).join(' ');
+    const dotsFor = (idx,color)=> rows.map((r,i)=>{ const [x,y]=toPt(i,r[idx]); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${color}"/>`; }).join('');
+    const labels = rows.map((r,i)=>{ const [x]=toPt(i,0); return `<text x="${x.toFixed(1)}" y="${H-10}" font-size="10" text-anchor="middle" fill="var(--ink-soft)">${escapeHtml(String(r[0]).slice(2))}</text>`; }).join('');
+    host.innerHTML = subHeader('RELATIONSHIP PULSE', '1,000 messages 당 애정/긴장 표현 빈도 — 긴장 지표는 실제 다툰 횟수가 아니라 참고용 heuristic이에요.') + `
+      <div class="card">
+        <div style="display:flex; gap:16px; margin-bottom:10px; font-size:12px;">
+          <span style="color:var(--red);">● 애정 표현</span><span style="color:var(--blue);">● 긴장 표현</span>
+          ${liveKakaoStats ? '<span class="section-note">(내 카톡 업로드 기준)</span>' : '<span class="section-note">(예전 기준값 — Kakao Import에서 갱신 가능)</span>'}
+        </div>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%; display:block;">
+          <path d="${pathFor(1)}" fill="none" stroke="var(--red)" stroke-width="2"/>
+          <path d="${pathFor(2)}" fill="none" stroke="var(--blue)" stroke-width="2"/>
+          ${dotsFor(1,'var(--red)')}${dotsFor(2,'var(--blue)')}
+          ${labels}
+        </svg>
+      </div>`;
+  }});
+
+  /* ---- KAKAO IMPORT (Section 53) ---- */
+  Router.registerSpecial('kakao', {render(host){
+    host.innerHTML = subHeader('KAKAO IMPORT', '실제 카카오톡 대화 내보내기(.txt)를 올리면 통계가 이 기기뿐 아니라 서로에게도 갱신돼요. 원문 메시지는 저장하지 않고, 집계된 숫자만 저장해요.') + `
+      <div class="card">
+        <input type="file" id="kakaoFile" accept=".txt">
+        <div id="kakaoPreview" class="section-note" style="margin-top:10px;"></div>
+        <button class="btn btn-sm" id="kakaoSaveBtn" style="margin-top:10px; display:none;">이 통계로 저장하기</button>
+      </div>
+      ${liveKakaoStats ? `<div class="section-note" style="margin-top:10px;">현재 저장된 통계: ${escapeHtml(liveKakaoStats.asOf)} 업로드 · 총 ${liveKakaoStats.total.toLocaleString()}개 메시지 · ${liveKakaoStats.byDays}일</div>` : ''}
+    `;
+    let pending = null;
+    host.querySelector('#kakaoFile').addEventListener('change', async (e)=>{
+      const file = e.target.files[0];
+      const preview = host.querySelector('#kakaoPreview');
+      const saveBtn = host.querySelector('#kakaoSaveBtn');
+      if(!file) return;
+      preview.textContent = '읽는 중...';
+      saveBtn.style.display = 'none';
+      const text = await file.text();
+      const messages = window.KakaoParse.parseKakaoExport(text);
+      if(!messages.length){
+        preview.textContent = '이 파일에서 카카오톡 내보내기 형식을 인식하지 못했어요. 카카오톡 채팅방 → 설정 → 대화 내용 내보내기(.txt)로 받은 파일인지 확인해주세요.';
+        return;
+      }
+      pending = window.KakaoParse.aggregate(messages);
+      const [from,to] = pending.dateRange || ['',''];
+      preview.innerHTML = `${pending.total.toLocaleString()}개 메시지 · ${pending.byDays}일 · ${escapeHtml(from)} ~ ${escapeHtml(to)}<br>
+        말하는 사람: ${Object.entries(pending.bySpeaker).map(([k,v])=>`${escapeHtml(k)} ${v}`).join(' · ')}`;
+      saveBtn.style.display = '';
+    });
+    host.querySelector('#kakaoSaveBtn').addEventListener('click', async ()=>{
+      if(!pending) return;
+      await DB.setKakaoStats(pending);
+      await DB.logActivity('kakao', null, Identity.displayName(Identity.current()), `카톡 통계 갱신 · ${pending.total.toLocaleString()}개`);
+      Router.toast('카톡 통계를 저장했어요');
+    });
   }});
 
   /* ---- PHOTOBOOTH ---- */
