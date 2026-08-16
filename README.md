@@ -60,7 +60,7 @@ Firestore 보안 규칙은 두 사람 모두 읽기/쓰기가 가능하게 열�
 ## 지금 구현된 범위 / 백로그
 
 핵심 화면(잠금 → identity → Home / Our Days / Diary / Memory Detail / Photo Album /
-Special 14개 하위 화면 / Our Future 3탭 / 알림)은 모두 이 새 아키텍처 위에서 동작합니다.
+Special 15개 하위 화면 / Our Future 3탭 / 알림)은 모두 이 새 아키텍처 위에서 동작합니다.
 
 - **카카오톡 `.txt` import** (Special → KAKAO IMPORT): 카카오톡 채팅방 설정 →
   대화 내용 내보내기로 받은 `.txt`를 올리면 브라우저에서만 파싱합니다. 원문 메시지는
@@ -76,6 +76,18 @@ Special 14개 하위 화면 / Our Future 3탭 / 알림)은 모두 이 새 아키
 
 아직 손대지 않은 것 (의도적으로 제외): 챗봇(토심이 & 깜자) — 원본 기획서에서도
 "새 rebuild 기본 기능에서 제외, 나중에 검색 기반 Ask Our Archive로" 라고 명시돼 있습니다.
+
+이후 예전 사이트(git 히스토리 `ed691a3`)와 다시 대조해서 실제로 있었지만 빠졌던 것들도
+마저 옮겼습니다:
+
+- **Global Memory Search** (헤더 ⌕ 버튼): 날짜/제목/스토리/카톡/사진 메타데이터/메모를
+  가로질러 검색.
+- **OUR NEW YORK 실제 지도**: 예전 사이트의 실제 위경도(NYC_PINS)를 그대로 옮겨 Leaflet
+  지도로 렌더링. CDN을 못 불러오는 환경에서는 카드 목록으로 자동 대체됩니다.
+- **HOME 인용구 로테이션**, **메모리 상세 안의 연관 기억 링크**(V7_STORY_LINKS),
+  **MINI AWARDS** 실제 4개 카테고리 + "가장 뉴욕다웠던 날" 보너스 카드,
+  **Before/Came True** 3쌍 전부, **Cities We Shared** 11개 전체(날짜 없는 곳 포함),
+  **300 DAYS OF 고마워** 검색 가능한 감사 아카이브.
 
 ## 모바일
 

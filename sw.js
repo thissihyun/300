@@ -5,7 +5,7 @@ const CORE = [
   './js/data.js', './js/kakaoparse.js', './js/firebase.js', './js/store.js', './js/router.js', './js/app.js',
   './js/views/home.js', './js/views/ourdays.js', './js/views/diary.js', './js/views/memory.js',
   './js/views/ourstory.js', './js/views/album.js', './js/views/special.js', './js/views/future.js',
-  './js/views/notifications.js', './manifest.webmanifest',
+  './js/views/notifications.js', './js/views/search.js', './manifest.webmanifest',
 ];
 
 self.addEventListener('install', e=>{

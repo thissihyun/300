@@ -60,6 +60,12 @@
 
       ${ev.story ? `<div class="story-text">${escapeHtml(ev.story)}</div>` : `<div class="empty-frame">${escapeHtml(ev.title)}</div>`}
 
+      ${(window.STORY_LINKS[date]||[]).map(([linkDate,label])=>`
+        <button class="card card-btn" style="display:flex; align-items:center; gap:8px; margin-bottom:10px; padding:10px 14px;" data-action="memory" data-date="${linkDate}">
+          <span style="color:var(--gold);">↳</span>
+          <span style="font-family:var(--hand); font-size:14px;">${escapeHtml(label)}</span>
+        </button>`).join('')}
+
       ${ev.kakao && ev.kakao.length ? `
         <div class="kakao-block" id="kakaoBlock">
           ${ev.kakao.map(([who,text])=>`<div class="kakao-msg from-${escapeHtml(who)}">${escapeHtml(text)}</div>`).join('')}

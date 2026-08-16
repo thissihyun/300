@@ -55,6 +55,7 @@
 
   function openMemory(date){
     if(!window.EVENTS[date] && !window.MemoryView) return;
+    closeAllOverlays(); // e.g. close Global Search / Upload before stacking Memory Detail on top
     location.hash = '#/memory/' + date;
     if(window.MemoryView) window.MemoryView.open(date);
   }

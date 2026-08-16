@@ -18,6 +18,7 @@
     {key:'liked', n:'12', t:'DAYS WE BOTH LOVED', s:'각자, 그리고 함께 좋아한 날.'},
     {key:'pulse', n:'13', t:'RELATIONSHIP PULSE', s:'월별 애정/긴장 표현 그래프.'},
     {key:'kakao', n:'14', t:'KAKAO IMPORT', s:'카톡 .txt를 올려서 통계를 갱신해요.'},
+    {key:'thanksarchive', n:'15', t:'300 DAYS OF 고마워', s:'우리가 남긴 모든 감사를 검색해요.'},
   ];
   const MORE = [
     {key:'funny', t:'Funny & Inside Jokes'},
@@ -104,15 +105,50 @@
   /* ---- OUR NEW YORK / PLACES ---- */
   Router.registerSpecial('places', {render(host){
     host.innerHTML = subHeader('OUR NEW YORK', 'A city full of places, somehow becoming full of us.') +
-      `<div class="grid grid-3">${window.PLACES.map(p=>`
-        <button class="card card-btn hub-card" data-action="memory" data-date="${p.date}">
-          <div class="t">${escapeHtml(p.name)}</div><div class="s">${p.date}${window.EVENTS[p.date]?' · '+escapeHtml(window.EVENTS[p.date].title):''}</div>
-        </button>`).join('')}</div>
+      `<div id="nycMapWrap" class="card" style="padding:0; overflow:hidden;"></div>
+      <div class="grid grid-3" id="placesFallback" style="margin-top:14px; display:none;"></div>
       <div class="section-head" style="margin-top:26px;"><div class="section-title" style="font-size:17px;">CITIES WE SHARED</div></div>
       <div class="grid grid-3">${window.CITIES.map(c=>{
-        const first = Object.keys(window.EVENTS).sort().find(d=>c.filter(d));
-        return `<button class="card card-btn hub-card" ${first?`data-action="memory" data-date="${first}"`:''}><div class="t">${escapeHtml(c.name)}</div></button>`;
+        const clickable = !!c.date;
+        return `<button class="card ${clickable?'card-btn':''} hub-card" ${clickable?`data-action="memory" data-date="${c.date}"`:'disabled style="opacity:.55; cursor:default;"'}>
+          <div class="t">${c.icon} ${escapeHtml(c.name)}</div>${clickable?`<div class="s">${c.date}</div>`:'<div class="s">아직 못 가본 곳</div>'}
+        </button>`;
       }).join('')}</div>`;
+
+    const mapWrap = host.querySelector('#nycMapWrap');
+    const fallback = host.querySelector('#placesFallback');
+    if(window.L && mapWrap){
+      mapWrap.style.height = '420px';
+      const map = L.map(mapWrap, {scrollWheelZoom:false}).setView([40.745,-73.98], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution:'&copy; OpenStreetMap', maxZoom:18,
+      }).addTo(map);
+      window.PLACES.forEach(p=>{
+        const marker = L.marker([p.lat, p.lng]).addTo(map);
+        const latest = p.dates[p.dates.length-1];
+        const popupHtml = `<div style="text-align:center; font-family:var(--serif);">
+          <div style="font-weight:700; margin-bottom:4px;">${escapeHtml(p.name)}</div>
+          <div style="font-size:11px; color:var(--ink-soft); margin-bottom:6px;">${p.dates.join(' · ')}</div>
+          <button class="popup-open-btn" style="border:1px solid var(--line); background:var(--paper); border-radius:999px; padding:4px 10px; font-size:11px;">열기</button>
+        </div>`;
+        marker.bindPopup(popupHtml);
+        // Leaflet stops click propagation inside popups, so the document-level
+        // router delegate never sees this button — bind it directly instead.
+        marker.on('popupopen', (e)=>{
+          const btn = e.popup.getElement().querySelector('.popup-open-btn');
+          if(btn) btn.addEventListener('click', ()=> Router.openMemory(latest));
+        });
+      });
+    } else if(mapWrap){
+      mapWrap.style.display = 'none';
+      fallback.style.display = '';
+      fallback.innerHTML = window.PLACES.map(p=>{
+        const latest = p.dates[p.dates.length-1];
+        return `<button class="card card-btn hub-card" data-action="memory" data-date="${latest}">
+          <div class="t">${escapeHtml(p.name)}</div><div class="s">${p.dates.join(' · ')}</div>
+        </button>`;
+      }).join('');
+    }
   }});
 
   /* ---- WORDS THAT BECAME OURS ---- */
@@ -262,32 +298,42 @@
 
   /* ---- MINI AWARDS ---- */
   Router.registerSpecial('awards', {render(host){
-    host.innerHTML = subHeader('OUR MINI AWARDS') + window.AWARDS.map(a=>`
-      <div class="section">
-        <div class="eyebrow">${escapeHtml(a.title)}</div>
-        <div class="grid grid-3" id="award-${a.id}" style="margin-top:8px;">
-          ${a.candidates.map(d=>`<button class="card card-btn hub-card" data-award="${a.id}" data-cand="${d}">
-            <div class="t" style="font-size:14px;">${escapeHtml((window.EVENTS[d]||{}).title||d)}</div><div class="s">${d}</div>
-            <div class="section-note" data-votecount="${a.id}:${d}">0 votes</div>
-          </button>`).join('')}
-        </div>
-      </div>`).join('');
-    host.querySelectorAll('[data-award]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        DB.setAwardVote(btn.dataset.award, Identity.displayName(Identity.current()), btn.dataset.cand);
+    const ny = window.MOST_NY_DAY;
+    host.innerHTML = subHeader('OUR MINI AWARDS') + `
+      <div class="grid grid-2" id="awardsGrid">${window.AWARDS.map(a=>`
+        <button class="card card-btn hub-card" data-action="memory" data-date="${a.date}">
+          <div style="font-size:26px;">${a.trophy}</div>
+          <div class="t" style="font-size:14px; text-transform:uppercase; letter-spacing:.04em;">${escapeHtml(a.title)}</div>
+          <div style="font-family:var(--serif); font-style:italic; font-size:16px; margin-top:4px;">${escapeHtml((window.EVENTS[a.date]||{}).title||a.date)}</div>
+          <div class="s">${a.date}</div>
+          <div style="margin-top:8px; display:flex; gap:6px;" data-agree="${a.id}"></div>
+        </button>`).join('')}</div>
+      <div class="section-head" style="margin-top:24px;"><div class="section-title" style="font-size:16px;">가장 뉴욕다웠던 날</div></div>
+      <button class="card card-btn" data-action="memory" data-date="${ny.date}">
+        <div style="font-family:var(--serif); font-size:16px;">LAST DAY IN NEW YORK</div>
+        <div class="section-note">${ny.date} · ${escapeHtml(ny.note)}</div>
+      </button>`;
+
+    // Mutual-agreement badge per award — each person taps "나도 동의해" independently.
+    host.querySelectorAll('[data-agree]').forEach(el=>{
+      const id = el.dataset.agree;
+      el.innerHTML = `<button class="btn btn-sm btn-outline" data-agree-btn="${id}" style="pointer-events:auto;">나도 동의해</button>`;
+      el.querySelector('button').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        DB.setAwardVote(id, Identity.displayName(Identity.current()), 'agree');
       });
     });
     DB.onAwardVotes(rows=>{
       window.AWARDS.forEach(a=>{
-        a.candidates.forEach(d=>{
-          const votes = rows.filter(r=>r.awardId===a.id && r.candidate===d);
-          const el = host.querySelector(`[data-votecount="${a.id}:${d}"]`);
-          if(el) el.textContent = `${votes.length} votes`;
-        });
-        const mine = rows.find(r=>r.awardId===a.id && r.user===Identity.displayName(Identity.current()));
-        host.querySelectorAll(`[data-award="${a.id}"]`).forEach(b=>{
-          b.classList.toggle('is-selected', mine && mine.candidate===b.dataset.cand);
-        });
+        const agreed = rows.filter(r=>r.awardId===a.id && r.candidate==='agree').map(r=>r.user);
+        const el = host.querySelector(`[data-agree="${a.id}"]`);
+        if(!el) return;
+        const both = agreed.includes(Identity.displayName('sihyun')) && agreed.includes(Identity.displayName('gangwon'));
+        el.innerHTML = both
+          ? `<span class="section-note">💛 둘 다 동의했어요</span>`
+          : `<button class="btn btn-sm btn-outline" data-agree-btn="${a.id}">나도 동의해${agreed.length?` (${agreed.join(', ')} 동의함)`:''}</button>`;
+        const btn = el.querySelector('button');
+        if(btn) btn.addEventListener('click', (e)=>{ e.stopPropagation(); DB.setAwardVote(a.id, Identity.displayName(Identity.current()), 'agree'); });
       });
     });
   }});
@@ -341,6 +387,33 @@
       <button class="list-row card-btn" style="width:100%;background:none;border:none;border-bottom:1px solid var(--line);" data-action="memory" data-date="${d}">
         <div class="list-date">${d.slice(5)}</div><div style="flex:1;text-align:left;margin-left:14px;">${escapeHtml(ev.title)}</div>
       </button>`).join('')}</div>` : '<div class="empty-frame">아직 없어요.</div>');
+  }});
+
+  /* ---- 300 DAYS OF 고마워 ---- */
+  Router.registerSpecial('thanksarchive', {render(host){
+    host.innerHTML = subHeader('300 DAYS OF 고마워', '우리가 하루하루 남긴 감사를 다시 읽어요.') + `
+      <input class="field" id="thanksSearch" placeholder="감사 내용 검색 (예: 공부, 기다려줘서)" style="margin-bottom:14px;">
+      <div id="thanksResults"></div>`;
+    let all = [];
+    function draw(){
+      const q = host.querySelector('#thanksSearch').value.trim();
+      const results = host.querySelector('#thanksResults');
+      if(!results) return;
+      const items = (q ? all.filter(it=>it.text.includes(q)) : all);
+      results.innerHTML = items.length ? `<div class="card">${items.map(it=>`
+        <button class="list-row card-btn" style="width:100%;background:none;border:none;border-bottom:1px solid var(--line);" data-action="memory" data-date="${it.date}">
+          <div class="list-date">${escapeHtml(it.date)}</div>
+          <div style="flex:1;text-align:left;margin-left:14px;">
+            <div class="section-note">FROM ${escapeHtml(it.from)}</div>
+            <div>${escapeHtml(it.text)}</div>
+          </div>
+        </button>`).join('')}</div>` : '<div class="empty-frame">아직 저장된 감사가 없어요.</div>';
+    }
+    host.querySelector('#thanksSearch').addEventListener('input', draw);
+    DB.onAllGratitude(rows=>{
+      all = rows.filter(r=>r.text && r.text.trim()).sort((a,b)=> b.date.localeCompare(a.date));
+      draw();
+    });
   }});
 
   /* ---- BEFORE / CAME TRUE ---- */

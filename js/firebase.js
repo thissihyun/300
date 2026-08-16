@@ -92,6 +92,7 @@
     // Free-form note per date (Memory Detail "나의 한 줄")
     setNote: (date, text) => setDoc('notes', date, {date, text}),
     onNote: (date, cb) => onDoc('notes', date, cb),
+    onAllNotes: (cb) => onCollection('notes', cb),
 
     // Photos
     addPhoto: (data) => addDoc('photos', data),
