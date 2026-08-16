@@ -48,6 +48,9 @@ async function listKeys(prefix=''){
   }
   return Object.keys(localStorage).filter(k=>k.startsWith(LOCAL_PREFIX+prefix)).map(k=>k.slice(LOCAL_PREFIX.length));
 }
+function readOriginalAsDataURL(file){
+  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});
+}
 
 export const Store={
   online:()=>online,
@@ -77,14 +80,20 @@ export const Store={
     return ()=>{};
   },
   async uploadPhoto(file,date){
+    // Never recompress or regenerate the photo. Storage receives the original File bytes.
     if(fbStorage){
-      const safe=(file.name||'photo.jpg').replace(/[^a-zA-Z0-9._-]+/g,'_');
-      const ref=fbStorage.ref().child(`photos/${date}/${Date.now()}_${safe}`);
-      await ref.put(file,{contentType:file.type||'image/jpeg'});
-      return ref.getDownloadURL();
+      try{
+        const safe=(file.name||'photo.jpg').replace(/[^a-zA-Z0-9._-]+/g,'_');
+        const ref=fbStorage.ref().child(`photos/${date}/${Date.now()}_${safe}`);
+        await ref.put(file,{contentType:file.type||'image/jpeg'});
+        return await ref.getDownloadURL();
+      }catch(err){
+        console.warn('[300 Days] Firebase Storage upload failed; trying unmodified Data URL fallback.',err);
+      }
     }
-    if(file.size>720000) throw new Error('photo-too-large-without-storage');
-    return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});
+    // Firestore documents have a hard size ceiling. We refuse large fallback files rather than alter them.
+    if(file.size>720000) throw new Error('original-photo-too-large-for-firestore-fallback');
+    return readOriginalAsDataURL(file);
   }
 };
 
