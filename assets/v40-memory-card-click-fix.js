@@ -24,7 +24,7 @@ function validDate(s){
 function dateFrom(el){
   if(!el) return '';
   const ds=el.dataset||{};
-  for(const k of ['date','d','v28Date','v39Date','v35Date','v35Month']){
+  for(const k of ['date','d','v40Date','v28Date','v39Date','v35Date','v35Month']){
     const d=validDate(ds[k]); if(d) return d;
   }
   const raw=el.getAttribute?.('onclick')||'';
@@ -57,24 +57,23 @@ function emergencyOpen(date){
 }
 async function openMemory(date){
   if(!date) return false;
-  const fixed=date==='2026-08-18'?'2026-08-19':date;
   const overlay=document.getElementById('overlay');
 
   /* First use the app's canonical modal function. */
   const fn=globalValue('openModal');
   if(typeof fn==='function'){
-    try{ await Promise.resolve(fn(fixed)); }catch(e){ console.warn('[V40 openModal]',fixed,e); }
+    try{ await Promise.resolve(fn(date)); }catch(e){ console.warn('[V40 openModal]',date,e); }
     if(overlay?.classList.contains('open')) return true;
   }
 
-  /* Then use the older robust memory bridge if available. */
-  if(typeof window.V28OpenMemory==='function'){
-    try{ await Promise.resolve(window.V28OpenMemory(fixed)); }catch(e){}
+  /* Then use the older robust bridge, except for DAY 300 where the old bridge remaps the date. */
+  if(date!=='2026-08-18' && typeof window.V28OpenMemory==='function'){
+    try{ await Promise.resolve(window.V28OpenMemory(date)); }catch(e){}
     if(overlay?.classList.contains('open')||document.querySelector('.v28-fallback')) return true;
   }
 
   /* Final guarantee: open a simple memory sheet rather than doing nothing. */
-  return emergencyOpen(fixed);
+  return emergencyOpen(date);
 }
 
 let lastEl=null,lastAt=0;
