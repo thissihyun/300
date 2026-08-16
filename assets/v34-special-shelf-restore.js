@@ -37,12 +37,23 @@ function render(){
  panel.appendChild(shelf);
  $$('[data-v34]',shelf).forEach(b=>b.onclick=()=>{try{switchView(b.dataset.v34)}catch(e){}});
 }
+function loadV38(){
+ if($('#v38SpecialClickScript'))return;
+ const s=document.createElement('script');
+ s.id='v38SpecialClickScript';
+ s.src='assets/v38-special-click-fix.js?build=20260816-2234';
+ s.defer=true;
+ document.head.appendChild(s);
+}
 function loadV37(){
- if($('#v37SpecialTravelScript'))return;
+ const old=$('#v37SpecialTravelScript');
+ if(old){loadV38();return;}
  const s=document.createElement('script');
  s.id='v37SpecialTravelScript';
  s.src='assets/v37-specials-travel-magazine-safe.js?build=20260816-2214b';
  s.defer=true;
+ s.onload=loadV38;
+ s.onerror=loadV38;
  document.head.appendChild(s);
 }
 function loadV36(){
