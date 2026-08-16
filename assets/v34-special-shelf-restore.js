@@ -1,20 +1,16 @@
-/* 300 DAYS WITH YOU — V34 SPECIAL SHELF RESTORE */
+/* 300 DAYS WITH YOU — V34 SPECIAL EXTRAS ONLY */
 (function(){
 'use strict';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+/* Keep only features that are NOT already represented in the main Special grid. */
 const ITEMS=[
- ['timeline','🎬','Our Story','챕터 순서로 보는 전체 이야기'],
- ['photoalbum','▣','Photo Album','모든 실제 사진과 포토북 후보'],
- ['firsts','💌','Our Firsts','처음이었던 순간들'],
- ['posters','🎞','Dates I’d Live Again','다시 살고 싶은 날들'],
  ['photobooth','▥','Photobooth Archive','인생네컷과 포토부스 기록'],
  ['favorites','♡','Our Favorites','저장해둔 기억'],
  ['liked','♥','Days We Both Loved','둘이 함께 좋아한 날'],
  ['funny','☺','Funny & Inside Jokes','웃긴 순간과 둘만의 말'],
  ['thankyou','✦','300 Days of 고마워','과거 카톡 속 고마움'],
  ['lookback','↗','Before / Came True','말했던 미래와 실제가 된 날'],
- ['search','⌕','Search Our Story','날짜·장소·카톡 검색'],
- ['places','⌖','Cities We Shared','뉴욕 밖의 도시까지']
+ ['search','⌕','Search Our Story','날짜·장소·카톡 검색']
 ];
 const CSS=`
 #view-specials .v27-shelf{display:none!important}
@@ -35,13 +31,11 @@ const CSS=`
 function style(){if($('#v34ShelfStyle'))return;const s=document.createElement('style');s.id='v34ShelfStyle';s.textContent=CSS;document.head.appendChild(s)}
 function render(){
  const panel=$('#view-specials>.panel'); if(!panel)return;
- let shelf=$('.v34-shelf',panel);
- if(!shelf){
-   shelf=document.createElement('section'); shelf.className='v34-shelf';
-   shelf.innerHTML=`<div class="v34-shelf-head"><div><div class="k">MORE TO EXPLORE</div><h3>More of us.</h3></div><p>사진, 처음, 포토부스, 좋아한 날, 웃긴 대화와 검색까지 이어서 볼 수 있어요.</p></div><div class="v34-shelf-grid">${ITEMS.map(x=>`<button class="v34-shelf-btn" data-v34="${x[0]}"><span class="ico">${x[1]}</span><b>${x[2]}</b><span>${x[3]}</span></button>`).join('')}</div>`;
-   panel.appendChild(shelf);
-   $$('[data-v34]',shelf).forEach(b=>b.onclick=()=>{try{switchView(b.dataset.v34)}catch(e){}});
- }
+ $('.v34-shelf',panel)?.remove();
+ const shelf=document.createElement('section'); shelf.className='v34-shelf';
+ shelf.innerHTML=`<div class="v34-shelf-head"><div><div class="k">MORE TO EXPLORE</div><h3>More of us.</h3></div><p>메인 Special과 겹치지 않는 추가 기록들만 모아뒀어요.</p></div><div class="v34-shelf-grid">${ITEMS.map(x=>`<button class="v34-shelf-btn" data-v34="${x[0]}"><span class="ico">${x[1]}</span><b>${x[2]}</b><span>${x[3]}</span></button>`).join('')}</div>`;
+ panel.appendChild(shelf);
+ $$('[data-v34]',shelf).forEach(b=>b.onclick=()=>{try{switchView(b.dataset.v34)}catch(e){}});
 }
 async function boot(){for(let i=0;i<180;i++){if(typeof window.V26!=='undefined'&&typeof window.switchView==='function')break;await new Promise(r=>setTimeout(r,100))}style();render();window.addEventListener('v26:view',e=>{if(e.detail==='specials')setTimeout(render,150)});}
 boot();
