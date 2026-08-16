@@ -3,6 +3,7 @@ const CORE=[
   './',
   './index.html',
   './assets/app.css',
+  './assets/app-mobile.css',
   './assets/app.js',
   './assets/app-data.js',
   './assets/app-store.js',
