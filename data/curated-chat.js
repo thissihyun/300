@@ -1,4 +1,4 @@
-/* V34 loader — main Special grid plus full archive shelf. */
+/* V34 loader — main Special grid plus non-duplicate extras. */
 document.write('<script src="https://cdn.jsdelivr.net/gh/thissihyun/300@f504a42c66b2d59521c6869713caf966d8ee33bc/data/curated-chat.js"><\/script>');
 document.write('<script src="assets/daily-us-v24.js"><\/script>');
 document.write('<script src="assets/identity-v25.js"><\/script>');
@@ -16,4 +16,4 @@ document.write('<script src="assets/v31-calendar-album.js?build=20260816-0108"><
 document.write('<script src="assets/v31-polish.js?build=20260816-0124"><\/script>');
 document.write('<script src="assets/v32-readable-structure.js?build=20260816-1014"><\/script>');
 document.write('<script src="assets/v33-calendar-special-future.js?build=20260816-1026"><\/script>');
-document.write('<script src="assets/v34-special-shelf-restore.js?build=20260816-1913"><\/script>');
+document.write('<script src="assets/v34-special-shelf-restore.js?build=20260816-1947"><\/script>');
