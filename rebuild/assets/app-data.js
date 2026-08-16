@@ -1,0 +1,102 @@
+export const DAY_ONE = '2025-10-23';
+export const DAY_300 = '2026-08-18';
+export const USERS = ['시현','강원'];
+export const CHAPTERS = [
+{id:'before',label:'BEFORE WE WERE US',sub:'OCT · NEW YORK',start:'2025-10-01'},
+{id:'dayone',label:'DAY ONE',sub:'10.23.2025',start:'2025-10-23'},
+{id:'falling',label:'FALLING IN NEW YORK',sub:'NOV · NEW YORK',start:'2025-11-04'},
+{id:'december',label:'LAST DECEMBER',sub:'DEC · NEW YORK',start:'2025-12-08'},
+{id:'west',label:'GO WEST, TOGETHER',sub:'WEST COAST',start:'2025-12-21'},
+{id:'korea',label:'A WINTER IN KOREA',sub:'JAN · KOREA',start:'2026-01-03'},
+{id:'distance',label:'LONG DISTANCE, SAME US',sub:'NYC ↔ KOREA',start:'2026-01-19'},
+{id:'continue',label:'300 DAYS',sub:'TO BE CONTINUED',start:'2026-08-18'}];
+const E=(date,title,chapter,story='',opts={})=>({date,title,chapter,story,...opts});
+export const EVENTS=[
+E('2025-10-01','The Beginning','before','첫 카톡. 시현의 질문에서 시작해, 곧 학식 약속으로 이어진 평범한 시작.',{location:'NYU · New York',layout:'museum',chat:['학식 먹자','낼 점심 고?','좋지 내일 점심 고고고']}),
+E('2025-10-04','MoMA + Zoo','before','Central Park Zoo와 MoMA. 처음으로 둘이 긴 하루를 함께 보낸 날.',{location:'Central Park · MoMA',layout:'museum',chat:['오늘 덕분에 동물원도 가고 모마도 가고~ 즐거웠어','나도 진짜 같이가서 너무 재밌었어~ 다음에 같이 또 놀자','정말…?']}),
+E('2025-10-11','Bobst, Before Us','before','지윤과 시현이 집에 가기 전 Bobst에서 강원에게 인사했던 날.',{location:'Bobst Library'}),
+E('2025-10-17','Downstein Dinner','before','강원, 시현, 현수, 지윤 넷이 Downstein에서 저녁을 먹었다.',{location:'Downstein'}),
+E('2025-10-22','Governors Island','before','Governors Island, 다 같이 첫 Palladium 모임, 진리 생일. 그리고 고백 직전의 하루.',{location:'Governors Island · Palladium',layout:'map'}),
+E('2025-10-22','And Then, Something Changed','before','강원의 고백은 대면으로 이루어졌다. 가짜 카톡 장면을 만들지 않는다.',{special:'confession',layout:'minimal'}),
+E('2025-10-23','DAY 1','dayone','시현과 강원의 연애 1일차.',{special:'milestone',layout:'milestone',chat:['조금 더 간결하게 물어볼게','나랑 사귈래?','그래!']}),
+E('2025-10-23','Canada Begins','dayone','시현의 캐나다 여행이 시작됐다. 막 시작한 연애가 잠시 서로 다른 도시에서 이어졌다.',{location:'NYC ↔ Canada',layout:'distance'}),
+E('2025-10-28','The First Real Talk','dayone','캐나다 여행 후 첫 점심. 고백과 관계에 대해 진솔하게 이야기한 날.',{location:'New York'}),
+E('2025-11-01','Beacon · 20 KM','falling','Beacon에서 20km를 함께 걸었다.',{location:'Beacon, NY',layout:'map',chat:['우리 오늘 20키로 걸었더라']}),
+E('2025-11-04','The Turning Point','falling','Paulson 앞. 서로의 마음과 속도를 솔직하게 이야기했고, 이 날 이후 시현의 마음이 더 열렸다.',{location:'Paulson',layout:'minimal',chat:['그냥 하루 중에 문득 누군가 생각나서 연락해주는 게 고마웠다는 거야.','시현아 너가 표현해줘서 진짜 행복하다.']}),
+E('2025-11-09','Surprise, Brooklyn','falling','시현이 Brooklyn Botanic Garden 뒤 도서관으로 깜짝 찾아왔다. 함께 공부하고 DUMBO를 걸었고 첫 사랑해가 남았다.',{location:'Brooklyn · DUMBO',special:'first-love',chat:['데이트~?','데이트 맞지','내가 너 많이 사랑해']}),
+E('2025-11-11','Game Night','falling','강원 미용실 그리고 NBA 농구 경기.',{location:'New York',layout:'cinema',chat:['나는 너랑 카톡만해도 행복한가봐']}),
+E('2025-11-13','First Hand-Holding','falling','처음 손을 잡은 날.',{special:'first-hands',chat:['나 진짜 손 잡고싶었는데 용기냈어','잡을 수 있을때 많이 잡아라~']}),
+E('2025-11-14','Last Autumn','falling','Central Park의 마지막 단풍을 함께 보았다.',{location:'Central Park',chat:['뉴욕에서 너를 만나 참 감사해.']}),
+E('2025-11-15','The Met Cloisters','falling','다 같이 The Met Cloisters.',{location:'The Met Cloisters',layout:'museum',chat:['왜 행복해','너랑 함께해서요!']}),
+E('2025-11-16','First Worship + Rooftop','falling','강원과 첫 예배, 그리고 루프탑 바.',{location:'New York'}),
+E('2025-11-18','The Ordinary Future','falling','민재와 셋이 점심. 평범한 미래를 함께하고 싶다는 이야기.',{chat:['사소하게 같이 밥 먹고 카페가고','그런 일상들을 함께하기']}),
+E('2025-11-19','Our Winter Movie','falling','Central Park 아이스스케이팅과 Bryant Park Christmas Market.',{location:'Central Park · Bryant Park',layout:'cinema'}),
+E('2025-11-20','Cancun · Distance for the First Time','falling','시현은 Cancun, 강원은 New York. 처음 길게 떨어져 지냈다.',{location:'Cancun ↔ NYC',layout:'distance'}),
+E('2025-11-22','First Video Call','falling','시현과 강원의 첫 영상통화.',{special:'first-video',layout:'distance'}),
+E('2025-11-24','Back From Cancun','falling','시현이 Cancun에서 돌아온 뒤 잠깐 만났다.'),
+E('2025-11-25','Maryland','falling','시현의 Maryland 일정이 시작됐다.',{location:'Maryland'}),
+E('2025-11-27','Chicago','falling','강원의 Chicago 여행.',{location:'Chicago'}),
+E('2025-11-28','Different Cities, Same Call','falling','Chicago에 있는 강원과 Vessel에 있는 시현의 영상통화.',{location:'Chicago ↔ New York',layout:'distance'}),
+E('2025-12-01','GPT & Us','december','GPT로 서로의 장단점과 결혼 이야기를 나눴다.',{chat:['그럼 내가 너 짝사랑했겠지~']}),
+E('2025-12-03','Roosevelt Tram + Pier 35','december','Roosevelt Island Tram을 타고 Pier 35에 갔다. 그네가 없어 사진만 찍고 돌아왔다.',{location:'Roosevelt Island · Pier 35',layout:'map'}),
+E('2025-12-04','Rockefeller Lights','december','Rockefeller Center 점등식.',{location:'Rockefeller Center'}),
+E('2025-12-05','Lunch for Three','december','시원 오빠와 셋이 점심.'),
+E('2025-12-06','Jazz Bar','december','시현이 뻗어서 못 갈 뻔했지만 결국 함께한 재즈바.',{layout:'cinema',chat:['2시간동안 손 잡고 내 심장박동수 확인하고 얼굴 좀 보다 끝나버렸어']}),
+E('2025-12-07','Zootopia','december','영화 주토피아를 함께 봤다.',{layout:'cinema'}),
+E('2025-12-08','Gangwon’s Birthday','december','시현의 아침밥으로 시작해 수업 청강, 핫팟, 뉴욕 인생네컷까지 하루를 함께 보낸 강원의 생일.',{special:'birthday',layout:'birthday',chat:['생일이니까 여자친구랑 있어야지','내가 제일 사랑하고 좋아하는 사람이랑 시간 보낼거야']}),
+E('2025-12-09','Brooklyn Again','december','시현이 Brooklyn을 찾았다.',{location:'Brooklyn',chat:['큰일이다 어제 하루종일 봐도 또 보고싶어']}),
+E('2025-12-10','Dinner with Haeun','december','하은과 셋이 저녁.'),
+E('2025-12-11','DAY 50','december','Washington Square Park 점등식과 Raku 저녁. 50일을 함께 축하했다.',{special:'milestone',layout:'milestone',location:'Washington Square Park · Raku',chat:['오래오래 좋아해달라구~','내 마음 어디 안가요']}),
+E('2025-12-12','Dinner with Minjae','december','민재와 셋이 저녁.'),
+E('2025-12-14','Our First Snow','december','아침에 잠옷 입고 첫눈을 보고, Oak Berry와 시현표 라면을 함께 먹었다.',{special:'first-snow',chat:['좋은 사람이랑 별개로 이 사람이랑 결혼하면 좋겠다~']}),
+E('2025-12-16','Exam + Hug','december','이산수학 시험장까지 데려다주고 끝나고 허그. 북스토어도 구경했다.',{chat:['결혼하자 그냥','졸업이나 하고 다시 이야기할래?^^']}),
+E('2025-12-17','The First Kiss','december','강원 마지막 기말고사, 시현의 아침, Dior 향수, 주찬과 저녁, 그리고 Broom에서 첫 볼뽀뽀.',{special:'first-kiss',layout:'milestone',location:'Broom',chat:['볼 뽀뽀 ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ','먼저 시현이가 뽀뽀를 할 줄이야….상상도 못했다']}),
+E('2025-12-18','The Great Gatsby','december','Great Gatsby, Rockefeller Center, Lia와 저녁.',{layout:'cinema'}),
+E('2025-12-19','Packing','december','하루 종일 짐 정리, Eileen’s cheesecake, 현수 goodbye party.',{layout:'minimal'}),
+E('2025-12-20','Last Day in New York','december','Ellen’s Stardust Diner, MoMA, 장미, Macy’s, 시현 생일파티와 치즈케이크. 처음의 MoMA로 다시 돌아왔다.',{special:'last-nyc',location:'New York · MoMA',layout:'museum'}),
+E('2025-12-21','Go West, Together','west','LA 도착. Hollywood 거리 밤산책으로 서부 여행이 시작됐다.',{location:'Los Angeles',layout:'map',chat:['우리 곧 보자 사랑해 ❤️']}),
+E('2025-12-22','Venice to Griffith','west','Venice Beach, Eggslut, Griffith Observatory, Joe’s Pizza.',{location:'Los Angeles'}),
+E('2025-12-23','Las Vegas','west','Las Vegas 첫날, Sphere show.',{location:'Las Vegas'}),
+E('2025-12-24','Christmas Countdown','west','와인과 치즈, Christmas countdown.',{location:'Las Vegas'}),
+E('2025-12-25','First Christmas','west','Horseshoe Bend, Grand Canyon, 저녁 Chicago pizza.',{special:'christmas',location:'Grand Canyon',chat:['크리스마스 소중해','너랑 함께여서 더 소중해']}),
+E('2025-12-26','Buffet Day','west','아침, 점심, 저녁 모두 뷔페.'),
+E('2025-12-27','Yosemite','west','Yosemite National Park.',{location:'Yosemite National Park'}),
+E('2025-12-28','San Francisco','west','Google, San Francisco, 결혼식 구경, Ghirardelli 두바이 초콜릿.',{location:'San Francisco'}),
+E('2025-12-29','On to San Diego','west','패키지 마지막 날, San Diego로 이동.',{location:'San Diego'}),
+E('2025-12-30','Sunset & A Kiss','west','San Diego taco, Kiss Statue 앞 촬영, 절벽에서 노을.',{location:'San Diego'}),
+E('2025-12-31','Joshua Tree','west','Joshua Tree tour. 한잔하고 뻗은 2025년 마지막 밤.',{location:'Joshua Tree'}),
+E('2026-01-01','Back to Korea','west','Hollywood Sign, Beverly Hills, 비행기.',{location:'Los Angeles'}),
+E('2026-01-02','One Day, Lost to Time Zones','korea','비행기와 시차로 삭제된 하루.',{layout:'minimal'}),
+E('2026-01-03','Suwon First Visit','korea','강원의 두쫀쿠, 수원 첫 방문, Avenue France Starbucks.',{location:'Suwon'}),
+E('2026-01-04','First Parents','korea','시현 부모님과 예배, 국밥, 광교중앙역.',{location:'Suwon',chat:['시현 아가!','오늘도 봐서 너무 좋았고 내가 많이 사랑해!']}),
+E('2026-01-09','KAIST #1','korea','첫 KAIST 방문, 성심당, 뼈해장국, 커플 신발.',{location:'KAIST · Daejeon',chat:['남편 신발 내가 미리 샀다~']}),
+E('2026-01-10','Jongno · Day 80','korea','종로 데이트, 곱창과 갈매기살, 반지 구경, 광장시장과 노래방.',{location:'Seoul',special:'milestone',chat:['오늘 80일이다 강원아','쭉쭉쭉 우리의 사랑이 영원하자']}),
+E('2026-01-11','Tancheon Walk','korea','주찬 집 샌드위치 아침, 탄천 산책.'),
+E('2026-01-14','KAIST #2','korea','KAIST 학식, 영화 만약에 우리.',{location:'KAIST · Daejeon',layout:'cinema'}),
+E('2026-01-15','Physical AI','korea','Physical AI 첫 공부.'),
+E('2026-01-16','KAIST #3','korea','KAIST 학식, 같이 공부, 양고기, 노래방.',{location:'KAIST · Daejeon'}),
+E('2026-01-17','All-Day Date','korea','즉떡, 반지 구경, 보드게임카페, 붕어빵, 노래방.'),
+E('2026-01-18','Last Day of Winter Break','korea','점심, 교회, 강원에게 마카롱 선물.'),
+E('2026-01-19','Long Distance Begins','distance','강원이 New York으로 출국. 본격적인 롱디가 시작됐다.',{special:'distance',layout:'distance',chat:['끝까지 손 놓지 말기.','평생 행복해지자, 진짜로.']}),
+E('2026-01-20','Study With Me','distance','시현의 부산대 면접 준비 동안 함께 Study With Me. 강원이 RNA 관련 지원동기 아이디어를 보탰다.',{layout:'distance'}),
+E('2026-01-24','First Hard Day','distance','롱디를 하며 생긴 첫 고비. 연락 문제와 서운함을 솔직하게 이야기하고 함께할 방식을 정했다.',{layout:'minimal'}),
+E('2026-01-25','After the Storm','distance','큰 고비 뒤, 강원의 소중함을 다시 느낀 시현.'),
+E('2026-01-30','DAY 100','distance','오후 11시 58분 영상통화. 하고 싶었던 마음과 말을 전한 100일.',{special:'milestone',layout:'milestone'}),
+E('2026-02-06','SHE DID IT','distance','시현의 부산대 약대 합격 전화. 둘의 만남이 더 운명처럼 느껴진 날.',{special:'pharmacy',chat:['운명이다 우리','운명이야.']}),
+E('2026-03-12','Reunion','distance','봄방학, 강원이 한국에 들어왔다.'),
+E('2026-03-18','Busan Begins','distance','시현과 부산 데이트. 시현 자취방의 첫 손님.',{location:'Busan'}),
+E('2026-03-19','PNU Class','distance','부산대 약대 수업 도강.',{location:'Pusan National University'}),
+E('2026-03-20','Oryukdo','distance','오륙도 데이트.',{location:'Oryukdo · Busan'}),
+E('2026-03-21','DAY 150','distance','광안리 바다뷰 카공과 드론쇼. 우리의 150일.',{location:'Gwangalli · Busan',special:'milestone',layout:'milestone'}),
+E('2026-08-18','DAY 300','continue','첫 300일의 끝이 아니라 다음 이야기를 여는 날.',{special:'milestone',layout:'milestone'})].sort((a,b)=>a.date.localeCompare(b.date));
+export const FIRSTS=[['2025-10-01','first Kakao'],['2025-10-23','DAY 1'],['2025-11-09','first “사랑해”'],['2025-11-13','first hand holding'],['2025-11-22','first video call'],['2025-12-14','first snow'],['2025-12-17','first cheek kiss'],['2026-01-19','first long distance'],['2026-01-30','DAY 100'],['2026-03-21','DAY 150'],['2026-08-18','DAY 300']];
+export const MONTH_BOARDS=[{label:'OCT',title:'before we were us',sub:'NEW YORK · 2025',date:'2025-10-01'},{label:'NOV',title:'falling in New York',sub:'20 KM · FIRSTS',date:'2025-11-01'},{label:'DEC',title:'our last December',sub:'BIRTHDAY · 50 · SNOW',date:'2025-12-01'},{label:'WEST COAST',title:'go west, together',sub:'LA → SF → SAN DIEGO',date:'2025-12-21'},{label:'KOREA',title:'a winter at home',sub:'SUWON · SEOUL · KAIST',date:'2026-01-03'},{label:'LONG DISTANCE',title:'same us, two places',sub:'NYC ↔ KOREA',date:'2026-01-19'}];
+export const QUESTIONS=['상대방의 첫인상은?','좋아지기 시작한 결정적 순간은?','가장 기억에 남는 통화는?','우리 둘이 가장 우리답다고 느끼는 일상은?','지금 DAY 1의 우리에게 한마디 한다면?','다음 300일 안에 꼭 같이 하고 싶은 건?','다시 살고 싶은 뉴욕의 하루는?','상대방이 해준 말 중 아직 기억나는 한마디는?','요즘 상대방에게 가장 고마운 점은?','우리가 잘 맞는다고 느낄 때는?','함께 먹은 것 중 다시 먹고 싶은 건?','우리의 가장 웃긴 순간은?','지금 가장 같이 가고 싶은 곳은?','서로에게 더 자주 해주고 싶은 말은?','장거리 연애를 버티게 한 건 뭐였을까?','다음 계절에 같이 하고 싶은 건?','상대방의 귀여운 습관 하나는?','함께 공부했던 날 중 가장 기억나는 날은?','우리 둘의 대표 노래를 하나 고른다면?','서로 처음 손 잡았던 날을 떠올리면?','가장 영화 같았던 데이트는?','뉴욕에서 우리에게 가장 중요한 장소는?','한국에서 가장 편안했던 하루는?','서부 여행에서 다시 가고 싶은 장면은?','서로의 꿈을 위해 해주고 싶은 응원은?','둘이 같이 살게 되면 가장 먼저 해보고 싶은 일은?','우리가 싸우거나 서운할 때 꼭 지키고 싶은 약속은?','지금의 우리를 세 단어로 표현하면?','상대방에게 배운 점은?','앞으로 꼭 남기고 싶은 사진은?','우리의 평범한 하루 중 가장 좋아하는 순간은?','둘이 나이 들어도 계속 하고 싶은 것은?','상대방이 가장 사랑스럽게 느껴지는 순간은?','우리의 가장 뜻밖의 추억은?','다시 한 번 처음부터 시작해도 같은 선택을 할까?','서로의 가족과 함께 만들고 싶은 기억은?','올해 안에 같이 이루고 싶은 작은 목표는?','다음 여행의 첫 목적지는 어디였으면 좋겠어?','300일 동안 가장 많이 변한 건?','오늘 상대방에게 꼭 해주고 싶은 말은?'];
+export const PLACES=[['NYU / Washington Square','2025-10-01'],['MoMA','2025-10-04'],['Central Park Zoo','2025-10-04'],['Governors Island','2025-10-22'],['Beacon · 20 KM','2025-11-01'],['Brooklyn / DUMBO','2025-11-09'],['Central Park','2025-11-14'],['Bryant Park','2025-11-19'],['Roosevelt Island Tram','2025-12-03'],['Rockefeller Center','2025-12-04'],['Raku','2025-12-11'],['Broom','2025-12-17'],['Ellen’s Stardust','2025-12-20']];
+export const CITIES=['New York','Beacon','Los Angeles','Las Vegas','Grand Canyon','Yosemite','San Francisco','San Diego','Suwon','Seoul','Daejeon / KAIST','Busan'];
+export const CONSTELLATION=FIRSTS.filter(([d])=>['2025-10-01','2025-10-23','2025-11-09','2025-11-13','2025-12-14','2026-01-30','2026-03-21','2026-08-18'].includes(d));
+export const SEASONS=[{id:'autumn',title:'AUTUMN',sub:'New York fall',dates:['2025-10-04','2025-11-01','2025-11-14']},{id:'winter',title:'WINTER',sub:'NYC · West Coast · Korea',dates:['2025-12-14','2025-12-25','2026-01-10']},{id:'spring',title:'SPRING',sub:'Busan reunion',dates:['2026-03-18','2026-03-20','2026-03-21']},{id:'summer',title:'SUMMER',sub:'toward DAY 300',dates:['2026-08-18']}];
+export const SPECIALS=[['firsts','OUR FIRSTS','The milestones that changed us.'],['places','OUR PLACES','New York, annotated by us.'],['posters','DATES I’D LIVE AGAIN','Our favorite days as movie posters.'],['constellation','OUR CONSTELLATION','The dates that became stars.'],['words','WORDS THAT BECAME OURS','사랑해 · 보고싶어 · 여보 · 아가'],['seasons','THE SEASONS WE SHARED','Autumn to summer.'],['food','“밥 먹자”','Our relationship food journal.'],['numbers','US, BY THE NUMBERS','The first 300 days in numbers.'],['photobooth','PHOTOBOOTH ARCHIVE','Keep each four-cut photo intact.'],['awards','OUR MINI AWARDS','A tiny award show for us.'],['favorites','OUR FAVORITES','Memories with a heart.'],['liked','DAYS WE BOTH LOVED','시현 · 강원 · both.']];
+export const MORE_SPECIALS=[['funny','FUNNY & INSIDE JOKES'],['thanks','300 DAYS OF 고마워'],['beforecame','BEFORE / CAME TRUE'],['pulse','RELATIONSHIP PULSE'],['album','PHOTO ALBUM'],['story','OUR STORY'],['search','GLOBAL MEMORY SEARCH']];
+export const FOOD_ENTRIES=[['Raku','2025-12-11'],['Hotpot','2025-12-08'],['Oak Berry','2025-12-14'],['Joe’s Pizza','2025-12-22'],['Chicago Pizza','2025-12-25'],['San Diego Taco','2025-12-30'],['국밥','2026-01-04'],['뼈해장국','2026-01-09'],['곱창 · 갈매기살','2026-01-10'],['즉떡 · 붕어빵','2026-01-17']];
+export const BEFORE_CAME_TRUE=[{before:'미래에도 함께하고 싶고 계속 너랑 붙어있고 싶다 했었잖아',beforeDate:'2025-11-17',came:'West Coast trip',cameDate:'2025-12-21'},{before:'사소하게 같이 밥 먹고 카페가고 그런 일상들을 함께하기',beforeDate:'2025-11-18',came:'A winter in Korea',cameDate:'2026-01-03'},{before:'일정주기마다 서로 감사편지 써주기~',beforeDate:'2025-11-17',came:'Daily Thank You',cameDate:'2026-08-18'}];
