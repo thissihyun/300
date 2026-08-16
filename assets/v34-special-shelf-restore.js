@@ -37,12 +37,23 @@ function render(){
  panel.appendChild(shelf);
  $$('[data-v34]',shelf).forEach(b=>b.onclick=()=>{try{switchView(b.dataset.v34)}catch(e){}});
 }
+function loadV36(){
+ if($('#v36CanvaInternalScript'))return;
+ const s=document.createElement('script');
+ s.id='v36CanvaInternalScript';
+ s.src='assets/v36-canva-internal-pages.js?build=20260816-2204';
+ s.defer=true;
+ document.head.appendChild(s);
+}
 function loadV35(){
- if($('#v35CanvaRefreshScript'))return;
+ const old=$('#v35CanvaRefreshScript');
+ if(old){loadV36();return;}
  const s=document.createElement('script');
  s.id='v35CanvaRefreshScript';
  s.src='assets/v35-canva-refresh.js?build=20260816-2129';
  s.defer=true;
+ s.onload=loadV36;
+ s.onerror=loadV36;
  document.head.appendChild(s);
 }
 async function boot(){for(let i=0;i<180;i++){if(typeof window.V26!=='undefined'&&typeof window.switchView==='function')break;await new Promise(r=>setTimeout(r,100))}style();render();loadV35();window.addEventListener('v26:view',e=>{if(e.detail==='specials')setTimeout(render,150)});}
