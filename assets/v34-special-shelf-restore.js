@@ -37,6 +37,14 @@ function render(){
  panel.appendChild(shelf);
  $$('[data-v34]',shelf).forEach(b=>b.onclick=()=>{try{switchView(b.dataset.v34)}catch(e){}});
 }
-async function boot(){for(let i=0;i<180;i++){if(typeof window.V26!=='undefined'&&typeof window.switchView==='function')break;await new Promise(r=>setTimeout(r,100))}style();render();window.addEventListener('v26:view',e=>{if(e.detail==='specials')setTimeout(render,150)});}
+function loadV35(){
+ if($('#v35CanvaRefreshScript'))return;
+ const s=document.createElement('script');
+ s.id='v35CanvaRefreshScript';
+ s.src='assets/v35-canva-refresh.js?build=20260816-2129';
+ s.defer=true;
+ document.head.appendChild(s);
+}
+async function boot(){for(let i=0;i<180;i++){if(typeof window.V26!=='undefined'&&typeof window.switchView==='function')break;await new Promise(r=>setTimeout(r,100))}style();render();loadV35();window.addEventListener('v26:view',e=>{if(e.detail==='specials')setTimeout(render,150)});}
 boot();
 })();
