@@ -41,7 +41,7 @@ function loadV37(){
  if($('#v37SpecialTravelScript'))return;
  const s=document.createElement('script');
  s.id='v37SpecialTravelScript';
- s.src='assets/v37-specials-travel-magazine.js?build=20260816-2214';
+ s.src='assets/v37-specials-travel-magazine-safe.js?build=20260816-2214b';
  s.defer=true;
  document.head.appendChild(s);
 }
