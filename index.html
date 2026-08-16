@@ -335,6 +335,34 @@
     font-family:'Cormorant Garamond','Griun Mongtori',serif; font-size:13px; text-decoration:underline;
   }
   .v22-teaser-streak{font-family:'Griun Mongtori','Gaegu',cursive; font-size:11px; color:var(--clay); margin-top:5px;}
+  .v7-hub-card .n, .modal-chapter, .chapter-block h3{
+    display:inline-block; background:#f3ead4; padding:6px 13px 7px; margin-bottom:6px;
+    box-shadow:0 3px 7px rgba(51,43,34,.16);
+    clip-path:polygon(
+      0% 12%,4% 4%,9% 10%,14% 2%,20% 8%,26% 0%,32% 6%,38% 3%,44% 9%,50% 1%,
+      56% 7%,62% 2%,68% 8%,74% 0%,80% 6%,86% 3%,92% 9%,96% 1%,100% 10%,
+      100% 88%,96% 96%,91% 90%,86% 98%,80% 92%,74% 100%,68% 94%,62% 99%,56% 91%,50% 97%,
+      44% 93%,38% 99%,32% 92%,26% 98%,20% 91%,14% 97%,9% 90%,4% 96%,0% 88%
+    );
+  }
+  .v7-hub-card .n{transform:rotate(-1.4deg);}
+  .modal-chapter{transform:rotate(-1.1deg);}
+  .chapter-block h3{transform:rotate(-.8deg);}
+  .modal.layout-cinema .modal-chapter{background:#e9dcc0;}
+  .v22-washi{position:relative;}
+  .v22-washi::before, .v22-washi::after{
+    content:''; position:absolute; top:3px; width:28px; height:13px; z-index:6; pointer-events:none;
+    background:rgba(255,251,240,.82); border:1px solid rgba(184,146,63,.35); box-shadow:0 1px 3px rgba(51,43,34,.22);
+  }
+  .v22-washi::before{left:4px; transform:rotate(-9deg);}
+  .v22-washi::after{right:4px; transform:rotate(8deg);}
+  .v22-washi-bottom{position:relative;}
+  .v22-washi-bottom::before, .v22-washi-bottom::after{
+    content:''; position:absolute; bottom:3px; width:26px; height:12px; z-index:6; pointer-events:none;
+    background:rgba(255,251,240,.82); border:1px solid rgba(184,146,63,.35); box-shadow:0 1px 3px rgba(51,43,34,.22);
+  }
+  .v22-washi-bottom::before{left:3px; transform:rotate(-9deg);}
+  .v22-washi-bottom::after{right:3px; transform:rotate(8deg);}
   .v22-gratitude-garden{font-size:17px; letter-spacing:2px; margin-top:12px; line-height:1.6; min-height:22px;}
   .v22-garden-empty{color:var(--ink-soft); opacity:.35; letter-spacing:6px;}
   .v22-gratitude-caption{font-family:'Griun Mongtori','Gaegu',cursive; font-size:11px; color:var(--ink-soft); margin-top:4px;}
@@ -4008,7 +4036,7 @@ function v15PhotoCard(p){
   return `<div class="v15-photo-card" data-date="${p.date}" data-src="${encodeURIComponent(p.src)}">
     ${p.hero?'<span class="hero-mark">HERO</span>':''}
     <button class="v16-editmeta" data-meta="1" title="사진 태그 수정">✎</button>
-    <div class="thumb"><img src="${p.src}" alt="${escapeHtml(p.title)}" loading="lazy"></div>
+    <div class="thumb v22-washi-bottom"><img src="${p.src}" alt="${escapeHtml(p.title)}" loading="lazy"></div>
     <div class="date">${p.date}</div><div class="title">${escapeHtml(p.title)}</div>
     <div class="v16-tags">${tags.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div>
   </div>`;
@@ -5309,6 +5337,7 @@ async function renderFrames(dateStr, photos){
     const frame = document.createElement('div'); frame.className='frame v22-polaroid';
     frame.style.animationDelay = Math.min(i*130, 900)+'ms';
     if(photos[i]){
+      frame.classList.add('v22-washi');
       const isHero = heroUrl === photos[i];
       if(isHero) frame.classList.add('is-hero');
       frame.innerHTML = `<img src="${photos[i]}" alt="추억 사진"><button class="remove" data-i="${i}">✕</button>` +
