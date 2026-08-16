@@ -1,4 +1,4 @@
-/* V32 loader: keep the original Kakao source immutable, then layer the app experience on top. */
+/* V32 loader — readability + archive structure stable build. */
 document.write('<script src="https://cdn.jsdelivr.net/gh/thissihyun/300@f504a42c66b2d59521c6869713caf966d8ee33bc/data/curated-chat.js"><\/script>');
 document.write('<script src="assets/daily-us-v24.js"><\/script>');
 document.write('<script src="assets/identity-v25.js"><\/script>');
