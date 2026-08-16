@@ -18,4 +18,4 @@ document.write('<script src="assets/v32-readable-structure.js?build=20260816-101
 document.write('<script src="assets/v33-calendar-special-future.js?build=20260816-1026"><\/script>');
 document.write('<script src="assets/v34-special-shelf-restore.js?build=20260816-2234"><\/script>');
 document.write('<script src="assets/v39-universal-card-router.js?build=20260816-2247"><\/script>');
-document.write('<script src="assets/v40-memory-card-click-fix.js?build=20260816-2302"><\/script>');
+document.write('<script src="assets/v40-memory-card-click-fix.js?build=20260816-2306"><\/script>');
