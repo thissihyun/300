@@ -1,0 +1,7 @@
+/* Mobile interaction baseline: iOS zoom prevention + reliable 44px touch targets. */
+@media (max-width: 900px){
+  input,textarea,select{font-size:16px!important}
+  .pill-btn,.identity-pill,.round-btn,.mood-btn,.word-chip,.more-shelf button,.photo-actions button,.award-choice,.check-btn,.close-btn,.icon-btn,.music-button{min-height:44px;min-width:44px;touch-action:manipulation}
+  button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  .decor,.tape,.paper-noise{pointer-events:none!important}
+}
