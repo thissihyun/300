@@ -37,12 +37,23 @@ function render(){
  panel.appendChild(shelf);
  $$('[data-v34]',shelf).forEach(b=>b.onclick=()=>{try{switchView(b.dataset.v34)}catch(e){}});
 }
+function loadV37(){
+ if($('#v37SpecialTravelScript'))return;
+ const s=document.createElement('script');
+ s.id='v37SpecialTravelScript';
+ s.src='assets/v37-specials-travel-magazine.js?build=20260816-2214';
+ s.defer=true;
+ document.head.appendChild(s);
+}
 function loadV36(){
- if($('#v36CanvaInternalScript'))return;
+ const old=$('#v36CanvaInternalScript');
+ if(old){loadV37();return;}
  const s=document.createElement('script');
  s.id='v36CanvaInternalScript';
  s.src='assets/v36-canva-internal-pages.js?build=20260816-2204';
  s.defer=true;
+ s.onload=loadV37;
+ s.onerror=loadV37;
  document.head.appendChild(s);
 }
 function loadV35(){
