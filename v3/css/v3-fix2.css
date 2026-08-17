@@ -1,0 +1,23 @@
+/* Interaction + bulk import refinements */
+.v1-film-track{cursor:grab;touch-action:pan-x;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch;user-select:none}
+.v1-film-track.is-dragging{cursor:grabbing;scroll-snap-type:none!important}
+.v1-film-track.is-dragging .v1-film-card{pointer-events:none}
+.v1-movie-frame::after{pointer-events:none}
+
+.v1-promise-sheet .v3-seed-cloud{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;margin:16px 0!important}
+.v1-promise-sheet .v3-seed-cloud button{font-size:14px!important;line-height:1.55!important;text-align:left!important;padding:11px 14px!important;min-height:44px!important;border-radius:10px!important}
+.v1-promise-sheet #v1PromiseList .v3-bucket-row .copy{font-size:14px!important;line-height:1.6!important}
+@media(max-width:560px){.v1-promise-sheet .v3-seed-cloud button,.v1-promise-sheet #v1PromiseList .v3-bucket-row .copy{font-size:13px!important}}
+
+.v3-bulk-help{display:grid;gap:5px;margin:12px 0 16px;padding:13px 14px;border:1px dashed var(--line);border-radius:12px;background:#fffaf0}
+.v3-bulk-help b{font-family:var(--serif);font-size:14px}.v3-bulk-help span{font-size:11px;line-height:1.55;color:var(--ink-soft)}
+.v3-bulk-preview{display:grid;gap:7px;margin:12px 0;max-height:300px;overflow:auto}
+.v3-bulk-group{display:grid;grid-template-columns:110px 70px 1fr;gap:8px;align-items:center;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fffdf8;font-size:11px}
+.v3-bulk-group b{font-family:var(--serif);font-size:13px}.v3-bulk-group small{color:var(--ink-soft)}
+#v3BulkPhotoBtn{white-space:nowrap}
+@media(max-width:600px){.v3-bulk-group{grid-template-columns:1fr auto}.v3-bulk-group small{grid-column:1/-1}}
+
+.v3-kakao-import-card{border:1px solid var(--line);border-radius:16px;background:#fffdf8;padding:18px;box-shadow:0 10px 24px rgba(35,31,22,.06)}
+.v3-kakao-how{display:grid;gap:6px;margin-bottom:14px;padding:12px;border-radius:10px;background:#f7f0df}
+.v3-kakao-how b{font-family:var(--serif);font-size:14px}.v3-kakao-how span{font-size:11px;line-height:1.55;color:var(--ink-soft)}
+#v3KakaoPreview{margin:12px 0;line-height:1.65}.v3-kakao-warning{display:inline-block;margin-top:7px;color:#9a4b42;font-size:10px}
