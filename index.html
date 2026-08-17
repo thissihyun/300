@@ -44,6 +44,8 @@
 
   /* ---------- App shell ---------- */
   #app{display:none; padding:26px 16px 80px;}
+  #app{transition:opacity .28s ease}
+  #app.v-boot-settling{opacity:0; pointer-events:none}
   .wrap{max-width:900px; margin:0 auto; position:relative;}
 
   header.site-header{text-align:center; margin-bottom:6px;}
@@ -3307,7 +3309,26 @@ function tryUnlock(){
   if(val === PASSCODE || sessionStorage.getItem('unlocked')==='1'){
     sessionStorage.setItem('unlocked','1');
     document.getElementById('lockScreen').style.display='none';
-    document.getElementById('app').style.display='block';
+    const appEl = document.getElementById('app');
+    appEl.style.display='block';
+    /* A chain of add-on scripts (assets/v26-*.js through v34-*.js) loads
+       after this point and progressively restyles the header, nav, home
+       page and global font size. On a real connection those can still be
+       loading when the app becomes visible, so the page visibly jumps as
+       each one lands. Hold the reveal briefly so the user sees the
+       settled page, not the jump. */
+    appEl.classList.add('v-boot-settling');
+    (function(){
+      const start = Date.now();
+      (function poll(){
+        const ready = !!window.V26;
+        if(ready || Date.now()-start > 2200){
+          setTimeout(()=>appEl.classList.remove('v-boot-settling'), 200);
+        } else {
+          setTimeout(poll, 80);
+        }
+      })();
+    })();
     initApp();
     startMusic();
   } else {
