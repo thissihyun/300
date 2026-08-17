@@ -1,0 +1,190 @@
+/* 300 Days With You — production polish */
+
+/* remove development/version labels from the shipped app */
+.brand-tag::after{content:none!important}
+.v3-home-stamp{display:none!important}
+
+/* neutral hero placeholder: real photo replaces this automatically */
+#view-home .hero-photo .empty-frame,
+#view-home .hero-photo .v3-hero-empty{
+  border:0!important;
+  background:linear-gradient(135deg,#eee5d3,#f8f3e8)!important;
+  color:var(--ink-soft)!important;
+  height:100%!important;
+  min-height:320px;
+  display:flex!important;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-family:var(--hand);
+  text-align:center;
+  padding:30px;
+}
+#view-home .hero-photo .v3-hero-empty::before{content:'▣';font-size:28px;opacity:.35}
+
+/* top date widgets — prominent, balanced, not lost in the header row */
+.v3-top-metrics{
+  max-width:1080px;margin:10px auto 0;padding:0 18px;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;
+}
+.v3-top-metrics .v3-head-metric{
+  display:flex!important;min-width:0;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fffdf8;
+  box-shadow:0 6px 18px rgba(35,31,22,.07);text-align:left!important;
+}
+.v3-top-metrics .v3-head-metric-right{text-align:right!important;flex-direction:row-reverse}
+.v3-top-metrics .v3-metric-big{font-size:20px!important;margin:0!important;white-space:nowrap}
+.v3-top-metrics .v3-metric-k{font-size:9px!important}
+.v3-top-metrics .v3-head-metric button{font-size:10px!important}
+
+/* milestone badges: birthdays/anniversaries should actually read as milestones */
+.cal-cell .cal-badge{
+  position:absolute;right:5px;top:5px;z-index:5;
+  width:24px;height:24px;border-radius:999px;background:rgba(255,253,248,.94);
+  display:grid;place-items:center;font-size:15px;line-height:1;
+  border:1px solid rgba(165,55,44,.25);box-shadow:0 3px 8px rgba(35,31,22,.13)
+}
+.cal-cell.kind-birthday .cal-badge{width:30px;height:30px;font-size:20px;border-color:rgba(165,55,44,.48)}
+.cal-cell.kind-anniversary .cal-badge{font-size:18px}
+.cal-legend span{font-size:12px}
+
+/* V1-style Our Story reading column */
+.v3-story-shell{max-width:760px;margin:0 auto}
+.v3-story-intro{text-align:center;margin:8px auto 24px;max-width:580px}
+.v3-story-intro h1{font-family:var(--serif);font-style:italic;font-size:clamp(30px,5vw,48px);margin-bottom:6px}
+.v3-story-intro p{font-size:13px;color:var(--ink-soft);line-height:1.75}
+.v3-story-chapter{margin:26px 0 32px}
+.v3-story-chapter-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.v3-story-chapter-head::after{content:'';height:1px;background:var(--line);flex:1}
+.v3-story-chapter h3{margin:0;font-family:var(--hand);font-size:13px;color:var(--kraft);letter-spacing:.08em;text-transform:uppercase}
+.v3-story-list{background:#fffdf8;border:1px solid var(--line);border-radius:8px;overflow:hidden;box-shadow:var(--shadow)}
+.v3-story-row{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;padding:13px 15px;display:grid;grid-template-columns:72px 1fr;gap:12px;text-align:left;color:var(--ink)}
+.v3-story-row:last-child{border-bottom:0}
+.v3-story-row:hover{background:rgba(165,55,44,.045)}
+.v3-story-date{font-family:var(--serif);font-size:12px;color:var(--kraft);letter-spacing:.04em}
+.v3-story-title{font-family:var(--serif);font-style:italic;font-size:16px}
+.v3-story-copy{font-size:11px;color:var(--ink-soft);margin-top:3px;line-height:1.55}
+
+/* special hub hierarchy */
+.v3-special-hero{padding:12px 0 4px}
+.v3-special-hero h1{font-family:var(--serif);font-style:italic;font-size:clamp(30px,5vw,44px);margin:0}
+.v3-special-hero p{font-size:13px;color:var(--ink-soft);margin:6px 0 0}
+.v3-special-group{margin-top:28px}
+.v3-special-group-title{font-family:var(--hand);font-size:11px;color:var(--kraft);letter-spacing:.12em;margin-bottom:10px}
+.v3-special-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.v3-special-card{min-height:130px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
+.v3-special-card .n{position:absolute;left:14px;top:12px;font-family:var(--serif);font-size:28px;font-style:italic;color:rgba(165,55,44,.18)}
+.v3-special-card .t{font-family:var(--serif);font-size:16px}
+.v3-special-card .s{font-size:11px;color:var(--ink-soft);margin-top:5px;line-height:1.45}
+.v3-special-secondary .v3-special-card{min-height:96px;background:#f8f2e6}
+.v3-special-tools{display:flex;gap:8px;flex-wrap:wrap}
+
+/* map without connecting route */
+.v3-plain-map{height:430px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#efe6d4}
+.v3-map-note{font-family:var(--hand);font-size:10px;color:var(--kraft);margin:-5px 0 10px}
+
+/* every season gets its own editorial language */
+.v3-season-stack{display:grid;gap:18px}
+.v3-season-card{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+.v3-season-card::after{position:absolute;right:18px;top:5px;font-family:var(--serif);font-size:72px;line-height:1;opacity:.08;pointer-events:none}
+.v3-season-card.autumn{background:linear-gradient(135deg,#f4e4d1,#fff8ee)}
+.v3-season-card.autumn::after{content:'🍂'}
+.v3-season-card.winter{background:linear-gradient(135deg,#e8eef3,#fafcff)}
+.v3-season-card.winter::after{content:'❄'}
+.v3-season-card.spring{background:linear-gradient(135deg,#f4e5ea,#fff8fa)}
+.v3-season-card.spring::after{content:'✿'}
+.v3-season-card.summer{background:linear-gradient(135deg,#f5edcb,#fffaf0)}
+.v3-season-card.summer::after{content:'☀'}
+.v3-season-title{font-family:var(--serif);font-style:italic;font-size:30px;margin-bottom:3px}
+.v3-season-quote{font-family:var(--hand);font-size:12px;color:var(--ink-soft);margin-bottom:15px}
+.v3-season-events{display:flex;gap:8px;overflow-x:auto;padding:2px 1px 8px;scroll-snap-type:x proximity}
+.v3-season-event{flex:0 0 190px;scroll-snap-align:start;border:1px solid rgba(110,91,63,.18);background:rgba(255,253,248,.74);border-radius:10px;padding:12px;text-align:left}
+.v3-season-event b{display:block;font-family:var(--serif);font-size:13px;margin-bottom:5px}.v3-season-event span{font-size:10px;color:var(--ink-soft)}
+
+/* food archive */
+.v3-food-head{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-bottom:18px}
+.v3-food-note,.v3-food-add{border:1px solid var(--line);border-radius:14px;background:#fffdf8;padding:16px}
+.v3-food-note h2{font-family:var(--serif);font-style:italic;font-size:25px;margin:0 0 6px}
+.v3-food-note p{font-size:12px;color:var(--ink-soft);line-height:1.7;margin:0}
+.v3-food-form{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.v3-food-form .full{grid-column:1/-1}
+.v3-food-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.v3-food-card{position:relative;border:1px solid var(--line);border-radius:12px;background:#fffdf8;padding:14px;min-height:118px;text-align:left}
+.v3-food-card .icon{font-size:20px}.v3-food-card h3{font-size:15px;margin:7px 0 5px}.v3-food-card .meta{font-size:10px;color:var(--ink-soft)}
+.v3-food-card .source{position:absolute;right:10px;top:8px;font-size:8px;color:var(--kraft);letter-spacing:.08em}
+.v3-food-delete{position:absolute;right:7px;bottom:7px;border:0;background:none;color:var(--red);font-size:10px}
+
+/* V1-like numbers: numbers + graph together */
+.v3-numbers-hero{text-align:center;margin:8px 0 22px}
+.v3-numbers-hero h2{font-family:var(--serif);font-style:italic;font-size:clamp(30px,5vw,44px);margin-bottom:6px}
+.v3-number-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.v3-number-tile{border:1px solid var(--line);background:#fffdf8;border-radius:8px;padding:18px 12px;text-align:center;box-shadow:0 8px 20px rgba(35,31,22,.06)}
+.v3-number-tile .v{font-family:var(--serif);font-style:italic;font-size:31px;color:var(--clay)}
+.v3-number-tile .l{font-family:var(--hand);font-size:10px;color:var(--ink-soft);margin-top:3px}
+.v3-number-chart{margin-top:16px;border:1px solid var(--line);border-radius:12px;background:#fffdf8;padding:16px}
+.v3-chart-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;margin-bottom:10px}.v3-chart-legend .love{color:var(--red)}.v3-chart-legend .tension{color:var(--blue)}
+.v3-word-bars{margin-top:14px;display:grid;gap:7px}.v3-word-bar{display:grid;grid-template-columns:70px 1fr 45px;gap:8px;align-items:center;font-size:11px}.v3-word-track{height:7px;border-radius:99px;background:#eee5d4;overflow:hidden}.v3-word-fill{height:100%;background:var(--clay);border-radius:99px}
+
+/* V1 mini awards */
+.v3-awards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.v3-award-card{position:relative;border:1px solid var(--line);border-radius:8px;background:#fffdf8;padding:20px;text-align:center;box-shadow:0 8px 22px rgba(35,31,22,.08)}
+.v3-award-card::before{content:'AWARD';position:absolute;left:10px;top:8px;font-family:var(--hand);font-size:8px;letter-spacing:.12em;color:var(--kraft)}
+.v3-award-trophy{font-size:34px;margin:4px 0 8px}.v3-award-title{font-family:var(--hand);font-size:11px;color:var(--clay);letter-spacing:.06em}.v3-award-winner{font-family:var(--serif);font-style:italic;font-size:18px;margin:6px 0}.v3-award-date{font-size:10px;color:var(--ink-soft)}
+.v3-award-agree{margin-top:10px;min-height:28px;display:flex;justify-content:center;align-items:center}
+.v3-most-ny{margin-top:18px;border:2px double var(--gold);background:#f7efdc;padding:17px;text-align:center;transform:rotate(-.25deg)}
+.v3-most-ny .stamp{font-family:var(--serif);font-size:21px;font-style:italic}.v3-most-ny p{font-size:11px;color:var(--ink-soft);margin:5px 0 0}
+
+/* unified thank-you jar */
+.v3-thank-hero{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-bottom:16px}
+.v3-thank-copy,.v3-thank-jar{border:1px solid var(--line);border-radius:15px;padding:17px;background:#fffdf8}
+.v3-thank-copy h2{font-family:var(--serif);font-style:italic;font-size:28px;margin:0 0 6px}.v3-thank-copy p{font-size:12px;color:var(--ink-soft);line-height:1.7;margin:0}
+.v3-thank-jar{text-align:center;background:linear-gradient(180deg,#fffdf8,#f2ead8)}.v3-thank-jar .count{font-family:var(--serif);font-size:38px;font-style:italic;color:var(--clay)}.v3-thank-jar .flowers{font-size:18px;line-height:1.5;margin-top:5px}
+.v3-thank-tabs,.v3-thank-cats{display:flex;gap:7px;overflow-x:auto;padding:3px 0 10px}
+.v3-thank-tabs button,.v3-thank-cats button{white-space:nowrap;border:1px solid var(--line);background:#fffdf8;border-radius:999px;padding:7px 11px;font-size:10px}.v3-thank-tabs button.is-active,.v3-thank-cats button.is-active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.v3-thank-results{display:grid;gap:8px}.v3-thank-item{border:1px solid var(--line);background:#fffdf8;border-radius:10px;padding:12px;text-align:left}.v3-thank-item .meta{font-family:var(--hand);font-size:9px;color:var(--kraft);margin-bottom:4px}.v3-thank-item .text{font-family:var(--serif);font-size:13px;line-height:1.6}
+.v3-thank-category-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px}.v3-thank-category-summary button{border:1px solid var(--line);border-radius:10px;background:#fffdf8;padding:10px;text-align:left}.v3-thank-category-summary b{display:block;font-family:var(--serif);font-size:18px}.v3-thank-category-summary span{font-size:9px;color:var(--ink-soft)}
+
+/* explain 0 day streaks */
+.v3-streak-help{margin-top:8px;padding:9px 11px;border:1px dashed var(--line);border-radius:9px;background:rgba(200,162,74,.08);font-size:10px;line-height:1.6;color:var(--ink-soft)}
+
+/* categorized NEXT 300 DAYS */
+.v3-bucket-categories{display:grid;gap:13px}
+.v3-bucket-cat{border:1px solid var(--line);background:#fffdf8;border-radius:14px;padding:15px}
+.v3-bucket-cat-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-end;margin-bottom:10px}.v3-bucket-cat-head h3{font-family:var(--serif);font-style:italic;font-size:19px;margin:0}.v3-bucket-cat-head p{font-size:10px;color:var(--ink-soft);margin:2px 0 0}.v3-bucket-cat-icon{font-size:22px}
+.v3-bucket-list{display:grid;gap:7px}.v3-bucket-row{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;border-top:1px dashed var(--line);padding-top:8px}.v3-bucket-row:first-child{border-top:0;padding-top:0}.v3-bucket-row.is-done .copy{text-decoration:line-through;opacity:.55}.v3-bucket-row .stamp{font-family:var(--hand);font-size:9px;color:var(--red);transform:rotate(-4deg)}
+.v3-bucket-add{display:grid;grid-template-columns:1fr auto;gap:7px;margin-top:10px}.v3-bucket-add .field{min-width:0}
+
+/* V1-style letter to future */
+[data-panel="letter"].v3-letter-polished{max-width:760px;margin:18px auto 0;padding:18px;background:#eadfc9;border-radius:4px;box-shadow:0 12px 28px rgba(35,31,22,.10);position:relative}
+[data-panel="letter"].v3-letter-polished::before,[data-panel="letter"].v3-letter-polished::after{content:'';position:absolute;width:70px;height:20px;background:rgba(226,205,159,.72);top:-7px;transform:rotate(-4deg)}
+[data-panel="letter"].v3-letter-polished::before{left:22px}[data-panel="letter"].v3-letter-polished::after{right:22px;transform:rotate(4deg)}
+.v3-letter-heading{text-align:center;margin-bottom:12px}.v3-letter-heading .k{font-family:var(--hand);font-size:10px;color:var(--clay);letter-spacing:.09em}.v3-letter-heading h3{font-family:var(--serif);font-style:italic;font-size:27px;margin:4px 0}.v3-letter-heading p{font-size:11px;color:var(--ink-soft);margin:0}
+[data-panel="letter"].v3-letter-polished .envelope{background:#fffdf8!important;border:1px solid #d5c6a8!important;border-radius:3px!important;padding:22px!important;box-shadow:inset 0 0 0 7px rgba(239,229,209,.55)}
+[data-panel="letter"].v3-letter-polished textarea{background:#fffef9;line-height:1.9;background-image:repeating-linear-gradient(180deg,transparent 0 30px,rgba(93,111,130,.12) 30px 31px)}
+
+/* shared-photo explanation in album */
+.v3-photo-sync-note{margin:10px 0 14px;border:1px dashed var(--line);border-radius:10px;padding:9px 11px;background:rgba(95,107,63,.07);font-size:10px;color:var(--ink-soft);line-height:1.6}
+
+@media(max-width:800px){
+  .v3-special-grid{grid-template-columns:repeat(2,1fr)}
+  .v3-food-grid{grid-template-columns:repeat(2,1fr)}
+  .v3-thank-category-summary{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+  .v3-top-metrics{grid-template-columns:1fr 1fr;padding:0 12px;margin-top:7px;gap:7px}
+  .v3-top-metrics .v3-head-metric{padding:9px 10px;display:block!important}
+  .v3-top-metrics .v3-head-metric-right{text-align:right!important}
+  .v3-top-metrics .v3-metric-big{font-size:16px!important;margin:3px 0!important}
+  .v3-food-head,.v3-thank-hero{grid-template-columns:1fr}
+  .v3-number-grid{grid-template-columns:repeat(2,1fr)}
+  .v3-awards-grid{grid-template-columns:1fr 1fr}
+  .v3-story-row{grid-template-columns:62px 1fr;padding:11px}
+  .v3-plain-map{height:360px}
+}
+@media(max-width:520px){
+  .v3-special-grid,.v3-food-grid,.v3-awards-grid{grid-template-columns:1fr}
+  .v3-number-grid{grid-template-columns:1fr 1fr}
+  .v3-top-metrics{grid-template-columns:1fr 1fr}
+  .v3-top-metrics .v3-metric-k{font-size:8px!important}.v3-top-metrics .v3-metric-big{font-size:14px!important}
+}
