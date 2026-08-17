@@ -1,0 +1,23 @@
+/* Stable horizontal movie interaction */
+#view-home #movieStripStable .v1-movie-frame,
+#view-ourstory .v1-movie-frame{position:relative!important;overflow:hidden!important}
+#view-home #movieStripStable .v1-film-track,
+#view-ourstory .v1-film-track{
+  overflow-x:auto!important;overflow-y:hidden!important;cursor:grab!important;user-select:none!important;
+  -webkit-user-select:none!important;touch-action:pan-y!important;overscroll-behavior-x:contain!important;
+  scroll-behavior:auto;scroll-snap-type:x proximity!important;padding-left:4px!important;padding-right:4px!important;
+}
+#view-home #movieStripStable .v1-film-track.is-grabbing,
+#view-ourstory .v1-film-track.is-grabbing{cursor:grabbing!important;scroll-snap-type:none!important}
+.v1-film-track img{-webkit-user-drag:none!important;user-drag:none!important;pointer-events:none}
+.v3-movie-arrow{position:absolute;top:50%;z-index:12;width:42px;height:58px;transform:translateY(-50%);border:1px solid rgba(255,255,255,.36);background:rgba(32,27,22,.78);color:#fff;font-family:Georgia,serif;font-size:34px;line-height:1;border-radius:4px;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(4px);box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.v3-movie-arrow.left{left:8px}.v3-movie-arrow.right{right:8px}.v3-movie-arrow:hover{background:rgba(32,27,22,.95)}
+#view-home #movieStripStable::before{content:'DRAG TO EXPLORE  ↔';display:block;margin:0 0 7px 3px;font-family:var(--hand);font-size:9px;letter-spacing:.14em;color:var(--kraft)}
+@media(max-width:720px){.v3-movie-arrow{width:34px;height:48px;font-size:28px}.v3-movie-arrow.left{left:5px}.v3-movie-arrow.right{right:5px}}
+
+/* Promise seed lines: comfortably readable */
+#view-future .v3-seed-cloud{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;margin:18px 0 24px!important}
+#view-future .v3-seed-cloud button{width:100%!important;text-align:left!important;padding:14px 16px!important;border-radius:10px!important;font-size:15px!important;line-height:1.55!important;font-family:var(--sans)!important;letter-spacing:0!important;background:#fffaf0!important;border:1px solid var(--line)!important;color:var(--ink)!important}
+#view-future .v3-seed-cloud button::first-letter{color:var(--red)}
+#view-future #v1PromiseList .v3-bucket-row .copy{font-size:15px!important;line-height:1.55!important}
+#view-future .v1-promise-sheet h2{font-size:clamp(28px,5vw,42px)!important}
