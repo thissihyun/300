@@ -150,27 +150,48 @@
     }
   }});
 
-  /* ---- WORDS THAT BECAME OURS ---- */
+  /* ---- WORDS THAT BECAME OURS ----
+     Shows curated EVENTS.kakao hits immediately, then upgrades in place to
+     every real occurrence across the full 89,251-message archive once
+     fullchat.js finishes loading (Section 1 gap: v1 could search the whole
+     export, v2 previously only knew about the small curated subset). */
+  const WORDS_MAX_ROWS = 120;
   Router.registerSpecial('words', {render(host){
     host.innerHTML = subHeader('WORDS THAT BECAME OURS') + `<div class="mood-grid" id="wordChips" style="margin-bottom:16px;">
       ${window.WORDS.map(w=>`<button class="chip" data-word="${w}">${escapeHtml(w)} <span class="section-note">${(window.BASELINE_STATS.words[w]||0)}</span></button>`).join('')}
       </div><div id="wordDetail"></div>`;
+
+    let activeWord = null;
+    function draw(){
+      if(!activeWord) return;
+      const w = activeWord;
+      const detail = host.querySelector('#wordDetail');
+      if(!detail) return;
+      const full = window.FullChat && window.FullChat.ready ? window.FullChat.allMessages().filter(m=>m.text.includes(w)) : null;
+      const rows = full
+        ? full.slice().sort((a,b)=>a.date<b.date?1:-1)
+        : Object.entries(window.EVENTS).filter(([,ev])=>(ev.kakao||[]).some(([,t])=>t.includes(w)))
+            .map(([d,ev])=>({date:d, speaker:ev.kakao.find(([,t])=>t.includes(w))[0], text:ev.kakao.find(([,t])=>t.includes(w))[1]}));
+      const total = full ? full.length : (window.BASELINE_STATS.words[w]||0);
+      const shown = rows.slice(0, WORDS_MAX_ROWS);
+      detail.innerHTML = `<div class="card">
+        <div class="eyebrow">“${escapeHtml(w)}” · 총 ${total}회 ${full?'(실제 카톡 전체 기준)':'(불러오는 중… 우선 큐레이션된 기록만 보여요)'}</div>
+        ${shown.length ? shown.map(r=>`
+          <button class="list-row card-btn" style="width:100%;background:none;border:none;border-bottom:1px solid var(--line);" data-action="memory" data-date="${r.date}">
+            <div class="list-date">${r.date.slice(5)}</div>
+            <div style="flex:1;text-align:left;margin-left:14px;"><span class="section-note">${escapeHtml(r.speaker||'')}</span> ${escapeHtml(r.text)}</div>
+          </button>`).join('') : '<div class="empty-frame">아직 등장하지 않아요.</div>'}
+        ${rows.length > shown.length ? `<div class="section-note" style="padding:10px 2px;">+ ${rows.length-shown.length}개 더 (날짜순 최근 ${WORDS_MAX_ROWS}개만 표시)</div>` : ''}
+      </div>`;
+    }
     host.querySelectorAll('[data-word]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         host.querySelectorAll('[data-word]').forEach(b=>b.classList.toggle('is-selected', b===btn));
-        const w = btn.dataset.word;
-        const dates = Object.entries(window.EVENTS).filter(([,ev])=>(ev.kakao||[]).some(([,t])=>t.includes(w)));
-        const detail = host.querySelector('#wordDetail');
-        detail.innerHTML = `<div class="card">
-          <div class="eyebrow">“${escapeHtml(w)}” · 총 ${window.BASELINE_STATS.words[w]||0}회 (전체 카톡 기준)</div>
-          ${dates.length ? dates.map(([d,ev])=>`
-            <button class="list-row card-btn" style="width:100%;background:none;border:none;border-bottom:1px solid var(--line);" data-action="memory" data-date="${d}">
-              <div class="list-date">${d.slice(5)}</div>
-              <div style="flex:1;text-align:left;margin-left:14px;">${escapeHtml(ev.kakao.find(([,t])=>t.includes(w))[1])}</div>
-            </button>`).join('') : '<div class="empty-frame">큐레이션된 대화에는 등장하지 않아요.</div>'}
-        </div>`;
+        activeWord = btn.dataset.word;
+        draw();
       });
     });
+    if(window.FullChat) window.FullChat.load().then(draw);
   }});
 
   /* ---- SEASONS ---- */
