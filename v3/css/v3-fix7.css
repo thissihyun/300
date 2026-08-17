@@ -1,0 +1,81 @@
+/* 300 Days With You — final release layout polish */
+
+/* HERO thumbnails: remove pillar bars in the thumbnail viewport only. The stored source image is untouched. */
+#view-album .v3-feature-grid .v3-photo-card{contain:none!important;isolation:auto!important;overflow:hidden!important}
+#view-album .v3-feature-grid .v6-clean-photo-hit,
+#view-album .v3-feature-grid .v3-photo-imagebtn{overflow:hidden!important;clip-path:none!important;-webkit-mask:none!important;mask:none!important;background:#e9dfcd!important}
+#view-album .v3-feature-grid .v6-clean-photo-hit>img,
+#view-album .v3-feature-grid .v3-photo-imagebtn>img{object-fit:cover!important;background:transparent!important;clip-path:none!important;-webkit-mask:none!important;mask:none!important}
+#view-album .v3-feature-grid .v6-clean-photo-hit::before,
+#view-album .v3-feature-grid .v6-clean-photo-hit::after,
+#view-album .v3-feature-grid .v3-photo-imagebtn::before,
+#view-album .v3-feature-grid .v3-photo-imagebtn::after{display:none!important;content:none!important}
+
+/* SPECIAL photo-driven cards */
+.v7-first-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.v7-memory-photo-card{padding:7px!important;overflow:hidden!important;text-align:left}
+.v7-memory-photo{width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:9px;background:#ece3d3;border:1px solid rgba(217,205,176,.75)}
+.v7-memory-photo img,.v7-special-inline-photo img,.v7-season-photo img,.v7-food-photo img{width:100%;height:100%;display:block;object-fit:cover}
+.v7-card-copy{padding:10px 7px 7px}.v7-card-copy .t{font-family:var(--serif);font-style:italic;font-size:17px;line-height:1.25}.v7-card-copy .s{font-size:10px;color:var(--kraft);margin-top:5px}
+.v7-photo-placeholder{width:100%;height:100%;display:grid;place-items:center;padding:14px;background:linear-gradient(135deg,#eee4d2,#f8f2e7);font-family:var(--hand);font-size:9px;line-height:1.55;color:var(--ink-soft);text-align:center}.v7-photo-placeholder.compact{padding:5px;font-size:10px}
+
+.v7-season-stack{display:grid;gap:24px}.v7-season-block{border:1px solid var(--line);border-radius:18px;padding:18px;background:#fffdf8;box-shadow:0 10px 25px rgba(35,31,22,.06)}
+.v7-season-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:13px}.v7-season-heading>div{display:flex;align-items:center;gap:8px}.v7-season-heading>div span{font-size:22px}.v7-season-heading b{font-family:var(--serif);font-style:italic;font-size:26px;font-weight:500}.v7-season-heading p{margin:0;max-width:440px;font-family:var(--hand);font-size:10px;line-height:1.6;color:var(--ink-soft);text-align:right}
+.v7-season-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.v7-season-memory{padding:0;border:1px solid var(--line);border-radius:11px;background:#fffaf0;overflow:hidden;text-align:left;color:var(--ink);cursor:pointer;min-width:0}.v7-season-photo{aspect-ratio:1;overflow:hidden;background:#ece3d3}.v7-season-copy{padding:9px}.v7-season-copy b{display:block;font-family:var(--serif);font-size:13px;line-height:1.3;font-weight:500}.v7-season-copy span{display:block;margin-top:4px;font-size:9px;color:var(--kraft)}
+.v7-special-inline-photo{height:145px!important;margin:-2px -2px 10px!important;border:0!important;border-radius:9px!important;overflow:hidden!important;background:#ece3d3!important;padding:0!important}
+.poster-flip-front .v7-special-inline-photo{height:150px!important;margin:0 0 10px!important;border-radius:5px!important}
+.v7-food-photo{height:110px;margin:-14px -14px 10px;overflow:hidden;border-radius:12px 12px 0 0;background:#ece3d3}
+
+/* Product copy / save state */
+.v7-sync-note{display:block;margin-top:4px;font-size:10px;color:var(--ink-soft);line-height:1.5}
+#specialDetailHost .v3-kakao-how{grid-template-columns:1fr!important}
+#specialDetailHost .v3-kakao-how span{font-size:11px!important}
+
+/* Text should not split awkwardly on Korean mobile layouts. */
+.section-title,.modal-title,.v3-special-card .t,.v7-card-copy .t,.v7-season-copy b,.v1-future-head h1,.v1-future-head p,.v3-special-card .s,.section-note,.btn,button{word-break:keep-all;overflow-wrap:break-word}
+.v7-special-head{align-items:flex-end}
+
+@media(max-width:900px){
+  .v7-first-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .v7-season-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  main{padding-left:12px!important;padding-right:12px!important}
+  .section{margin:25px 0!important}
+  .section-head{gap:8px!important}
+  .section-title{font-size:clamp(20px,6vw,27px)!important;line-height:1.08}
+  .v3-special-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+  .v3-special-card{min-height:112px!important;padding:13px!important}
+  .v3-special-card .t{font-size:14px!important;line-height:1.25}.v3-special-card .s{font-size:10px!important;line-height:1.45}
+  .v7-season-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .v7-season-heading{align-items:flex-start;flex-direction:column;gap:5px}.v7-season-heading p{text-align:left;max-width:none}
+  .v7-season-heading b{font-size:23px}.v7-season-block{padding:13px}
+  .future-tabs,.v1-future-tabs{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:6px!important;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .future-tabs::-webkit-scrollbar,.v1-future-tabs::-webkit-scrollbar{display:none}
+  .future-tabs button,.v1-future-tabs button{flex:0 0 auto!important;white-space:nowrap!important;min-height:42px!important}
+  .v3-top-metrics{grid-template-columns:1fr 1fr!important;gap:7px!important;padding:0 9px!important}
+  .v3-top-metrics .v3-head-metric{min-width:0!important;padding:10px 9px!important}.v3-top-metrics .v3-metric-big{font-size:16px!important;white-space:normal!important;line-height:1.05}
+  .modal-panel{width:min(96vw,720px)!important;max-height:92vh!important;padding-left:14px!important;padding-right:14px!important}
+}
+@media(max-width:480px){
+  .v7-first-grid{grid-template-columns:1fr}
+  .v7-memory-photo{aspect-ratio:16/10}
+  .v7-season-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .v7-season-copy{padding:7px}.v7-season-copy b{font-size:12px}.v7-season-copy span{font-size:8px}
+  .v3-special-grid{grid-template-columns:1fr!important}
+  .v3-special-card{min-height:92px!important}
+  .v3-top-metrics{grid-template-columns:1fr!important}
+  .v3-top-metrics .v3-head-metric,.v3-top-metrics .v3-head-metric-right{transform:none!important;text-align:left!important;flex-direction:row!important}
+  .v1-future-head h1{font-size:clamp(30px,11vw,42px)!important;line-height:.98}.v1-future-head p{font-size:12px!important;line-height:1.65}
+  .v3-album-hero h1{font-size:clamp(28px,10vw,38px)!important}
+  .v3-album-filterbar{grid-template-columns:1fr!important}
+  .v3-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  .v3-photo-title{font-size:11px!important}.v3-photo-date{font-size:8px!important}
+  #view-ourdays .cal-title{font-size:7.8px!important;line-height:1.12!important;-webkit-line-clamp:2!important}
+}
+@media(max-width:360px){
+  main{padding-left:8px!important;padding-right:8px!important}
+  .v7-season-grid{grid-template-columns:1fr}
+  .v3-photo-grid{grid-template-columns:1fr!important}
+  .bottom-nav button{font-size:8px!important;min-width:0!important}.bottom-nav button .ic{font-size:17px!important}
+}
