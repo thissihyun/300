@@ -31,7 +31,25 @@
     return Object.entries(window.EVENTS).filter(([k])=>k.startsWith(prefix)).sort((a,b)=>a[0]<b[0]?-1:1);
   }
 
-  function renderCalendar(host, y, m, dir){
+  function photoFor(key, photos){
+    const forDate = photos.filter(p=>p.date===key);
+    if(!forDate.length) return null;
+    return forDate.find(p=>p.hero) || forDate[0];
+  }
+
+  function moodDots(key, diaryRows){
+    const rows = diaryRows.filter(r=>r.date===key && r.mood);
+    if(!rows.length) return '';
+    return `<div class="cal-mood-dots">${rows.map(r=>{
+      const uid = r.user===Identity.displayName('sihyun') ? 'sihyun' : 'gangwon';
+      return `<span class="cal-mood-dot is-${uid}" title="${escapeHtml(r.user)} · ${escapeHtml(r.mood)}"></span>`;
+    }).join('')}</div>`;
+  }
+
+  function renderCalendar(host, y, m, dir, photos, diaryRows){
+    photos = photos || [];
+    diaryRows = diaryRows || [];
+    const chatDates = (window.FullChat && window.FullChat.ready) ? window.FULL_CHAT_DATA : null;
     const first = new Date(y,m,1);
     const startDow = first.getDay();
     const daysInMonth = new Date(y,m+1,0).getDate();
@@ -43,20 +61,27 @@
       const ev = window.EVENTS[key];
       const isToday = key===today;
       const kind = dayKind(key, ev);
+      const photo = photoFor(key, photos);
+      const isChatOnly = !ev && chatDates && chatDates[key] && chatDates[key].length;
       const cls = ['cal-cell'];
       if(ev) cls.push('has-event');
       if(isToday) cls.push('is-today');
       if(kind) cls.push('kind-'+kind);
-      cells += `<button class="${cls.join(' ')}" ${ev?`data-action="memory" data-date="${key}"`:''}>
+      if(photo) cls.push('has-photo');
+      if(isChatOnly) cls.push('chat-only');
+      const style = photo ? ` style="background-image:url('${photo.url}')"` : '';
+      cells += `<button class="${cls.join(' ')}"${style} ${ev?`data-action="memory" data-date="${key}"`:(isChatOnly?`data-action="memory" data-date="${key}"`:'')}>
         <div class="cal-num">${d}</div>
         ${kind ? `<span class="cal-badge">${KIND_ICON[kind]}</span>` : ''}
+        ${isChatOnly ? `<span class="cal-chat-badge">💬</span>` : ''}
         ${ev ? `<div class="cal-title">${escapeHtml(ev.title)}</div>` : ''}
+        ${moodDots(key, diaryRows)}
       </button>`;
     }
     const wrapCls = dir==='next' ? 'cal-slide-left' : dir==='prev' ? 'cal-slide-right' : '';
     host.innerHTML = `<div class="cal-grid" style="margin-bottom:6px;">${['SUN','MON','TUE','WED','THU','FRI','SAT'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}</div>
       <div class="cal-grid ${wrapCls}">${cells}</div>
-      <div class="cal-legend">${Object.keys(KIND_ICON).map(k=>`<span>${KIND_ICON[k]} ${KIND_LABEL[k]}</span>`).join('')}<span class="is-today-sw">오늘</span></div>`;
+      <div class="cal-legend">${Object.keys(KIND_ICON).map(k=>`<span>${KIND_ICON[k]} ${KIND_LABEL[k]}</span>`).join('')}<span>💬 대화만 있는 날</span><span class="is-today-sw">오늘</span></div>`;
     host.querySelectorAll('.cal-cell').forEach(cell=>{
       cell.addEventListener('click', ()=>{ cell.classList.remove('cal-bounce'); void cell.offsetWidth; cell.classList.add('cal-bounce'); });
     });
@@ -145,10 +170,11 @@
     });
 
     let diaryRows = [];
+    let photoRows = [];
     function draw(dir){
       const y = cursor.getFullYear(), m = cursor.getMonth();
       container.querySelector('#monthLabel').textContent = `${MONTH_NAMES[m]} ${y}`;
-      renderCalendar(container.querySelector('#calHost'), y, m, dir);
+      renderCalendar(container.querySelector('#calHost'), y, m, dir, photoRows, diaryRows);
       renderList(container.querySelector('#listHost'), y, m);
       renderReport(container.querySelector('#reportHost'), y, m, diaryRows);
     }
@@ -160,8 +186,13 @@
 
     unsub.push(DB.onAllDailyRecords(rows=>{
       diaryRows = rows;
-      renderReport(container.querySelector('#reportHost'), cursor.getFullYear(), cursor.getMonth(), rows);
+      draw();
     }));
+    unsub.push(DB.onAllPhotos(rows=>{
+      photoRows = rows;
+      draw();
+    }));
+    if(window.FullChat) window.FullChat.load().then(()=> draw());
   }
 
   Router.registerView('ourdays', {render});
