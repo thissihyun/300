@@ -1,0 +1,6 @@
+/* Hide superseded fragments that older compatibility observers may append after the consolidated Future view renders. */
+#view-future .v3-future-intro{display:none!important}
+#view-future [data-target="v3next300"],
+#view-future [data-panel="v3next300"]{display:none!important}
+#view-future [data-panel="promises"] > .v3-promise-note,
+#view-future [data-panel="promises"] > .v3-promise-note + .v3-seed-cloud{display:none!important}
