@@ -21,6 +21,7 @@
     {key:'thanksarchive', n:'15', t:'300 DAYS OF 고마워', s:'우리가 남긴 모든 감사를 검색해요.'},
     {key:'stats', n:'16', t:'OUR STATS', s:'연속 기록, 감정 믹스, 30일 히트맵.'},
     {key:'likedkakao', n:'17', t:'LIKED KAKAO MESSAGES', s:'저장해둔 카톡 한 줄들.'},
+    {key:'thankskakao', n:'18', t:'고마워, 우리의 카톡에서', s:'진짜 대화에서 찾은 감사한 순간들.'},
   ];
   const MORE = [
     {key:'funny', t:'Funny & Inside Jokes'},
@@ -595,9 +596,9 @@
     DB.onAllChatLikes(rows=>{ all = rows.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')); draw(); });
   }});
 
-  /* ---- 300 DAYS OF 고마워 ---- */
+  /* ---- 300 DAYS OF 고마워 (our own written gratitude entries, from Firestore) ---- */
   Router.registerSpecial('thanksarchive', {render(host){
-    host.innerHTML = subHeader('300 DAYS OF 고마워', '우리가 하루하루 남긴 감사를 다시 읽어요.') + `
+    host.innerHTML = subHeader('300 DAYS OF 고마워', '우리가 하루하루 직접 남긴 감사 기록을 다시 읽어요.') + `
       <input class="field" id="thanksSearch" placeholder="감사 내용 검색 (예: 공부, 기다려줘서)" style="margin-bottom:14px;">
       <div id="thanksResults"></div>`;
     let all = [];
@@ -620,6 +621,30 @@
       all = rows.filter(r=>r.text && r.text.trim()).sort((a,b)=> b.date.localeCompare(a.date));
       draw();
     });
+  }});
+
+  /* ---- 고마워, 우리의 카톡에서 (curated from the real Kakao archive — distinct
+     from thanksarchive above, which is our own written gratitude entries) ---- */
+  const THANKS_KEYWORDS = ['고마워','고마워요','감사'];
+  Router.registerSpecial('thankskakao', {render(host){
+    host.innerHTML = subHeader('고마워, 우리의 카톡에서', '진짜 카톡 대화에서 “고마워/감사”가 나온 순간들.') + `<div id="thankskakaoBody"><div class="empty-frame">불러오는 중…</div></div>`;
+    function draw(){
+      const body = host.querySelector('#thankskakaoBody');
+      if(!body || !(window.FullChat && window.FullChat.ready)) return;
+      const matches = window.FullChat.allMessages()
+        .filter(m=> THANKS_KEYWORDS.some(k=>m.text.includes(k)))
+        .sort((a,b)=> b.date.localeCompare(a.date));
+      const shown = matches.slice(0, 150);
+      body.innerHTML = `
+        <div class="eyebrow" style="margin-bottom:10px;">실제 카톡에서 “고마워/감사” · 총 ${matches.length}개</div>
+        ${shown.length ? `<div class="card">${shown.map(r=>`
+          <button class="list-row card-btn" style="width:100%;background:none;border:none;border-bottom:1px solid var(--line);" data-action="memory" data-date="${r.date}">
+            <div class="list-date">${r.date.slice(5)}</div>
+            <div style="flex:1;text-align:left;margin-left:14px;"><span class="section-note">${escapeHtml(r.speaker)}</span> ${escapeHtml(r.text)}</div>
+          </button>`).join('')}</div>` : '<div class="empty-frame">아직 등장하지 않아요.</div>'}
+        ${matches.length > shown.length ? `<div class="section-note" style="padding:10px 2px;">+ ${matches.length-shown.length}개 더 (최근 150개만 표시)</div>` : ''}`;
+    }
+    if(window.FullChat) window.FullChat.load().then(draw);
   }});
 
   /* ---- BEFORE / CAME TRUE ---- */
