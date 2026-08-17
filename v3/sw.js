@@ -1,7 +1,8 @@
-/* 300 Days With You V3 — V2 engine + full V1 archive compatibility */
-const CACHE = 'days300-v3-4-album-legacy';
+/* 300 Days With You — app cache */
+const CACHE = 'days300-production-5';
 const CORE = [
-  './', './index.html', './css/v3.css', './css/v3-full.css', './css/v3-album.css', './js/v3.js', './js/v3-full.js', './js/v3-album.js', './js/v3-photo-legacy.js', './manifest.webmanifest',
+  './', './index.html', './css/v3.css', './css/v3-full.css', './css/v3-album.css', './css/v3-polish.css', './css/v3-production.css',
+  './js/v3.js', './js/v3-full.js', './js/v3-album.js', './js/v3-photo-legacy.js', './js/v3-polish.js', './js/v3-production.js', './manifest.webmanifest',
   '../v2/css/main.css',
   '../v2/js/data.js','../v2/js/fullchat.js','../v2/js/anim.js','../v2/js/kakaoparse.js',
   '../v2/js/firebase.js','../v2/js/store.js','../v2/js/router.js','../v2/js/app.js',
