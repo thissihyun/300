@@ -1,0 +1,50 @@
+/* Our Days curation + definitive photo bar cleanup */
+
+/* Remove every possible decorative/native layer from album photo surface. */
+.v3-photo-card{isolation:isolate!important;overflow:hidden!important;contain:paint!important}
+.v3-photo-card::before,.v3-photo-card::after,.v3-photo-imagebtn::before,.v3-photo-imagebtn::after,.v6-clean-photo-hit::before,.v6-clean-photo-hit::after{content:none!important;display:none!important;background:none!important;border:0!important;box-shadow:none!important}
+.v3-photo-card>.v3-photo-imagebtn,.v6-clean-photo-hit{position:relative!important;display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;aspect-ratio:4/5!important;height:auto!important;overflow:hidden!important;border:0!important;padding:0!important;margin:0!important;border-radius:4px!important;background:#efe7d7!important;background-image:none!important;box-shadow:none!important;outline:0!important;clip-path:inset(0 round 4px)!important;-webkit-mask:none!important;mask:none!important;filter:none!important;transform:none!important;appearance:none!important;-webkit-appearance:none!important;scrollbar-width:none!important;cursor:zoom-in;touch-action:manipulation}
+.v6-clean-photo-hit::-webkit-scrollbar,.v6-clean-photo-hit *::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+.v6-clean-photo-hit>img,.v3-photo-imagebtn>img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;display:block!important;object-fit:contain!important;object-position:center!important;background:#efe7d7!important;border:0!important;outline:0!important;box-shadow:none!important;filter:none!important;transform:none!important;-webkit-mask:none!important;mask:none!important}
+
+/* Calendar: photo area itself opens the same metadata editor as Album. */
+#view-ourdays .cal-cell{position:relative!important}
+.v6-calendar-photo-hit{position:absolute!important;inset:25px 3px 3px!important;z-index:2!important;border-radius:7px;cursor:pointer;display:flex;align-items:flex-end;justify-content:flex-end;padding:4px;pointer-events:auto}
+.v6-calendar-photo-hit i{display:none}.v6-calendar-photo-hit b{font-family:var(--hand);font-size:7px;font-weight:700;color:#332b22;background:rgba(255,253,248,.9);border:1px solid rgba(217,205,176,.78);border-radius:999px;padding:2px 5px;opacity:.86;box-shadow:0 2px 6px rgba(35,31,22,.1)}
+.cal-cell .cal-num,.cal-cell .cal-title,.cal-cell .cal-badge,.cal-cell .v3-calendar-special-label,.cal-cell .cal-mood-dots,.cal-cell .cal-chat-badge{z-index:4!important;pointer-events:auto}
+.v6-day-edit-icon{position:absolute;left:3px;top:3px;z-index:7;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(255,253,248,.94);border:1px solid rgba(217,205,176,.88);box-shadow:0 2px 7px rgba(35,31,22,.12);font-size:10px;color:var(--ink);cursor:pointer;line-height:1}
+.cal-cell.has-photo .v6-day-edit-icon{left:auto;right:31px}
+
+/* Date title + representative Kakao editor. */
+.v6-day-editor-note{font-size:9px;color:var(--ink-soft);margin:4px 0 16px}
+.v6-rep-editor-head{display:grid;grid-template-columns:1fr minmax(130px,180px);gap:10px;align-items:end;margin:14px 0 8px;padding-top:13px;border-top:1px dashed var(--line)}
+.v6-rep-editor-head b{display:block;font-family:var(--serif);font-size:16px}.v6-rep-editor-head span{display:block;font-size:9px;color:var(--ink-soft);margin-top:3px;line-height:1.5}
+.v6-auto-preview{border:1px solid var(--line);background:#fffaf0;border-radius:12px;padding:11px;margin-bottom:10px}.v6-auto-preview>span{font-family:var(--hand);font-size:9px;color:var(--red);letter-spacing:.08em}.v6-auto-preview p{margin:5px 0 0;font-size:10px;line-height:1.5}.v6-auto-preview p b{margin-right:6px;color:var(--kraft)}
+.v6-chat-pick-list{display:grid;gap:5px;max-height:36vh;overflow:auto;padding-right:3px}.v6-chat-pick-list label{display:grid;grid-template-columns:24px 1fr;gap:7px;align-items:start;border:1px solid var(--line);border-radius:9px;background:#fffdf8;padding:8px;cursor:pointer}.v6-chat-pick-list input{width:18px;height:18px;margin:1px 0}.v6-chat-pick-list span{font-size:10px;line-height:1.5;white-space:pre-wrap}.v6-chat-pick-list span b{display:block;font-size:8px;color:var(--kraft);margin-bottom:2px}
+
+/* Representative Kakao shown when a calendar date opens. */
+.v6-representative-kakao{margin:18px 0;padding:15px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,#fffdf8,#f5ecdc);box-shadow:0 8px 22px rgba(35,31,22,.06)}
+.v6-rep-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.v6-rep-head>div span{display:block;font-family:var(--hand);font-size:8px;letter-spacing:.12em;color:var(--kraft)}.v6-rep-head>div b{font-family:var(--serif);font-style:italic;font-size:20px;font-weight:500}.v6-rep-head button{border:0;background:transparent;color:var(--red);font-size:10px;text-decoration:underline;cursor:pointer;padding:8px}
+.v6-rep-bubbles{display:flex;flex-direction:column;gap:6px}.v6-rep-msg{max-width:82%;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 3px 8px rgba(35,31,22,.04)}.v6-rep-msg.sihyun{align-self:flex-start;border-bottom-left-radius:3px}.v6-rep-msg.gangwon{align-self:flex-end;border-bottom-right-radius:3px;background:#f8edcf}.v6-rep-msg small{display:block;font-family:var(--hand);font-size:8px;color:var(--kraft);margin-bottom:2px}.v6-rep-msg p{margin:0;font-size:11px;line-height:1.55;white-space:pre-wrap}
+.v6-memory-title-edit{display:inline-grid;place-items:center;margin-left:7px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#fffdf8;color:var(--ink);font-size:11px;vertical-align:middle;cursor:pointer}
+
+/* Calendar square focal-point editor — viewport only, never edits the source image. */
+.v6-focus-editor{margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:#fffaf0}.v6-focus-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.v6-focus-head b{display:block;font-family:var(--serif);font-size:15px}.v6-focus-head span{display:block;margin-top:2px;font-size:9px;color:var(--ink-soft)}
+.v6-focus-preview{position:relative;width:min(320px,100%);aspect-ratio:1;margin:0 auto 10px;overflow:hidden;border:1px solid var(--line);border-radius:10px;background:#e9dfcd;touch-action:none;cursor:crosshair}.v6-focus-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.v6-focus-preview i{position:absolute;width:20px;height:20px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(165,55,44,.8),0 2px 7px rgba(0,0,0,.22);pointer-events:none}.v6-focus-preview i::before,.v6-focus-preview i::after{content:'';position:absolute;background:#fff;box-shadow:0 0 0 .5px #a5372c}.v6-focus-preview i::before{width:28px;height:1px;left:-6px;top:8px}.v6-focus-preview i::after{width:1px;height:28px;left:8px;top:-6px}.v6-focus-preview>span{position:absolute;left:8px;bottom:7px;background:rgba(25,20,15,.62);color:#fff;border-radius:999px;padding:4px 7px;font-size:8px;pointer-events:none}.v6-focus-sliders{display:grid;gap:8px}.v6-focus-sliders label{display:grid;grid-template-columns:38px 1fr;gap:8px;align-items:center;font-size:9px;color:var(--ink-soft)}.v6-focus-sliders input{width:100%}.v6-photo-extra-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+
+/* Home hero is now explicitly manageable. */
+#view-home .hero{position:relative}.v6-home-hero-manage{position:absolute;right:14px;top:14px;z-index:9;border:1px solid rgba(255,255,255,.6);background:rgba(28,23,18,.62);color:#fff;border-radius:999px;padding:8px 11px;font-family:var(--hand);font-size:9px;backdrop-filter:blur(5px);cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.16)}
+.v6-pulse-edit{animation:v6PulseEdit 1s ease 3}@keyframes v6PulseEdit{50%{transform:scale(1.18);box-shadow:0 0 0 8px rgba(165,55,44,.16)}}
+
+/* Photos inside Memory Detail also behave like Album photos. */
+#memPhotoGallery img{cursor:pointer!important}
+#memPhotoGallery .photo-frame{position:relative}
+#memPhotoGallery .photo-frame::after{content:'✎ 사진 설명';position:absolute;right:7px;bottom:7px;background:rgba(255,253,248,.92);border:1px solid var(--line);border-radius:999px;padding:3px 6px;font-family:var(--hand);font-size:8px;color:var(--ink);pointer-events:none}
+
+@media(max-width:760px){
+ .v6-day-edit-icon{width:27px;height:27px;font-size:11px}.cal-cell.has-photo .v6-day-edit-icon{right:33px}.v6-calendar-photo-hit{inset:28px 2px 2px}.v6-calendar-photo-hit b{font-size:6.5px;padding:2px 4px}
+ .v6-rep-editor-head{grid-template-columns:1fr}.v6-chat-pick-list{max-height:32vh}.v6-rep-msg{max-width:90%}.v6-rep-msg p{font-size:12px}
+ .v6-home-hero-manage{right:9px;top:9px;min-height:40px}.v6-home-hero-manage span{display:none}
+ .v6-photo-extra-actions{display:grid;grid-template-columns:1fr}.v6-photo-extra-actions .btn{width:100%}
+}
+@media(max-width:430px){.v6-calendar-photo-hit b{display:none}.v6-day-edit-icon{top:2px}.cal-cell.has-photo .v6-day-edit-icon{right:29px}.v6-representative-kakao{padding:12px}.v6-rep-head>div b{font-size:18px}}
