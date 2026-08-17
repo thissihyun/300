@@ -3,6 +3,7 @@
 'use strict';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 let photos=[],homeTimer=null;
+const photoFor=date=>photos.find(p=>p.date===date&&p.hero)||photos.find(p=>p.date===date)||null;
 
 /* Keep first-screen selections authoritative even when the base Home view refreshes. */
 function selectedHome(){return photos.filter(p=>p.homeHero).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).slice(0,8)}
@@ -19,7 +20,26 @@ function forceHomePhotos(){
   wrap.appendChild(layer);
   if(list.length>1){let i=0;homeTimer=setInterval(()=>{if(!layer.isConnected){clearInterval(homeTimer);return}const imgs=$$('img',layer),dots=$$('i',layer);i=(i+1)%imgs.length;imgs.forEach((im,j)=>im.classList.toggle('is-active',j===i));dots.forEach((d,j)=>d.classList.toggle('is-active',j===i))},4200)}
 }
-if(window.DB&&DB.onAllPhotos)DB.onAllPhotos(rows=>{photos=rows||[];requestAnimationFrame(forceHomePhotos)});
+if(window.DB&&DB.onAllPhotos)DB.onAllPhotos(rows=>{photos=rows||[];requestAnimationFrame(run)});
+
+/* Give every calendar day a canonical date. Photo-only days used to miss data-date. */
+function ensureOurDaysCells(){
+  const view=$('#view-ourdays');if(!view||!view.classList.contains('is-active'))return;
+  const label=$('#monthLabel',view)?.textContent||'';
+  const names={January:1,February:2,March:3,April:4,May:5,June:6,July:7,August:8,September:9,October:10,November:11,December:12};
+  const m=label.match(/(January|February|March|April|May|June|July|August|September|October|November|December)\s+(20\d{2})/i);if(!m)return;
+  const key=Object.keys(names).find(x=>x.toLowerCase()===m[1].toLowerCase()),month=names[key],year=Number(m[2]);
+  $$('.cal-cell:not(.is-empty)',view).forEach(cell=>{
+    const day=Number($('.cal-num',cell)?.textContent);if(!day)return;
+    const date=`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    cell.dataset.date=date;cell.dataset.v6Date=date;cell.dataset.action='memory';
+    if(!$('.v6-day-edit-icon',cell)){const e=document.createElement('span');e.className='v6-day-edit-icon';e.dataset.v6EditDay=date;e.textContent='✎';e.title='이 날 제목·대표카톡 수정';cell.appendChild(e)}else $('.v6-day-edit-icon',cell).dataset.v6EditDay=date;
+    const p=photoFor(date);
+    if(p){cell.classList.add('has-photo');cell.style.backgroundImage=`url("${String(p.url||'').replace(/"/g,'&quot;')}")`;cell.style.backgroundPosition=`${p.focusX==null?50:p.focusX}% ${p.focusY==null?50:p.focusY}%`;
+      let hit=$('.v6-calendar-photo-hit',cell);if(!hit){hit=document.createElement('span');hit.className='v6-calendar-photo-hit';hit.innerHTML='<i>▣</i><b>사진 수정</b>';hit.title='사진 설명·달력 위치 수정';cell.appendChild(hit)}hit.dataset.v6EditPhoto=p.id;
+    }
+  });
+}
 
 /* No implementation/version copy is allowed in the shipped UI. */
 function cleanProductCopy(){
@@ -49,7 +69,7 @@ button,.btn,[role="button"],.v6-day-edit-icon,.v6-calendar-photo-hit,.v9-home-ch
 `;
 document.head.appendChild(style);
 
-let queued=false;function run(){queued=false;cleanProductCopy();forceHomePhotos()}
+let queued=false;function run(){queued=false;cleanProductCopy();ensureOurDaysCells();forceHomePhotos()}
 new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(run)}).observe(document.body,{childList:true,subtree:true,characterData:true});
 window.addEventListener('hashchange',()=>setTimeout(run,50));run();
 })();
