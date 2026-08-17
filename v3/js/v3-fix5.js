@@ -26,3 +26,12 @@ function replace(){const b=$('#v3BulkPhotoBtn');if(!b||b.dataset.v5==='1')return
 function prefillExistingTitle(){const input=$('#v3MetaTitle');if(!input||input.dataset.v5Ready)return;input.dataset.v5Ready='1';const img=$('.v3-meta-preview img');if(!img)return;const p=knownPhotos.find(x=>String(x.url||'')===String(img.src||''));if(p&&p.title&&!input.value)input.value=p.title}
 let q=false;const mo=new MutationObserver(()=>{if(q)return;q=true;requestAnimationFrame(()=>{q=false;replace();prefillExistingTitle()})});mo.observe(document.body,{childList:true,subtree:true});replace();prefillExistingTitle();
 })();
+
+/* Load V6 after the existing V3 stack without disturbing V2. */
+(function(){
+  if(document.getElementById('v6DynamicCss'))return;
+  const link=document.createElement('link');link.id='v6DynamicCss';link.rel='stylesheet';link.href='css/v3-fix6.css?v=12';document.head.appendChild(link);
+  const files=['data/latest-chat-0812.js','data/latest-chat-0813.js','data/latest-chat-0814.js','data/latest-chat-0815.js','data/latest-chat-0816.js','data/latest-chat-0817.js','data/latest-chat-corrections.js','js/v3-fix6.js'];
+  const load=src=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src+'?v=12';s.onload=resolve;s.onerror=reject;document.body.appendChild(s)});
+  (async()=>{for(const f of files){try{await load(f)}catch(e){console.warn('[V6 loader]',f,e)}}})();
+})();
