@@ -53,13 +53,14 @@
       <div class="section-head" style="margin-top:14px;"><div class="section-title">${escapeHtml(title)}</div>${sub?`<div class="section-note">${escapeHtml(sub)}</div>`:''}</div>`;
   }
 
-  /* ---- OUR FIRSTS ---- */
+  /* ---- OUR FIRSTS (stamp-in as each card scrolls into view) ---- */
   Router.registerSpecial('firsts', {render(host){
     host.innerHTML = subHeader('OUR FIRSTS') + `<div class="grid grid-3">${window.FIRSTS.map(([date,label])=>`
-      <button class="card card-btn hub-card" data-action="memory" data-date="${date}">
+      <button class="card card-btn hub-card v2-stamp" data-action="memory" data-date="${date}">
         <div class="empty-frame" style="height:90px; display:flex; align-items:center; justify-content:center; margin-bottom:8px;">▣</div>
         <div class="t">${escapeHtml(label)}</div><div class="s">${date}</div>
       </button>`).join('')}</div>`;
+    if(window.V2Anim) V2Anim.observeReveal(host.querySelectorAll('.v2-stamp'));
   }});
 
   /* ---- CONSTELLATION ---- */
@@ -87,18 +88,36 @@
       </div>`;
   }});
 
-  /* ---- THE DATES I'D LIVE AGAIN (favorited days as posters) ---- */
+  /* ---- THE DATES I'D LIVE AGAIN (favorited days as flip-poster cards) ---- */
   Router.registerSpecial('liveagain', {render(host){
-    host.innerHTML = subHeader("THE DATES I'D LIVE AGAIN", '다시 살고 싶은 날들을 영화 포스터처럼.') +
+    const canHover = window.matchMedia && window.matchMedia('(hover:hover)').matches;
+    host.innerHTML = subHeader("THE DATES I'D LIVE AGAIN", '다시 살고 싶은 날들을 영화 포스터처럼. 탭하면 뒤집혀요.') +
       `<div class="grid grid-3">${window.POSTERS.map(p=>`
-        <button class="card card-btn" style="background:#1c1712; color:#f6f1e6; text-align:center;" data-action="memory" data-date="${p.date}">
-          <div class="empty-frame" style="height:140px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; border-color:#5a4c33;">▣</div>
-          <div style="font-size:11px; color:#c8a24a; letter-spacing:.08em;">${escapeHtml(p.genre)}</div>
-          <div style="font-family:var(--serif); font-size:17px; margin:4px 0;">${escapeHtml(p.title)}</div>
-          <div style="font-family:var(--hand); font-size:12px; opacity:.85;">${escapeHtml(p.tagline)}</div>
-          <div style="margin-top:6px; color:#e0917a;">${p.stars}</div>
-          <div style="font-size:11px; color:#a99; margin-top:4px;">${p.date}</div>
-        </button>`).join('')}</div>`;
+        <div class="poster-flip" style="aspect-ratio:2/3;" data-poster-date="${p.date}">
+          <div class="poster-flip-inner">
+            <div class="poster-flip-front card" style="background:#1c1712; color:#f6f1e6; text-align:center; padding:16px;">
+              <div class="empty-frame" style="height:140px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; border-color:#5a4c33;">▣</div>
+              <div style="font-size:11px; color:#c8a24a; letter-spacing:.08em;">${escapeHtml(p.genre)}</div>
+              <div style="font-family:var(--serif); font-size:17px; margin:4px 0;">${escapeHtml(p.title)}</div>
+              <div style="font-family:var(--hand); font-size:12px; opacity:.85;">${escapeHtml(p.tagline)}</div>
+              <div style="margin-top:6px; color:#e0917a;">${p.stars}</div>
+              <div style="font-size:11px; color:#a99; margin-top:4px;">${p.date}</div>
+            </div>
+            <div class="poster-flip-back card" style="background:#2a231c; color:#f6f1e6; text-align:center; padding:16px;">
+              <div style="font-family:var(--serif); font-size:16px;">${escapeHtml(p.title)}</div>
+              <div class="section-note" style="color:#c9bfae;">${p.date}</div>
+              <button class="btn btn-sm btn-gold" data-poster-play="${p.date}" style="margin-top:10px;">PLAY ▶</button>
+            </div>
+          </div>
+        </div>`).join('')}</div>`;
+
+    host.querySelectorAll('.poster-flip').forEach(card=>{
+      const date = card.dataset.posterDate;
+      card.addEventListener('click', (e)=>{
+        if(e.target.closest('[data-poster-play]') || canHover){ Router.openMemory(date); return; }
+        card.classList.toggle('is-flipped');
+      });
+    });
   }});
 
   /* ---- OUR NEW YORK / PLACES ---- */
@@ -128,7 +147,8 @@
         const popupHtml = `<div style="text-align:center; font-family:var(--serif);">
           <div style="font-weight:700; margin-bottom:4px;">${escapeHtml(p.name)}</div>
           <div style="font-size:11px; color:var(--ink-soft); margin-bottom:6px;">${p.dates.join(' · ')}</div>
-          <button class="popup-open-btn" style="border:1px solid var(--line); background:var(--paper); border-radius:999px; padding:4px 10px; font-size:11px;">열기</button>
+          <div class="map-visited-stamp">VISITED</div><br>
+          <button class="popup-open-btn" style="border:1px solid var(--line); background:var(--paper); border-radius:999px; padding:4px 10px; font-size:11px; margin-top:6px;">열기</button>
         </div>`;
         marker.bindPopup(popupHtml);
         // Leaflet stops click propagation inside popups, so the document-level
@@ -138,6 +158,19 @@
           if(btn) btn.addEventListener('click', ()=> Router.openMemory(latest));
         });
       });
+      // animated thread connecting every place in visiting order (earliest date first)
+      try{
+        const ordered = window.PLACES.slice().sort((a,b)=> (a.dates[0]||'') < (b.dates[0]||'') ? -1 : 1);
+        const line = L.polyline(ordered.map(p=>[p.lat,p.lng]), {color:'#a5372c', weight:2, opacity:.55, dashArray:'1,1'}).addTo(map);
+        const pathEl = line.getElement && line.getElement();
+        if(pathEl && pathEl.getTotalLength){
+          const len = pathEl.getTotalLength();
+          pathEl.style.strokeDasharray = len;
+          pathEl.style.strokeDashoffset = len;
+          pathEl.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(.22,.9,.25,1)';
+          requestAnimationFrame(()=> requestAnimationFrame(()=>{ pathEl.style.strokeDashoffset = 0; }));
+        }
+      }catch(e){ console.warn('[places] thread line skipped', e); }
     } else if(mapWrap){
       mapWrap.style.display = 'none';
       fallback.style.display = '';
@@ -145,6 +178,7 @@
         const latest = p.dates[p.dates.length-1];
         return `<button class="card card-btn hub-card" data-action="memory" data-date="${latest}">
           <div class="t">${escapeHtml(p.name)}</div><div class="s">${p.dates.join(' · ')}</div>
+          <div class="map-visited-stamp">VISITED</div>
         </button>`;
       }).join('');
     }
@@ -224,19 +258,21 @@
     const stats = liveKakaoStats || window.BASELINE_STATS;
     const total = liveKakaoStats ? liveKakaoStats.total : window.BASELINE_STATS.total;
     const words = liveKakaoStats ? liveKakaoStats.words : window.BASELINE_STATS.words;
+    const tiles = [
+      [dayNumber(todayISO()), 'days together'],
+      [days, 'recorded days'],
+      [firsts, 'firsts'],
+      [total, 'kakao messages'],
+      [words['사랑해']||0, '“사랑해”'],
+      [words['보고싶어']||0, '“보고싶어”'],
+    ];
     host.innerHTML = subHeader('US, BY THE NUMBERS') + `<div class="report-grid">
-      ${[
-        [dayNumber(todayISO()), 'days together'],
-        [days, 'recorded days'],
-        [firsts, 'firsts'],
-        [total.toLocaleString(), 'kakao messages'],
-        [words['사랑해']||0, '“사랑해”'],
-        [words['보고싶어']||0, '“보고싶어”'],
-      ].map(([v,l])=>`<div class="report-tile"><div class="val">${v}</div><div class="lbl">${escapeHtml(l)}</div></div>`).join('')}
+      ${tiles.map(([v,l],i)=>`<div class="report-tile"><div class="val" data-countto="${v}">0</div><div class="lbl">${escapeHtml(l)}</div></div>`).join('')}
     </div><div class="section-note" style="margin-top:10px;">
       카카오톡 통계는 ${escapeHtml(stats.asOf)} ${liveKakaoStats?'업로드':'기준 값'}이에요.
       ${liveKakaoStats ? '' : '<button class="btn btn-sm btn-outline" style="margin-left:8px;" data-action="special" data-target="kakao">최신 카톡으로 갱신 →</button>'}
     </div>`;
+    if(window.V2Anim) host.querySelectorAll('.report-tile .val[data-countto]').forEach(el=> V2Anim.countUp(el, +el.dataset.countto, {duration:1000}));
   }});
 
   /* ---- RELATIONSHIP PULSE (Section 54) ---- */
@@ -311,8 +347,8 @@
       const grid = host.querySelector('#pbGrid');
       if(!grid) return;
       const strips = photos.filter(p=>p.type==='네컷').sort((a,b)=>a.date<b.date?1:-1);
-      grid.innerHTML = strips.length ? strips.map(p=>`<div class="photo-frame"><img src="${p.url}" data-action="photo" data-url="${p.url}"></div>`).join('')
-        : '<div class="empty-frame" style="grid-column:1/-1;">아직 네컷이 없어요. 사진을 추가하고 종류를 “네컷”으로 태그해보세요.</div>';
+      grid.innerHTML = strips.length ? strips.map((p,i)=>`<div class=”photo-frame v2-print-in” style=”animation-delay:${Math.min(i*60,420)}ms;”><img src=”${p.url}” data-action=”photo” data-url=”${p.url}”></div>`).join('')
+        : '<div class=”empty-frame” style=”grid-column:1/-1;”>아직 네컷이 없어요. 사진을 추가하고 종류를 “네컷”으로 태그해보세요.</div>';
     });
   }});
 

@@ -77,6 +77,7 @@
           <div class="section-title" style="font-size:16px;">OUR THANK-YOU JAR</div>
           <div id="jarDays" style="font-family:var(--serif); font-size:22px; margin-top:6px;">0 days</div>
           <div class="section-note" id="jarStreak">0 day streak</div>
+          <div id="jarStars" style="margin-top:8px; line-height:1.6;"></div>
         </div>
       </div>
       </div>
@@ -229,6 +230,12 @@
         else break;
       }
       container.querySelector('#jarStreak').textContent = `${streak} day streak`;
+      const starsEl = container.querySelector('#jarStars');
+      if(starsEl){
+        const count = Math.min(30, mutualDates.length);
+        starsEl.innerHTML = Array.from({length:count}, (_,i)=>
+          `<span class="jar-star" style="animation-delay:${Math.min(i*30,300)}ms;">${i%5===0?'✦':i%3===0?'♡':'★'}</span>`).join('');
+      }
     }));
   }
 

@@ -11,8 +11,9 @@
 
     container.innerHTML = `
       <div class="section-head"><div class="section-title">OUR STORY, AS A MOVIE</div></div>
+      <div class="timeline-thread"><div class="thread-line" id="storyThreadLine"></div>
       ${window.CHAPTER_ORDER.filter(c=>byChapter[c]).map(chapter=>`
-        <div class="section">
+        <div class="section timeline-node">
           <div class="eyebrow">${escapeHtml(chapter)}</div>
           <div class="card" style="margin-top:10px;">
             ${byChapter[chapter].map(([date,ev])=>`
@@ -26,7 +27,24 @@
           </div>
         </div>
       `).join('')}
+      </div>
     `;
+
+    // thread grows to the deepest chapter node scrolled into view
+    const thread = container.querySelector('.timeline-thread');
+    const line = container.querySelector('#storyThreadLine');
+    const nodes = [...container.querySelectorAll('.timeline-node')];
+    if(line && nodes.length && 'IntersectionObserver' in window){
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(entry=>{
+          if(entry.isIntersecting){
+            const bottom = entry.target.offsetTop + entry.target.offsetHeight - thread.offsetTop;
+            line.style.height = Math.max(parseFloat(line.style.height)||0, bottom)+'px';
+          }
+        });
+      }, {threshold:0.15});
+      nodes.forEach(n=>io.observe(n));
+    }
   }
   Router.registerView('ourstory', {render});
 })();
