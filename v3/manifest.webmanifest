@@ -1,0 +1,12 @@
+{
+  "name": "300 Days With You V3",
+  "short_name": "300 Days V3",
+  "description": "Sihyun & Gangwon — V2 engine with the full V1 memory archive experience",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f1e4",
+  "theme_color": "#a5372c",
+  "orientation": "portrait-primary",
+  "icons": [{"src":"../assets/app-icon-v26.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
