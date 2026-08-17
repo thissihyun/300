@@ -36,7 +36,16 @@ const CORE=[
  ['numbers','№','Us, By the Numbers','우리 기록에서 발견한 숫자들',''],
  ['awards','🏆','Our Mini Awards','둘만의 작은 시상식','']
 ];
-function special(){const p=$('#view-specials>.panel'),g=$('.v26-special-grid',p);if(!g)return;$('.v32-featured',p)?.remove();const existing=[...g.children];const byTitle=new Map(existing.map(n=>[((n.querySelector('h3')?.textContent||'').trim().toLowerCase()),n]));const used=new Set();const nodes=CORE.map(([view,ico,title,desc,extra])=>{let n=byTitle.get(title.toLowerCase());if(!n){n=document.createElement('button');n.className='v26-special-card v33-core '+extra;n.dataset.v33=view;n.innerHTML=`<div class="n">OPEN</div><div class="ico">${ico}</div><h3>${esc(title)}</h3><p>${esc(desc)}</p>`;n.onclick=()=>{try{switchView(view)}catch(e){}}}else{n.classList.add('v33-core');if(extra)n.classList.add(extra);used.add(n)}return n});g.replaceChildren(...nodes);existing.filter(n=>!used.has(n)&&!n.dataset.v33).forEach(n=>n.remove());const shelf=$('.v27-shelf',p);if(shelf){$$('.v27-shelf-btn',shelf).forEach(b=>{if(['timeline','photoalbum','firsts','posters'].includes(b.dataset.v))b.remove()})}}
+function special(){const p=$('#view-specials>.panel'),g=$('.v26-special-grid',p);if(!g)return;$('.v32-featured',p)?.remove();const existing=[...g.children];const byTitle=new Map(existing.map(n=>[((n.querySelector('h3')?.textContent||'').trim().toLowerCase()),n]));const used=new Set();const nodes=CORE.map(([view,ico,title,desc,extra])=>{let n=byTitle.get(title.toLowerCase());if(!n){n=document.createElement('button');n.className='v26-special-card v33-core '+extra;n.dataset.v33=view;n.innerHTML=`<div class="n">OPEN</div><div class="ico">${ico}</div><h3>${esc(title)}</h3><p>${esc(desc)}</p>`;n.onclick=()=>{try{switchView(view)}catch(e){}}}else{n.classList.add('v33-core');if(extra)n.classList.add(extra);used.add(n)}return n});
+  /* Recomputing the same 10 nodes in the same order still counts as a DOM
+     mutation once passed through replaceChildren, which re-triggers this
+     file's own document-wide MutationObserver — an infinite self-loop that
+     kept tearing the whole card grid out from under the user's cursor every
+     ~100ms as long as SPECIAL stayed open. Only touch the DOM when the
+     result actually differs from what's already there. */
+  const same = nodes.length===existing.length && nodes.every((n,i)=>n===existing[i]);
+  if(!same){g.replaceChildren(...nodes);existing.filter(n=>!used.has(n)&&!n.dataset.v33).forEach(n=>n.remove())}
+  const shelf=$('.v27-shelf',p);if(shelf){$$('.v27-shelf-btn',shelf).forEach(b=>{if(['timeline','photoalbum','firsts','posters'].includes(b.dataset.v))b.remove()})}}
 function promises(){const sh=$('#v26FutureShell'),p=$('.v32-promises',sh),stage=$('#v26FutureStage',sh),active=$('.v26-future-nav button.active',sh);if(!p||!stage)return;const isBucket=active?.dataset.t==='bucket';p.classList.toggle('v33-hidden',!isBucket);if(isBucket&&p.parentElement!==stage)stage.appendChild(p)}
 function records(){const b=$('#v10ArchiveBtn');if(!b)return;b.title='기록 · 감사 · 질문 · 저장 카톡';if(!$('.v32-rec',b))b.innerHTML='<span>▥</span><span class="v32-rec"><b>OUR RECORDS</b></span>';else $('.v32-rec small',b)?.remove()}
 function run(){calendar();questionTitles();directWriteLabels();records();const v=$('.view.active')?.id?.replace('view-','');if(v==='specials')special();if(v==='future')promises()}
