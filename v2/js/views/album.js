@@ -196,6 +196,66 @@
     const sorted = [...allPhotos].sort((a,b)=>a.date<b.date?-1:1);
     host.innerHTML = `<div class="contact-sheet">${sorted.map(p=>`<div class="contact-tile"><img src="${p.url}" data-action="photo" data-url="${p.url}"></div>`).join('')}</div>`;
   }
+  function renderMonthly(host){
+    if(!allPhotos.length){ host.innerHTML = '<div class="empty-frame">아직 앨범에 사진이 없어요.</div>'; return; }
+    const byMonth = {};
+    allPhotos.forEach(p=>{ const m = (p.date||'').slice(0,7); (byMonth[m]=byMonth[m]||[]).push(p); });
+    const months = Object.keys(byMonth).sort((a,b)=>a<b?1:-1);
+    const MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    host.innerHTML = months.map(m=>{
+      const [y,mo] = m.split('-');
+      return `<div class="section">
+        <div class="section-head"><div class="eyebrow">${MN[+mo-1]} ${y}</div><div class="section-note">${byMonth[m].length} photos</div></div>
+        <div class="grid grid-4">${byMonth[m].map(tile).join('')}</div>
+      </div>`;
+    }).join('');
+  }
+  function renderHeroOnly(host){
+    const heroes = allPhotos.filter(p=>p.hero).sort((a,b)=>a.date<b.date?-1:1);
+    if(!heroes.length){ host.innerHTML = '<div class="empty-frame">아직 대표 사진(HERO)으로 지정된 사진이 없어요. 사진의 ✎ 버튼에서 지정할 수 있어요.</div>'; return; }
+    host.innerHTML = `<div class="grid grid-3">${heroes.map(p=>`
+      <button class="card card-btn" style="padding:0; overflow:hidden;" data-action="memory" data-date="${p.date}">
+        <div class="photo-frame" style="border:0; border-radius:0; margin:0;"><img src="${p.url}"></div>
+        <div style="padding:10px;"><div style="font-family:var(--serif);">${escapeHtml((window.EVENTS[p.date]||{}).title||p.date)}</div><div class="section-note">${p.date}</div></div>
+      </button>`).join('')}</div>`;
+  }
+  let filmIndex = 0;
+  function renderFilm(host){
+    if(!allPhotos.length){ host.innerHTML = '<div class="empty-frame">아직 앨범에 사진이 없어요.</div>'; return; }
+    const sorted = [...allPhotos].sort((a,b)=>a.date<b.date?-1:1);
+    if(filmIndex >= sorted.length) filmIndex = 0;
+    const p = sorted[filmIndex];
+    host.innerHTML = `<div class="film-viewer">
+      <div class="photo-frame" style="max-width:420px; margin:0 auto 12px;"><img src="${p.url}"></div>
+      <div style="text-align:center;">
+        <div style="font-family:var(--serif); font-size:16px;">${escapeHtml((window.EVENTS[p.date]||{}).title||p.date)}</div>
+        <div class="section-note">${p.date} · ${filmIndex+1} / ${sorted.length}</div>
+        <div style="display:flex; gap:8px; justify-content:center; margin-top:12px;">
+          <button class="btn btn-sm btn-outline" id="filmPrev">◀ PREV</button>
+          <button class="btn btn-sm btn-outline" data-action="memory" data-date="${p.date}">열기</button>
+          <button class="btn btn-sm btn-outline" id="filmNext">NEXT ▶</button>
+        </div>
+      </div>
+    </div>`;
+    host.querySelector('#filmPrev').addEventListener('click', ()=>{ filmIndex = (filmIndex-1+sorted.length)%sorted.length; renderFilm(host); });
+    host.querySelector('#filmNext').addEventListener('click', ()=>{ filmIndex = (filmIndex+1)%sorted.length; renderFilm(host); });
+  }
+  function renderRandom(host){
+    if(!allPhotos.length){ host.innerHTML = '<div class="empty-frame">아직 앨범에 사진이 없어요.</div>'; return; }
+    const p = allPhotos[Math.floor(Math.random()*allPhotos.length)];
+    host.innerHTML = `<div class="film-viewer">
+      <div class="photo-frame v2-photo-in" style="max-width:420px; margin:0 auto 12px;"><img src="${p.url}"></div>
+      <div style="text-align:center;">
+        <div style="font-family:var(--serif); font-size:16px;">${escapeHtml((window.EVENTS[p.date]||{}).title||p.date)}</div>
+        <div class="section-note">${p.date}</div>
+        <div style="display:flex; gap:8px; justify-content:center; margin-top:12px;">
+          <button class="btn btn-sm" id="randomAgain">🎲 다른 사진</button>
+          <button class="btn btn-sm btn-outline" data-action="memory" data-date="${p.date}">열기</button>
+        </div>
+      </div>
+    </div>`;
+    host.querySelector('#randomAgain').addEventListener('click', ()=> renderRandom(host));
+  }
 
   function draw(host, searchTerm, typeFilter){
     let list = allPhotos;
@@ -209,8 +269,12 @@
     if(typeFilter) list = list.filter(p=>p.type===typeFilter);
     const prevAll = allPhotos; allPhotos = list;
     if(mode==='day') renderByDay(host);
+    else if(mode==='monthly') renderMonthly(host);
     else if(mode==='places') renderPlaces(host);
+    else if(mode==='hero') renderHeroOnly(host);
     else if(mode==='bookpicks') renderBookPicks(host);
+    else if(mode==='film') renderFilm(host);
+    else if(mode==='random') renderRandom(host);
     else renderContact(host);
     allPhotos = prevAll;
     host.querySelectorAll('[data-tag-id]').forEach(btn=>{
@@ -232,8 +296,12 @@
       <input class="field" id="albumSearch" placeholder="날짜 · 장소 · 음식 · 느낌 · 캡션 검색" style="margin-bottom:12px;">
       <div class="album-toolbar" id="modeToolbar">
         <button data-mode="day" class="is-active">BY DAY</button>
+        <button data-mode="monthly">MONTHLY</button>
         <button data-mode="places">PLACES</button>
+        <button data-mode="hero">★ HERO</button>
         <button data-mode="bookpicks">BOOK PICKS</button>
+        <button data-mode="film">FILM</button>
+        <button data-mode="random">🎲 RANDOM</button>
         <button data-mode="contact">CONTACT SHEET</button>
       </div>
       <div id="albumHost"></div>

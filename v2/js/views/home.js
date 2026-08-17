@@ -21,10 +21,32 @@
     }, 4200);
   }
 
+  const STORY_HUB = [
+    ['firsts','01','Our Firsts','처음들의 타임라인.'],
+    ['constellation','02','Our Constellation','중요한 날들을 별로 이은 우리 밤하늘.'],
+    ['places','03','Our New York','장소로 다시 보는 우리.'],
+    ['words','04','Words That Became Ours','둘만의 단어.'],
+    ['seasons','05','The Seasons We Shared','가을 뉴욕에서 여름의 300일까지.'],
+    ['food','06','밥 먹자','함께 먹은 음식들.'],
+    ['numbers','07','Us, By the Numbers','관계를 숫자로.'],
+    ['photobooth','08','Photobooth Archive','네컷 모음.'],
+    ['awards','09','Our Mini Awards','둘만의 시상식.'],
+    ['favorites','10','Our Favorites ♥','즐겨찾기한 기억들.'],
+    ['liked','11','Days We Both Loved','각자, 그리고 함께 좋아한 날.'],
+  ];
+
+  function onThisDay(today){
+    const [, mm, dd] = today.split('-');
+    return Object.entries(window.EVENTS)
+      .filter(([date])=> date !== today && date.slice(5)===`${mm}-${dd}`)
+      .sort((a,b)=>a[0]<b[0]?-1:1);
+  }
+
   function render(container){
     clearSub();
     clearInterval(carouselTimer);
     const today = todayISO();
+    const pastOnThisDay = onThisDay(today);
     container.innerHTML = `
       <section class="hero">
         <div>
@@ -36,6 +58,7 @@
             <button class="btn" data-action="view" data-target="ourdays">OPEN OUR DAYS</button>
             <button class="btn btn-outline" data-action="memory" data-date="2025-10-01">START FROM THE BEGINNING → 2025-10-01</button>
             <button class="btn btn-outline" data-action="memory" data-date="2025-10-23">GO TO DAY 1 → 2025-10-23</button>
+            <button class="btn btn-outline" id="randomMemoryBtn">🎲 RANDOM MEMORY</button>
           </div>
         </div>
         <div class="hero-photo v2-reveal" id="heroPhotoWrap"><div class="empty-frame" style="height:100%;display:flex;align-items:center;justify-content:center;">▣<br>EMPTY FRAME</div></div>
@@ -48,18 +71,21 @@
             <div class="section-title">${fmtDate(today)} · DAY ${dayNumber(today)}</div>
           </div>
         </div>
-        <table class="dash-table">
-          <thead><tr><th></th><th>시현</th><th>강원</th></tr></thead>
-          <tbody id="dashRows">
-            <tr><td>OUR DAY</td><td id="d-sihyun-record">·</td><td id="d-gangwon-record">·</td></tr>
-            <tr><td>THANK YOU</td><td id="d-sihyun-gratitude">·</td><td id="d-gangwon-gratitude">·</td></tr>
-            <tr><td>QUESTION</td><td id="d-sihyun-answer">·</td><td id="d-gangwon-answer">·</td></tr>
-          </tbody>
-        </table>
+        <div id="gratReminder"></div>
+        <div class="checkin-row" id="checkinPills"></div>
         <div class="progress-bar"><div class="progress-fill" id="dashProgressFill" style="width:0%"></div></div>
         <div class="section-note" id="dashProgressText">오늘 우리 0 / 6 완료</div>
         <div style="margin-top:12px;"><button class="btn btn-sm" data-action="view" data-target="diary">Continue today →</button></div>
       </section>
+
+      ${pastOnThisDay.length ? `
+      <section class="section v2-reveal">
+        <div class="section-head"><div class="section-title">ON THIS DAY</div><div class="section-note">${today.slice(5).replace('-','.')}, 다른 해에는.</div></div>
+        <div class="grid grid-3">${pastOnThisDay.map(([d,ev])=>`
+          <button class="card card-btn hub-card" data-action="memory" data-date="${d}">
+            <div class="n">${d.slice(0,4)}</div><div class="t">${escapeHtml(ev.title)}</div><div class="s">${d}</div>
+          </button>`).join('')}</div>
+      </section>` : ''}
 
       <section class="section v2-reveal">
         <div class="section-head">
@@ -67,6 +93,14 @@
           <button class="btn btn-sm btn-outline" data-action="view" data-target="ourstory">See the full story →</button>
         </div>
         <div class="filmstrip" id="movieStrip"></div>
+      </section>
+
+      <section class="section v2-reveal">
+        <div class="section-head"><div class="section-title">ENTER OUR STORY</div><div class="section-note">한눈에 보는 우리 아카이브.</div></div>
+        <div class="grid grid-3">${STORY_HUB.map(([key,n,t,s])=>`
+          <button class="card card-btn hub-card" data-action="special" data-target="${key}">
+            <div class="n">${n}</div><div class="t">${escapeHtml(t)}</div><div class="s">${escapeHtml(s)}</div>
+          </button>`).join('')}</div>
       </section>
 
       <section class="section v2-reveal">
@@ -79,6 +113,12 @@
         <div id="recentActivity"><div class="empty-frame">아직 새 활동이 없어요.</div></div>
       </section>
     `;
+
+    container.querySelector('#randomMemoryBtn').addEventListener('click', ()=>{
+      const dates = Object.keys(window.EVENTS);
+      if(!dates.length) return;
+      Router.openMemory(dates[Math.floor(Math.random()*dates.length)]);
+    });
 
     const quoteEl = container.querySelector('#homeQuote');
     if(quoteEl && window.HOME_QUOTES && window.HOME_QUOTES.length){
@@ -130,26 +170,40 @@
     }));
 
     // live: today dashboard
+    const KIND_LABEL = {record:'OUR DAY', gratitude:'THANK YOU', answer:'QUESTION'};
     let rec=[], grat=[], ans=[];
     function refreshDash(){
       const cells = {
         record: rec.map(r=>r.user), gratitude: grat.map(g=>g.from), answer: ans.map(a=>a.user)
       };
       let done=0;
-      ['sihyun','gangwon'].forEach(uid=>{
+      const pillsHost = container.querySelector('#checkinPills');
+      const pillsHtml = ['sihyun','gangwon'].map(uid=>{
         const name = Identity.displayName(uid);
-        ['record','gratitude','answer'].forEach(kind=>{
+        const stats = ['record','gratitude','answer'].map(kind=>{
           const ok = cells[kind].includes(name);
-          const el = document.getElementById(`d-${uid}-${kind}`);
-          if(el) el.textContent = ok ? '✓' : '·';
           if(ok) done++;
-        });
-      });
+          return `<span class="checkin-stat ${ok?'is-done':''}"><span class="checkin-dot"></span>${KIND_LABEL[kind]}</span>`;
+        }).join('');
+        return `<div class="checkin-pill"><div class="checkin-name">${escapeHtml(name)}</div><div class="checkin-stats">${stats}</div></div>`;
+      }).join('');
+      if(pillsHost) pillsHost.innerHTML = pillsHtml;
+
       const pct = Math.round(done/6*100);
       const fill = document.getElementById('dashProgressFill');
       const txt = document.getElementById('dashProgressText');
       if(fill) fill.style.width = pct+'%';
       if(txt) txt.textContent = `오늘 우리 ${done} / 6 완료`;
+
+      const gratHost = container.querySelector('#gratReminder');
+      if(gratHost){
+        const myUid = Identity.current();
+        const myName = myUid ? Identity.displayName(myUid) : '';
+        const iWroteGratitude = myName && cells.gratitude.includes(myName);
+        gratHost.innerHTML = (myUid && !iWroteGratitude)
+          ? `<div class="grat-reminder"><span>오늘 ${escapeHtml(myName)}의 고마운 순간을 아직 안 남겼어요.</span><button class="btn btn-sm" data-action="view" data-target="diary">지금 남기기 →</button></div>`
+          : '';
+      }
     }
     unsub.push(DB.onDailyRecordsForDate(today, rows=>{ rec=rows; refreshDash(); }));
     unsub.push(DB.onGratitudeForDate(today, rows=>{ grat=rows; refreshDash(); }));

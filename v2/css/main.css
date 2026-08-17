@@ -188,6 +188,17 @@ main{ max-width:1080px; margin:0 auto; padding:20px 18px 60px; }
 .progress-bar{ height:8px; background:var(--line); border-radius:999px; overflow:hidden; margin:8px 0; }
 .progress-fill{ height:100%; background:var(--gold); transition:width .4s ease; }
 
+.checkin-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0; }
+.checkin-pill{ border:1px solid var(--line); border-radius:12px; padding:12px 14px; background:var(--paper-alt, #fff); }
+.checkin-name{ font-family:var(--serif); font-size:14px; font-weight:700; margin-bottom:8px; }
+.checkin-stats{ display:flex; flex-wrap:wrap; gap:6px; }
+.checkin-stat{ display:inline-flex; align-items:center; gap:5px; font-size:11px; letter-spacing:.04em; color:var(--ink-soft); border:1px solid var(--line); border-radius:999px; padding:3px 9px 3px 7px; }
+.checkin-dot{ width:6px; height:6px; border-radius:50%; background:var(--line); display:inline-block; }
+.checkin-stat.is-done{ color:var(--ink); border-color:var(--gold); background:rgba(197,160,89,.1); }
+.checkin-stat.is-done .checkin-dot{ background:var(--gold); }
+.grat-reminder{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; background:rgba(197,160,89,.12); border:1px dashed var(--gold); border-radius:10px; padding:10px 14px; margin-bottom:12px; font-size:13px; }
+@media (max-width:560px){ .checkin-row{ grid-template-columns:1fr; } }
+
 /* ---------- FILM STRIP (Our Story As A Movie) ---------- */
 .filmstrip{ display:flex; gap:14px; overflow-x:auto; padding:6px 2px 16px; scroll-snap-type:x mandatory; }
 /* .card sets width:100%, which inside this horizontal flex row made flex-basis
@@ -320,6 +331,8 @@ body.modal-open{ overflow:hidden; }
 .album-toolbar button.is-active{ background:var(--ink); color:var(--paper); }
 .contact-sheet{ display:grid; grid-template-columns:repeat(6,1fr); gap:4px; }
 @media (max-width:700px){ .contact-sheet{ grid-template-columns:repeat(4,1fr); } }
+.film-viewer{ padding:20px 0; }
+.film-viewer .photo-frame{ aspect-ratio:4/5; }
 .contact-tile{ aspect-ratio:1; overflow:hidden; background:#111; position:relative; }
 .contact-tile img{ width:100%; height:100%; object-fit:cover; }
 
