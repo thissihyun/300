@@ -1,0 +1,21 @@
+/* Final production-only visual fixes */
+
+.v3-home-movie-v1{max-width:720px;margin:0 auto;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fffdf8;box-shadow:var(--shadow)}
+.v3-home-movie-row{width:100%;display:grid;grid-template-columns:48px 1fr 24px;gap:10px;align-items:center;border:0;border-bottom:1px solid var(--line);background:transparent;padding:12px 14px;text-align:left;color:var(--ink)}
+.v3-home-movie-row:last-child{border-bottom:0}.v3-home-movie-row:hover{background:rgba(165,55,44,.045)}
+.v3-home-movie-row .num{font-family:var(--serif);font-style:italic;font-size:22px;color:rgba(165,55,44,.42)}
+.v3-home-movie-row b{display:block;font-family:var(--serif);font-size:14px}.v3-home-movie-row small{display:block;font-size:10px;color:var(--ink-soft);margin-top:2px}.v3-home-movie-row .arrow{text-align:right;color:var(--red)}
+
+/* ensure no old technical stamp can reappear */
+.v3-home-stamp{display:none!important}.brand-tag::after{content:none!important}
+
+/* Photo sharing note should read like product copy, not developer copy */
+.v3-photo-sync-note b{font-family:var(--hand);color:var(--olive)}
+
+/* keep date widgets clearly separated from the navigation */
+.masthead+.v3-top-metrics{position:relative;z-index:20}
+
+/* food cards can contain their own delete control safely */
+.v3-food-card[data-action="memory"]{cursor:pointer}.v3-food-card[data-action="memory"]:hover{border-color:rgba(165,55,44,.48);transform:translateY(-1px)}
+
+@media(max-width:600px){.v3-home-movie-row{grid-template-columns:38px 1fr 18px;padding:10px}.v3-home-movie-row .num{font-size:18px}}
