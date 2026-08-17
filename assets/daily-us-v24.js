@@ -325,7 +325,7 @@
     const tabs=document.querySelector('#v10ArchiveDrawer .v10-drawer-tabs'); if(!tabs)return;
     tabs.innerHTML=`<button data-tab="today" class="active">${ICONS.today}<span>TODAY</span></button><button data-tab="records">${ICONS.days}<span>DAYS</span></button><button data-tab="thanks">${ICONS.heart}<span>THANKS</span></button><button data-tab="questions">${ICONS.question}<span>QUESTIONS</span></button><button data-tab="archive">${ICONS.archive}<span>ARCHIVE</span></button>`;
     tabs.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>renderDiaryTab(b.dataset.tab)));
-    const openBtn=document.getElementById('v10ArchiveBtn'); if(openBtn){openBtn.textContent='OUR DIARY'; openBtn.onclick=(e)=>{e.preventDefault();e.stopPropagation();openDiary('today');};}
+    const openBtn=document.getElementById('v10ArchiveBtn'); if(openBtn){openBtn.onclick=(e)=>{e.preventDefault();e.stopPropagation();openDiary('today');};}
   }
 
   async function reminderTick(){
