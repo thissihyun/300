@@ -85,9 +85,22 @@
   </nav>
 
   <button class="music-fab" id="musicToggle" aria-label="music">♪</button>
+  <button class="archive-fab" id="archiveBtn" data-action="toggle-archive">
+    <span class="archive-fab-ic">▥</span><span class="archive-fab-lbl">OUR<br>ARCHIVE</span>
+  </button>
   <div class="toast-host" id="toastHost"></div>
   <audio id="bgm" src="../assets/audio/bgm.mp3" loop preload="none"></audio>
 </div>
+
+<!-- ================= GLOBAL ARCHIVE DRAWER ================= -->
+<div class="archive-drawer" id="archiveDrawer">
+  <div class="archive-drawer-head">
+    <h3>OUR ARCHIVE</h3>
+    <button class="icon-btn" data-action="toggle-archive">✕</button>
+  </div>
+  <div class="archive-drawer-body" id="archiveDrawerBody"></div>
+</div>
+<div class="archive-drawer-scrim" id="archiveDrawerScrim" data-action="toggle-archive"></div>
 
 <!-- ================= MEMORY DETAIL MODAL (Section 23) ================= -->
 <div class="modal-backdrop" id="memoryModal">

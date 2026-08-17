@@ -393,6 +393,38 @@ body.modal-open{ overflow:hidden; }
 .notif-author{ font-weight:700; margin-right:4px; }
 .notif-empty{ padding:24px; text-align:center; color:var(--ink-soft); font-size:13px; }
 
+/* ---------- GLOBAL ARCHIVE DRAWER ---------- */
+.archive-fab{
+  position:fixed; right:0; top:50%; transform:translateY(-50%); z-index:150;
+  background:rgba(51,44,38,.95); color:#fff; border:1px solid rgba(255,255,255,.14); border-right:0;
+  border-radius:16px 0 0 16px; padding:12px 10px; box-shadow:var(--shadow); backdrop-filter:blur(12px);
+  display:flex; align-items:center; gap:8px; text-align:left;
+}
+.archive-fab-ic{ font-size:15px; }
+.archive-fab-lbl{ font-size:10px; font-weight:700; letter-spacing:.06em; line-height:1.25; }
+@media (max-width:720px){
+  .archive-fab{ top:auto; bottom:calc(150px + env(safe-area-inset-bottom)); transform:none; padding:10px 7px; }
+  .archive-fab-lbl{ display:none; }
+}
+.archive-drawer-scrim{
+  display:none; position:fixed; inset:0; background:rgba(20,16,8,.5); z-index:210;
+}
+.archive-drawer-scrim.is-open{ display:block; }
+.archive-drawer{
+  position:fixed; top:0; right:0; bottom:0; width:min(420px,92vw); z-index:220;
+  background:linear-gradient(180deg,#fbf7ed 0%,#f5ede0 100%); box-shadow:-18px 0 55px rgba(49,38,28,.22);
+  transform:translateX(100%); transition:transform .32s cubic-bezier(.25,.9,.35,1); overflow-y:auto; padding:20px;
+}
+.archive-drawer.is-open{ transform:translateX(0); }
+.archive-drawer-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.archive-drawer-head h3{ font-family:var(--serif); font-size:19px; }
+.archive-section{ margin-bottom:24px; }
+.archive-section-title{ font-size:11px; letter-spacing:.1em; color:var(--kraft); font-weight:700; margin-bottom:10px; }
+.archive-link-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.archive-link{ padding:12px 14px; text-align:left; }
+.archive-link .t{ font-family:var(--serif); font-size:13.5px; }
+.archive-link .s{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
+
 /* ---------- OUR STATS (streak rings / mood donut / activity bars / heatmap) ---------- */
 .stats-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
 @media (max-width:600px){ .stats-grid{ grid-template-columns:1fr; } }

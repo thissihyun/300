@@ -26,6 +26,9 @@
     {key:'funny', t:'Funny & Inside Jokes'},
     {key:'beforecame', t:'Before / Came True'},
   ];
+  // Exposed so the global Archive Drawer (app.js) can list every special
+  // page without duplicating this catalogue.
+  window.SPECIAL_HUB = HUB.concat(MORE);
 
   // Live Kakao import stats (Section 53/54), once uploaded, override the
   // ported BASELINE_STATS/PULSE_BASELINE everywhere they're shown.

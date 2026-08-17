@@ -120,6 +120,82 @@
     }
   });
 
+  /* ---------- GLOBAL ARCHIVE DRAWER ---------- */
+  const VIEW_LINKS = [
+    ['home','HOME','오늘의 우리부터.'],
+    ['ourdays','OUR DAYS','달력 · 리스트.'],
+    ['diary','OUR DIARY','오늘 기록 · 감사 · 질문.'],
+    ['ourstory','OUR STORY','챕터로 보는 우리 이야기.'],
+    ['album','ALBUM','우리가 남긴 모든 사진.'],
+    ['future','OUR FUTURE','약속 · 버킷리스트.'],
+  ];
+  let archiveUnsub = [];
+  function clearArchiveSub(){ archiveUnsub.forEach(f=>f&&f()); archiveUnsub=[]; }
+  function renderArchiveDrawer(){
+    const body = document.getElementById('archiveDrawerBody');
+    if(!body) return;
+    const today = todayISO();
+    body.innerHTML = `
+      <div class="archive-section">
+        <div class="archive-section-title">오늘, ${fmtDate(today)}</div>
+        <div class="checkin-row" id="archiveCheckin"></div>
+      </div>
+      <div class="archive-section">
+        <div class="archive-section-title">GO TO</div>
+        <div class="archive-link-grid">${VIEW_LINKS.map(([key,t,s])=>`
+          <button class="card card-btn archive-link" data-action="view" data-target="${key}">
+            <div class="t">${escapeHtml(t)}</div><div class="s">${escapeHtml(s)}</div>
+          </button>`).join('')}</div>
+      </div>
+      <div class="archive-section">
+        <div class="archive-section-title">SPECIAL FEATURES</div>
+        <div class="archive-link-grid">${(window.SPECIAL_HUB||[]).map(h=>`
+          <button class="card card-btn archive-link" data-action="special" data-target="${h.key}">
+            <div class="t">${escapeHtml(h.t)}</div>
+          </button>`).join('')}</div>
+      </div>`;
+
+    clearArchiveSub();
+    let rec=[], grat=[], ans=[];
+    function refresh(){
+      const host = document.getElementById('archiveCheckin');
+      if(!host) return;
+      const cells = { record: rec.map(r=>r.user), gratitude: grat.map(g=>g.from), answer: ans.map(a=>a.user) };
+      const KIND_LABEL = {record:'OUR DAY', gratitude:'THANK YOU', answer:'QUESTION'};
+      host.innerHTML = ['sihyun','gangwon'].map(uid=>{
+        const name = Identity.displayName(uid);
+        const stats = ['record','gratitude','answer'].map(kind=>{
+          const ok = cells[kind].includes(name);
+          return `<span class="checkin-stat ${ok?'is-done':''}"><span class="checkin-dot"></span>${KIND_LABEL[kind]}</span>`;
+        }).join('');
+        return `<div class="checkin-pill"><div class="checkin-name">${escapeHtml(name)}</div><div class="checkin-stats">${stats}</div></div>`;
+      }).join('');
+    }
+    archiveUnsub.push(DB.onDailyRecordsForDate(today, rows=>{ rec=rows; refresh(); }));
+    archiveUnsub.push(DB.onGratitudeForDate(today, rows=>{ grat=rows; refresh(); }));
+    archiveUnsub.push(DB.onAnswersForDate(today, rows=>{ ans=rows; refresh(); }));
+
+    body.querySelectorAll('.archive-link').forEach(btn=>{
+      btn.addEventListener('click', closeArchiveDrawer);
+    });
+  }
+  function closeArchiveDrawer(){
+    document.getElementById('archiveDrawer').classList.remove('is-open');
+    document.getElementById('archiveDrawerScrim').classList.remove('is-open');
+    clearArchiveSub();
+  }
+  window.RouterActions['toggle-archive'] = function(){
+    const drawer = document.getElementById('archiveDrawer');
+    const opening = !drawer.classList.contains('is-open');
+    if(opening){
+      drawer.classList.add('is-open');
+      document.getElementById('archiveDrawerScrim').classList.add('is-open');
+      renderArchiveDrawer();
+    } else {
+      closeArchiveDrawer();
+    }
+  };
+
   /* ---------- PWA (Section 70) ---------- */
   if('serviceWorker' in navigator){
     window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{}));
