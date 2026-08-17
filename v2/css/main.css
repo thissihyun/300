@@ -331,6 +331,12 @@ body.modal-open{ overflow:hidden; }
 .bucket-item{ display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--line); }
 .bucket-item:first-child{ border-top:none; }
 .bucket-item.is-done .bucket-text{ text-decoration:line-through; color:var(--ink-soft); }
+.wedidit-stamp{
+  border:1.5px solid var(--olive); color:var(--olive); border-radius:5px; padding:1px 6px; font-size:9px;
+  font-family:var(--hand); letter-spacing:.08em; transform:rotate(-5deg); flex:none;
+  animation:v2StampPop .35s cubic-bezier(.3,1.6,.4,1);
+}
+@keyframes v2StampPop{ 0%{ opacity:0; transform:scale(1.8) rotate(-5deg); } 100%{ opacity:1; transform:scale(1) rotate(-5deg); } }
 .envelope{ background:linear-gradient(180deg,#efe4c8,var(--paper)); border:1px solid var(--line); border-radius:12px; padding:20px; }
 
 /* ---------- SPECIAL HUB ---------- */

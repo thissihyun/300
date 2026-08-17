@@ -80,11 +80,15 @@
             <div class="bucket-item ${it.done?'is-done':''}">
               <input type="checkbox" data-toggle="${it.id}" ${it.done?'checked':''}>
               <div class="bucket-text" style="flex:1;">${escapeHtml(it.text)}</div>
+              ${it.done?'<span class="wedidit-stamp">WE DID IT</span>':''}
               <button class="icon-btn" data-del-bk="${it.id}" style="width:30px;height:30px;">✕</button>
             </div>`).join('') : '<div class="section-note">아직 없어요.</div>'}</div>
         </div>`;
       }).join('');
-      host.querySelectorAll('[data-toggle]').forEach(cb=> cb.addEventListener('change', ()=> DB.updateBucketItem(cb.dataset.toggle, {done:cb.checked})));
+      host.querySelectorAll('[data-toggle]').forEach(cb=> cb.addEventListener('change', ()=>{
+        DB.updateBucketItem(cb.dataset.toggle, {done:cb.checked});
+        if(cb.checked && window.V2Anim) V2Anim.sparkleAt(cb.closest('.bucket-item'), 6);
+      }));
       host.querySelectorAll('[data-del-bk]').forEach(b=> b.addEventListener('click', ()=> DB.deleteBucketItem(b.dataset.delBk)));
     }));
   }
@@ -145,9 +149,13 @@
         <div class="bucket-item ${it.done?'is-done':''}">
           <input type="checkbox" data-toggle-pr="${it.id}" ${it.done?'checked':''}>
           <div class="bucket-text" style="flex:1;">${escapeHtml(it.text)}</div>
+          ${it.done?'<span class="wedidit-stamp">WE DID IT</span>':''}
           <button class="icon-btn" data-del-pr="${it.id}" style="width:30px;height:30px;">✕</button>
         </div>`).join('') : '<div class="section-note">약속을 추가해보세요.</div>';
-      list.querySelectorAll('[data-toggle-pr]').forEach(cb=> cb.addEventListener('change', ()=> DB.updateBucketItem(cb.dataset.togglePr, {done:cb.checked})));
+      list.querySelectorAll('[data-toggle-pr]').forEach(cb=> cb.addEventListener('change', ()=>{
+        DB.updateBucketItem(cb.dataset.togglePr, {done:cb.checked});
+        if(cb.checked && window.V2Anim) V2Anim.sparkleAt(cb.closest('.bucket-item'), 6);
+      }));
       list.querySelectorAll('[data-del-pr]').forEach(b=> b.addEventListener('click', ()=> DB.deleteBucketItem(b.dataset.delPr)));
     }));
   }
