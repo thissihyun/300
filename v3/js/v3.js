@@ -62,7 +62,6 @@
     const suggested = inferActivities(date);
     if(!suggested.length) return;
     grid.insertAdjacentHTML('afterend', autoActivityMarkup(date));
-    // V1 behavior: auto-classified categories start selected, but remain editable.
     suggested.forEach(label=>{
       const btn = $$('[data-act]', grid).find(b=>b.dataset.act===label);
       if(btn && !btn.classList.contains('is-selected')) btn.click();
@@ -91,8 +90,12 @@
     const label = $('#monthLabel', view);
     const host = $('#calHost', view);
     if(!label || !host) return;
-    ['autumn','winter','spring','summer'].forEach(s=>view.classList.remove('v3-season-'+s));
-    view.classList.add('v3-season-'+seasonFromMonthText(label.textContent));
+    const season=seasonFromMonthText(label.textContent);
+    if(view.dataset.v3Season!==season){
+      ['autumn','winter','spring','summer'].forEach(s=>view.classList.remove('v3-season-'+s));
+      view.classList.add('v3-season-'+season);
+      view.dataset.v3Season=season;
+    }
     if(!$('.v3-calendar-note', view)){
       host.insertAdjacentHTML('beforebegin','<div class="v3-calendar-note">photos · chats · moods · little milestones</div>');
     }
@@ -216,10 +219,12 @@
   }
 
   function questionIndexFor(dateStr){
+    const list=window.QUESTIONS||[];
+    if(!list.length) return 0;
     const base=new Date('2025-10-23T00:00:00');
     const d=new Date(dateStr+'T00:00:00');
     const n=Math.floor((d-base)/86400000);
-    return ((n%(window.QUESTIONS||[]).length)+(window.QUESTIONS||[]).length)%(window.QUESTIONS||[]).length;
+    return ((n%list.length)+list.length)%list.length;
   }
 
   function injectHistoricEditor(date){
@@ -268,7 +273,6 @@
       else{selectedActs.add(a);btn.classList.add('is-selected')}
     }));
 
-    // Start with V1 auto classification; saved data overrides it when present.
     inferActivities(date).forEach(label=>{
       const b=actBtns.find(x=>x.dataset.v3Act===label);
       if(b){selectedActs.add(label);b.classList.add('is-selected')}
@@ -351,7 +355,7 @@
         </button>`).join('')}</div>${filtered.length>220?`<div class="section-note" style="margin-top:8px">상위 220개 표시 · 검색어로 더 좁혀보세요.</div>`:''}`;
     }
 
-    $$('#v3ThanksSearch',host).forEach(input=>input.addEventListener('input',e=>{q=e.target.value.trim();draw()}));
+    $('#v3ThanksSearch',host).addEventListener('input',e=>{q=e.target.value.trim();draw()});
     $$('[data-v3-thanks]',host).forEach(btn=>btn.addEventListener('click',()=>{
       mode=btn.dataset.v3Thanks; $$('[data-v3-thanks]',host).forEach(b=>b.classList.toggle('is-active',b===btn)); draw();
     }));
@@ -373,8 +377,8 @@
      6) HEADER TOGETHER / REUNION WIDGET
      ---------------------------------------------------------------- */
   function daysUntil(dateStr){
-    if(!dateStr) return null;
-    const a=new Date((typeof todayISO==='function'?todayISO():'')+'T00:00:00');
+    if(!dateStr || typeof todayISO!=='function') return null;
+    const a=new Date(todayISO()+'T00:00:00');
     const b=new Date(dateStr+'T00:00:00');
     if(Number.isNaN(+a)||Number.isNaN(+b)) return null;
     return Math.ceil((b-a)/86400000);
@@ -409,7 +413,9 @@
     let queued=false;
     const run=()=>{queued=false;try{fn(el)}catch(e){console.warn('[V3]',id,e)}};
     const mo=new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(run)});
-    mo.observe(el,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','style']});
+    // Only DOM/content changes are observed. Class/style mutations created by V3 itself
+    // are intentionally ignored to prevent self-triggered render loops.
+    mo.observe(el,{childList:true,subtree:true,characterData:true});
     run();
   }
 
