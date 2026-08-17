@@ -31,6 +31,23 @@
 
   function myName(){ return Identity.displayName(Identity.current()); }
 
+  // Highlight affection/tension words inline (Section 23 kakao emphasis).
+  function emphasize(text){
+    let out = escapeHtml(text);
+    (window.AFFECTION_WORDS||[]).concat(window.TENSION_WORDS||[]).forEach(w=>{
+      if(!w) return;
+      out = out.split(escapeHtml(w)).join(`<mark>${escapeHtml(w)}</mark>`);
+    });
+    return out;
+  }
+  // Best-effort real timestamp for a curated kakao line, once fullchat.js has loaded.
+  function realTimeFor(date, speaker, text){
+    if(!window.FULL_CHAT_DATA || !window.FULL_CHAT_DATA[date]) return null;
+    const hit = window.FULL_CHAT_DATA[date].find(m => m.t === text);
+    if(!hit) return null;
+    return `${hit.ap} ${hit.h}:${String(hit.m).padStart(2,'0')}`;
+  }
+
   function open(date){
     currentDate = date;
     clearSub();
@@ -69,8 +86,9 @@
       ${ev.kakao && ev.kakao.length ? `
         <div class="kakao-block" id="kakaoBlock">
           ${ev.kakao.map(([who,text],i)=>`
-            <div class="kakao-msg from-${escapeHtml(who)}" style="position:relative;">
-              ${escapeHtml(text)}
+            <div class="kakao-msg v2-msg-in from-${escapeHtml(who)}" data-kakao-msg="${i}" style="position:relative; animation-delay:${Math.min(i*70,500)}ms;">
+              ${emphasize(text)}
+              <span class="kakao-time" data-kakao-time="${i}"></span>
               <span class="kakao-like-row" data-kakao-idx="${i}">
                 <button class="kakao-like-btn" data-kakao-heart="${i}" title="저장">♡</button>
                 <button class="kakao-best-btn" data-kakao-best="${i}" title="BEST" style="display:none;">★</button>
@@ -113,6 +131,28 @@
     const panel = document.getElementById('memoryPanel');
     const me = myName();
 
+    // tap-to-expand: reveal a real timestamp (once the full archive is loaded) under the bubble
+    panel.querySelectorAll('.kakao-msg').forEach(msg=>{
+      msg.addEventListener('click', (e)=>{
+        if(e.target.closest('.kakao-like-row')) return;
+        const wasOpen = msg.classList.contains('is-expanded');
+        panel.querySelectorAll('.kakao-msg.is-expanded').forEach(m=>{ if(m!==msg) m.classList.remove('is-expanded'); });
+        msg.classList.toggle('is-expanded', !wasOpen);
+        if(!wasOpen){
+          const i = +msg.dataset.kakaoMsg;
+          const timeEl = msg.querySelector('.kakao-time');
+          if(timeEl && !timeEl.textContent && ev.kakao[i]){
+            const t = realTimeFor(date, ev.kakao[i][0], ev.kakao[i][1]);
+            if(t) timeEl.textContent = t;
+            else if(window.FullChat) window.FullChat.load().then(()=>{
+              const t2 = realTimeFor(date, ev.kakao[i][0], ev.kakao[i][1]);
+              if(t2) timeEl.textContent = t2;
+            });
+          }
+        }
+      });
+    });
+
     // per-message kakao like / best (Section: liked kakao messages archive)
     if(ev.kakao && ev.kakao.length){
       unsub.push(DB.onAllChatLikes(rows=>{
@@ -150,10 +190,15 @@
     let favVal = false;
     unsub.push(DB.onFavorite(date, d=>{ favVal = !!(d&&d.value); updateFav(); }));
     function updateFav(){ panel.querySelector('#favBtn').classList.toggle('is-liked', favVal); }
-    panel.querySelector('#favBtn').addEventListener('click', async ()=>{
+    panel.querySelector('#favBtn').addEventListener('click', async (e)=>{
       favVal = !favVal;
       await DB.setFavorite(date, favVal);
       updateFav();
+      if(favVal && window.V2Anim){
+        const btn = e.currentTarget;
+        btn.classList.remove('v2-fav-pop'); void btn.offsetWidth; btn.classList.add('v2-fav-pop');
+        V2Anim.sparkleAt(btn, 8);
+      }
     });
 
     // individual likes
@@ -187,8 +232,8 @@
       if(!dayPhotos.length){
         gallery.innerHTML = `<div class="empty-frame" style="grid-column:1/-1;">▣<br>사진이 아직 없어요</div>`;
       } else {
-        gallery.innerHTML = dayPhotos.map(p=>`
-          <div class="photo-frame">
+        gallery.innerHTML = dayPhotos.map((p,i)=>`
+          <div class="photo-frame v2-photo-in" style="animation-delay:${Math.min(i*80,480)}ms;">
             ${p.hero ? '<div class="hero-flag">HERO</div>' : ''}
             <img src="${p.url}" data-action="photo" data-url="${p.url}">
           </div>`).join('');

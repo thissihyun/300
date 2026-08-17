@@ -89,7 +89,8 @@ a{ color:inherit; }
 .masthead-inner{
   max-width:1080px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px;
 }
-.brand{ display:flex; flex-direction:column; line-height:1.15; cursor:pointer; }
+.brand{ display:flex; align-items:center; gap:8px; line-height:1.15; cursor:pointer; }
+.brand-text{ display:flex; flex-direction:column; }
 .brand-names{ font-family:var(--serif); font-size:15px; letter-spacing:.06em; }
 .brand-tag{ font-family:var(--hand); font-size:12px; color:var(--kraft); }
 
@@ -174,6 +175,9 @@ main{ max-width:1080px; margin:0 auto; padding:20px 18px 60px; }
 .hero-title{ font-family:var(--serif); font-size:clamp(34px,7vw,58px); line-height:1.02; margin:8px 0 10px; }
 .hero-sub{ font-family:var(--hand); font-size:16px; color:var(--ink-soft); margin-bottom:20px; }
 .hero-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.day-counter{ display:flex; align-items:baseline; gap:8px; margin-bottom:16px; }
+.day-counter #dayCounterNum{ font-family:var(--serif); font-size:clamp(30px,5vw,42px); color:var(--red); line-height:1; }
+.day-counter-lbl{ font-size:11px; letter-spacing:.12em; color:var(--kraft); font-weight:700; }
 
 /* ---------- TODAY DASHBOARD ---------- */
 .dash{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; }
@@ -206,10 +210,16 @@ main{ max-width:1080px; margin:0 auto; padding:20px 18px 60px; }
 .cal-cell.is-empty{ visibility:hidden; }
 .cal-cell.has-event{ background:#fbe9e2; border-color:#e6c3b6; }
 .cal-cell.is-today{ border-color:var(--gold); border-width:2px; }
-.cal-cell.is-birthday{ background:#fff3cf; }
+.cal-cell.kind-birthday{ background:#fff3cf; border-color:#e0c96a; }
+.cal-cell.kind-anniversary{ background:#fbe4e0; border-color:#dba79c; }
+.cal-cell.kind-first{ background:#f8e4ee; border-color:#d9a9c1; }
+.cal-cell.kind-trip{ background:#e3f0ec; border-color:#a9c7bd; }
 .cal-num{ font-weight:700; }
 .cal-dot{ font-size:9px; }
+.cal-badge{ position:absolute; top:2px; right:3px; font-size:9px; line-height:1; }
 .cal-title{ font-size:8px; color:var(--ink-soft); text-align:center; line-height:1.15; overflow:hidden; max-height:2.3em; }
+.cal-legend{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 12px; margin-top:12px; padding-top:10px; border-top:1px solid var(--line); font-size:10px; color:var(--ink-soft); }
+.cal-legend .is-today-sw{ border:1.5px solid var(--gold); border-radius:4px; padding:0 4px; }
 
 .list-row{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--line); }
 .list-row:last-child{ border-bottom:none; }
@@ -383,6 +393,119 @@ body.modal-open{ overflow:hidden; }
 .report-tile{ background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center; }
 .report-tile .val{ font-family:var(--serif); font-size:20px; }
 .report-tile .lbl{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
+
+/* ================================================================
+   ANIMATION LAYER — ported from v1 (Section: motion polish). All
+   purely visual: photos/text are never redrawn, only their containers
+   animate. Respects prefers-reduced-motion via the block at the very
+   end of this file.
+   ================================================================ */
+
+/* ---- ripple/glow press feedback (anim.js) ---- */
+.v2-ripple-host{ position:relative; }
+.v2-ripple{
+  position:absolute; border-radius:50%; background:radial-gradient(circle, rgba(200,162,74,.35), rgba(200,162,74,0) 70%);
+  pointer-events:none; transform:scale(0); animation:v2RippleOut .6s ease-out forwards; z-index:0;
+}
+@keyframes v2RippleOut{ from{ transform:scale(0); opacity:.9; } to{ transform:scale(1); opacity:0; } }
+
+/* ---- sparkle burst (favorites, jar) ---- */
+.v2-spark{
+  position:fixed; left:0; top:0; z-index:9999; pointer-events:none; font-size:14px; color:var(--gold);
+  animation:v2Spark .72s ease-out forwards; transform:translate(-50%,-50%);
+}
+@keyframes v2Spark{
+  0%{ opacity:0; transform:translate(-50%,-50%) scale(.3); }
+  22%{ opacity:1; }
+  100%{ opacity:0; transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.05); }
+}
+
+/* ---- generic fade/slide-up entrance, staggered via anim.js staggerIn() ---- */
+.v2-reveal{ opacity:0; transform:translateY(14px); animation:v2RevealUp .5s cubic-bezier(.22,.9,.25,1) forwards; animation-play-state:paused; }
+.v2-reveal.is-in{ animation-play-state:running; }
+@keyframes v2RevealUp{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
+
+/* ---- scroll-triggered stamp-in (FIRSTS) ---- */
+.v2-stamp{ opacity:0; transform:scale(1.5) rotate(-8deg); transition:opacity .4s ease, transform .4s cubic-bezier(.2,1.4,.4,1); }
+.v2-stamp.is-in{ opacity:1; transform:scale(1) rotate(-3deg); }
+
+/* ---- favorite heart pop ---- */
+.v2-fav-pop{ animation:v2FavPop .4s cubic-bezier(.3,1.6,.4,1); }
+@keyframes v2FavPop{ 0%{ transform:scale(1); } 40%{ transform:scale(1.35); } 100%{ transform:scale(1); } }
+
+/* ---- calendar cell press-bounce + month slide ---- */
+.cal-cell{ transition:transform .12s ease; }
+.cal-cell:active{ transform:scale(.92); }
+.cal-bounce{ animation:v2CalBounce .32s cubic-bezier(.3,1.6,.4,1); }
+@keyframes v2CalBounce{ 0%{ transform:scale(1); } 40%{ transform:scale(.88); } 100%{ transform:scale(1); } }
+.cal-slide-left{ animation:v2SlideLeft .28s ease both; }
+.cal-slide-right{ animation:v2SlideRight .28s ease both; }
+@keyframes v2SlideLeft{ from{ opacity:0; transform:translateX(18px); } to{ opacity:1; transform:translateX(0); } }
+@keyframes v2SlideRight{ from{ opacity:0; transform:translateX(-18px); } to{ opacity:1; transform:translateX(0); } }
+
+/* ---- memory modal: staggered photo/kakao reveal ---- */
+.v2-msg-in{ opacity:0; transform:translateY(8px); animation:v2RevealUp .35s ease forwards; }
+.photo-frame.v2-photo-in{ opacity:0; transform:scale(.92) rotate(-1deg); animation:v2PhotoIn .4s cubic-bezier(.22,.9,.25,1) forwards; }
+@keyframes v2PhotoIn{ to{ opacity:1; transform:scale(1) rotate(0deg); } }
+
+/* ---- kakao bubble tap-to-expand ---- */
+.kakao-msg{ cursor:pointer; transition:transform .15s ease; }
+.kakao-msg:active{ transform:scale(.99); }
+.kakao-msg .kakao-time{
+  display:block; margin-top:4px; font-size:10px; color:var(--ink-soft); opacity:0; max-height:0; overflow:hidden;
+  transition:opacity .25s ease, max-height .25s ease;
+}
+.kakao-msg.is-expanded .kakao-time{ opacity:1; max-height:20px; }
+.kakao-msg mark{ background:none; color:var(--red); font-weight:700; }
+
+/* ---- home entrance sequence ---- */
+.hero-eyebrow.v2-reveal, .hero-title.v2-reveal, .hero-sub.v2-reveal, .hero-actions.v2-reveal{ animation-name:v2RevealUp; }
+
+/* ---- header two-person widget ---- */
+.together-widget{ display:flex; align-items:center; gap:2px; width:40px; height:26px; flex:none; }
+.together-widget svg{ width:100%; height:100%; overflow:visible; }
+.together-widget .tw-a{ fill:var(--red); opacity:.82; transition:transform .6s cubic-bezier(.22,.9,.25,1); }
+.together-widget .tw-b{ fill:var(--gold); opacity:.82; transition:transform .6s cubic-bezier(.22,.9,.25,1); }
+.together-widget.is-close .tw-a{ transform:translateX(3px); }
+.together-widget.is-close .tw-b{ transform:translateX(-3px); }
+
+/* ---- hero photo carousel ---- */
+.hero-photo{ position:relative; overflow:hidden; }
+.hero-photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .9s ease; }
+.hero-photo img.is-active{ opacity:1; }
+
+/* ---- poster flip card (liveagain) ---- */
+.poster-flip{ perspective:1200px; }
+.poster-flip-inner{ position:relative; width:100%; height:100%; transition:transform .55s cubic-bezier(.22,.9,.25,1); transform-style:preserve-3d; }
+.poster-flip.is-flipped .poster-flip-inner{ transform:rotateY(180deg); }
+.poster-flip-front, .poster-flip-back{ position:absolute; inset:0; backface-visibility:hidden; border-radius:inherit; }
+.poster-flip-back{ transform:rotateY(180deg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; }
+
+/* ---- OUR STORY timeline thread ---- */
+.timeline-thread{ position:relative; padding-left:22px; }
+.timeline-thread:before{
+  content:''; position:absolute; left:6px; top:0; bottom:0; width:2px; background:var(--line);
+}
+.timeline-thread .thread-line{ position:absolute; left:6px; top:0; width:2px; background:var(--red); height:0; transition:height .6s ease; }
+.timeline-node{ position:relative; }
+.timeline-node:before{
+  content:''; position:absolute; left:-22px; top:16px; width:8px; height:8px; border-radius:50%;
+  background:var(--paper); border:2px solid var(--red); z-index:1;
+}
+
+/* ---- NYC map VISITED stamp ---- */
+.map-visited-stamp{
+  display:inline-block; border:2px solid var(--red); color:var(--red); border-radius:6px; padding:2px 8px;
+  font-family:var(--hand); font-size:11px; letter-spacing:.06em; transform:rotate(-6deg); margin-top:6px;
+}
+
+/* ---- photobooth print-out slide ---- */
+.photo-frame.v2-print-in{ animation:v2PrintOut .5s cubic-bezier(.22,.9,.25,1) both; transform-origin:top center; }
+@keyframes v2PrintOut{ from{ opacity:0; transform:translateY(-24px) scale(.96); } to{ opacity:1; transform:translateY(0) scale(1); } }
+
+/* ---- thank-you jar star drop ---- */
+.jar-star{ display:inline-block; font-size:12px; animation:v2StarDrop .45s cubic-bezier(.2,1.3,.4,1) both; }
+@keyframes v2StarDrop{ from{ opacity:0; transform:translateY(-18px) rotate(-15deg); } to{ opacity:1; transform:translateY(0) rotate(0deg); } }
 
 @media (prefers-reduced-motion: reduce){
   *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }

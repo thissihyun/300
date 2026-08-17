@@ -12,12 +12,26 @@
   function pad(n){ return String(n).padStart(2,'0'); }
   function keyFor(y,m,d){ return `${y}-${pad(m+1)}-${pad(d)}`; }
 
+  // Day-type classification for calendar badges (Section 15/32 in v1) — same
+  // small taxonomy as the original app: birthday / anniversary / first / trip.
+  function dayKind(date, ev){
+    if(!ev) return null;
+    const t = ev.title || '';
+    if(/생일/.test(t)) return 'birthday';
+    if(/DAY\s*(1|50|100|150|200|300)\b/i.test(t) || (window.MILESTONES||[]).some(m=>m.date===date)) return 'anniversary';
+    if(/첫|first/i.test(t)) return 'first';
+    if(/San Diego|Joshua|West Coast|Hollywood|Packing|공항|출국|귀국|여행|Beacon/i.test(t)) return 'trip';
+    return null;
+  }
+  const KIND_ICON = {birthday:'🎂', anniversary:'✦', first:'♥', trip:'✈'};
+  const KIND_LABEL = {birthday:'생일', anniversary:'기념일', first:'처음', trip:'여행'};
+
   function monthEntries(y,m){
     const prefix = `${y}-${pad(m+1)}`;
     return Object.entries(window.EVENTS).filter(([k])=>k.startsWith(prefix)).sort((a,b)=>a[0]<b[0]?-1:1);
   }
 
-  function renderCalendar(host, y, m){
+  function renderCalendar(host, y, m, dir){
     const first = new Date(y,m,1);
     const startDow = first.getDay();
     const daysInMonth = new Date(y,m+1,0).getDate();
@@ -28,18 +42,24 @@
       const key = keyFor(y,m,d);
       const ev = window.EVENTS[key];
       const isToday = key===today;
-      const isBirthday = ev && /생일/.test(ev.title);
+      const kind = dayKind(key, ev);
       const cls = ['cal-cell'];
       if(ev) cls.push('has-event');
       if(isToday) cls.push('is-today');
-      if(isBirthday) cls.push('is-birthday');
+      if(kind) cls.push('kind-'+kind);
       cells += `<button class="${cls.join(' ')}" ${ev?`data-action="memory" data-date="${key}"`:''}>
         <div class="cal-num">${d}</div>
+        ${kind ? `<span class="cal-badge">${KIND_ICON[kind]}</span>` : ''}
         ${ev ? `<div class="cal-title">${escapeHtml(ev.title)}</div>` : ''}
       </button>`;
     }
+    const wrapCls = dir==='next' ? 'cal-slide-left' : dir==='prev' ? 'cal-slide-right' : '';
     host.innerHTML = `<div class="cal-grid" style="margin-bottom:6px;">${['SUN','MON','TUE','WED','THU','FRI','SAT'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}</div>
-      <div class="cal-grid">${cells}</div>`;
+      <div class="cal-grid ${wrapCls}">${cells}</div>
+      <div class="cal-legend">${Object.keys(KIND_ICON).map(k=>`<span>${KIND_ICON[k]} ${KIND_LABEL[k]}</span>`).join('')}<span class="is-today-sw">오늘</span></div>`;
+    host.querySelectorAll('.cal-cell').forEach(cell=>{
+      cell.addEventListener('click', ()=>{ cell.classList.remove('cal-bounce'); void cell.offsetWidth; cell.classList.add('cal-bounce'); });
+    });
   }
 
   function renderList(host, y, m){
@@ -124,22 +144,23 @@
       });
     });
 
-    function draw(){
+    let diaryRows = [];
+    function draw(dir){
       const y = cursor.getFullYear(), m = cursor.getMonth();
       container.querySelector('#monthLabel').textContent = `${MONTH_NAMES[m]} ${y}`;
-      renderCalendar(container.querySelector('#calHost'), y, m);
+      renderCalendar(container.querySelector('#calHost'), y, m, dir);
       renderList(container.querySelector('#listHost'), y, m);
+      renderReport(container.querySelector('#reportHost'), y, m, diaryRows);
     }
-    container.querySelector('#prevMonth').addEventListener('click', ()=>{ cursor.setMonth(cursor.getMonth()-1); draw(); });
-    container.querySelector('#nextMonth').addEventListener('click', ()=>{ cursor.setMonth(cursor.getMonth()+1); draw(); });
+    // Single handler each — this used to also get re-bound via .onclick inside
+    // onAllDailyRecords below, so every click fired twice and jumped two months.
+    container.querySelector('#prevMonth').addEventListener('click', ()=>{ cursor.setMonth(cursor.getMonth()-1); draw('prev'); });
+    container.querySelector('#nextMonth').addEventListener('click', ()=>{ cursor.setMonth(cursor.getMonth()+1); draw('next'); });
     draw();
 
     unsub.push(DB.onAllDailyRecords(rows=>{
-      const y = cursor.getFullYear(), m = cursor.getMonth();
-      renderReport(container.querySelector('#reportHost'), y, m, rows);
-      const origDraw = draw;
-      container.querySelector('#prevMonth').onclick = ()=>{ cursor.setMonth(cursor.getMonth()-1); origDraw(); renderReport(container.querySelector('#reportHost'), cursor.getFullYear(), cursor.getMonth(), rows); };
-      container.querySelector('#nextMonth').onclick = ()=>{ cursor.setMonth(cursor.getMonth()+1); origDraw(); renderReport(container.querySelector('#reportHost'), cursor.getFullYear(), cursor.getMonth(), rows); };
+      diaryRows = rows;
+      renderReport(container.querySelector('#reportHost'), cursor.getFullYear(), cursor.getMonth(), rows);
     }));
   }
 

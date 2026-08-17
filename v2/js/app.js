@@ -171,6 +171,8 @@
     if(!musicMuted) bgm.play().catch(()=>{});
     if(window.NotificationsView) window.NotificationsView.watch();
     Router.init();
+    const tw = document.getElementById('togetherWidget');
+    if(tw) setTimeout(()=> tw.classList.add('is-close'), 300);
   }
 
   if(sessionStorage.getItem('unlocked')==='1'){
