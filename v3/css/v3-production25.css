@@ -1,0 +1,147 @@
+/* V3 production25 — final mobile/render cleanup */
+
+/* Mobile modals are full, opaque sheets. Never show the scrolled page through them. */
+@media (max-width:760px){
+  .modal-backdrop.is-open{
+    background:#f7f1e4!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    overscroll-behavior:none!important;
+    align-items:flex-start!important;
+  }
+  .modal-backdrop.is-open>.modal-panel{
+    width:100vw!important;
+    max-width:none!important;
+    min-height:100dvh!important;
+    margin:0!important;
+    border-radius:0!important;
+    background:#f7f1e4!important;
+    box-shadow:none!important;
+    padding-bottom:calc(108px + env(safe-area-inset-bottom))!important;
+    overscroll-behavior:contain!important;
+  }
+  body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;background:#f7f1e4!important}
+
+  /* Diary chips: two compact horizontal rows instead of one very long vertical list. */
+  #view-diary #moodGrid,
+  #view-diary #actGrid{
+    display:grid!important;
+    grid-template-rows:repeat(2,max-content)!important;
+    grid-auto-flow:column!important;
+    grid-auto-columns:max-content!important;
+    gap:7px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    -webkit-overflow-scrolling:touch!important;
+    scroll-snap-type:x proximity!important;
+    padding:3px 2px 10px!important;
+    margin-right:-10px!important;
+    scrollbar-width:none!important;
+  }
+  #view-diary #moodGrid::-webkit-scrollbar,
+  #view-diary #actGrid::-webkit-scrollbar{display:none!important}
+  #view-diary #moodGrid .chip,
+  #view-diary #actGrid .chip{
+    min-height:40px!important;
+    width:auto!important;
+    padding:8px 11px!important;
+    font-size:12px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    scroll-snap-align:start!important;
+  }
+}
+
+/* Album: one real image surface only. Remove all browser/pseudo/film-strip bars. */
+#view-album .v3-photo-card>.v3-photo-imagebtn,
+#view-album .v3-photo-card>.v6-clean-photo-hit{
+  display:none!important;
+}
+#view-album .v10-photo-surface{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  aspect-ratio:auto!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:5px!important;
+  background:transparent!important;
+  overflow:hidden!important;
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  box-shadow:none!important;
+  position:relative!important;
+}
+#view-album .v10-photo-surface::before,
+#view-album .v10-photo-surface::after,
+#view-album .v3-photo-imagebtn::before,
+#view-album .v3-photo-imagebtn::after,
+#view-album .v6-clean-photo-hit::before,
+#view-album .v6-clean-photo-hit::after,
+#view-album .v3-photo-card::before,
+#view-album .v3-photo-card::after{
+  content:none!important;
+  display:none!important;
+  width:0!important;
+}
+#view-album .v10-photo-surface img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:none!important;
+  background:transparent!important;
+  margin:0!important;
+  border:0!important;
+}
+#view-album .v3-photo-card{overflow:hidden!important;background:#fffdf8!important}
+#view-album #v3AlbumSelectToggle{white-space:nowrap!important}
+@media(max-width:760px){
+  #view-album .v3-album-hero-actions{width:100%;display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}
+  #view-album #v3AlbumCount{grid-column:1/-1!important}
+  #view-album #v3AlbumSelectToggle{min-height:44px!important}
+  #view-album .v3-select-bar{position:sticky!important;top:0!important;z-index:20!important;background:#fffaf0!important}
+}
+
+/* Special cards: if the card already has its own real photo, suppress the extra injected copy. */
+#specialDetailHost .v25-has-native-media>.v10-special-photo{display:none!important}
+#specialDetailHost .v25-duplicate-media{display:none!important}
+
+/* Movie posters: reduce the huge empty black lower half, especially on phones. */
+#specialDetailHost .poster-flip{aspect-ratio:4/5!important;max-height:720px!important}
+#specialDetailHost .poster-flip-front,
+#specialDetailHost .poster-flip-back{padding:13px!important}
+#specialDetailHost .poster-flip-front>.empty-frame{height:min(42vw,250px)!important;min-height:150px!important}
+#specialDetailHost .poster-flip-front>.v10-special-photo{height:min(42vw,250px)!important}
+@media(max-width:760px){
+  #specialDetailHost .poster-flip{aspect-ratio:5/6!important;max-height:610px!important}
+  #specialDetailHost .poster-flip-front>.empty-frame,
+  #specialDetailHost .poster-flip-front>.v10-special-photo{height:42vw!important;min-height:165px!important;max-height:250px!important}
+}
+
+/* Final map */
+.v25-map-card{padding:0!important;overflow:hidden!important;border-radius:17px!important;background:#efe7d7!important}
+.v25-map{width:100%!important;height:430px!important;background:#e9dfcd!important}
+.v25-map .leaflet-control-attribution{font-size:8px!important}
+.v25-map-fallback{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px}
+.v25-map-fallback button{min-height:64px}
+@media(max-width:760px){.v25-map{height:360px!important}.v25-map-fallback{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* WORDS THAT BECAME OURS: one message = one row. */
+.v25-word-head{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.v25-word-head::-webkit-scrollbar{display:none}
+.v25-word-head .chip{flex:0 0 auto;white-space:nowrap}
+.v25-word-summary{margin:6px 0 10px;font-family:var(--hand);font-size:11px;color:var(--kraft)}
+.v25-word-list{display:flex;flex-direction:column;gap:7px}
+.v25-word-row{width:100%;display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;align-items:start;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fffaf0;text-align:left;color:var(--ink);cursor:pointer}
+.v25-word-date{font-family:var(--serif);font-weight:700;color:var(--red);font-size:11px;padding-top:2px}
+.v25-word-copy small{display:block;font-family:var(--hand);font-size:9px;color:var(--kraft);margin-bottom:3px}
+.v25-word-copy p{margin:0;font-size:12px;line-height:1.55;word-break:keep-all;white-space:pre-wrap}
+.v25-word-more{margin:12px auto 0;display:block}
+
+/* release copy must not look like build notes */
+.v25-hide-copy{display:none!important}
