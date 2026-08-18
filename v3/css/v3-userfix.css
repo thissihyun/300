@@ -4,11 +4,30 @@
 #view-home .hero-photo{position:absolute!important;inset:0!important;overflow:hidden!important}
 #view-home .hero-photo img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important;background:#e8decb!important;opacity:0!important;transition:opacity .75s ease!important;display:block!important}
 #view-home .hero-photo img.is-active{opacity:1!important;z-index:2}
+/* #heroPhotoWrap (.hero-photo) is its own z-index:0 stacking context (cinematic
+   hero background layer); a child's z-index alone can never out-paint the
+   z-index:2 text column sibling, so the empty-state wrapper itself needs to
+   be lifted, not just the button inside it. */
+#view-home .hero-photo.v3-hero-empty-state{z-index:3!important}
 .v3-hero-add{position:absolute;inset:0;border:0;background:linear-gradient(145deg,#e5d9c3,#d8c9ae);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#5a4b39;padding:28px;text-align:center;cursor:pointer}
 .v3-hero-add .plus{width:54px;height:54px;border:1px solid rgba(90,75,57,.35);border-radius:50%;display:grid;place-items:center;font-size:28px;background:rgba(255,255,255,.36)}
 .v3-hero-add strong{font-family:var(--serif);font-size:18px;font-style:italic;color:#332b22}.v3-hero-add span{font-size:12px}.v3-hero-add small{max-width:280px;font-size:10px;line-height:1.6;opacity:.72}
 .v3-hero-dots{position:absolute;right:15px;bottom:14px;z-index:5;display:flex;gap:6px;padding:6px 8px;border-radius:999px;background:rgba(20,16,12,.42);backdrop-filter:blur(4px)}
 .v3-hero-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45);transition:.25s}.v3-hero-dots i.is-active{width:18px;border-radius:8px;background:#fff}
+.v3-hero-edit{position:absolute;right:14px;top:14px;z-index:5;border:1px solid rgba(255,255,255,.55);background:rgba(20,16,12,.5);backdrop-filter:blur(4px);color:#fff;font-size:11px;font-weight:600;padding:7px 12px;border-radius:999px;cursor:pointer}
+.v3-hero-edit:active{transform:scale(.96)}
+
+/* Home hero photo picker modal */
+.v3-hero-picker-count{font-family:var(--serif);font-size:13px;color:var(--kraft);margin:12px 0 8px;font-weight:700}
+.v3-hero-picker-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:18px}
+.v3-hero-pick-tile{position:relative;border:2px solid transparent;border-radius:10px;overflow:hidden;padding:0;background:#efe7d7;aspect-ratio:1;cursor:pointer}
+.v3-hero-pick-tile img{width:100%;height:100%;object-fit:cover;display:block}
+.v3-hero-pick-date{position:absolute;left:5px;top:5px;font-size:9px;color:#fff;background:rgba(20,16,12,.5);border-radius:5px;padding:1px 5px}
+.v3-hero-pick-mark{position:absolute;left:0;right:0;bottom:0;font-size:10px;font-weight:700;text-align:center;padding:5px 4px;background:rgba(20,16,12,.55);color:#f1e6d3}
+.v3-hero-pick-tile.is-picked{border-color:var(--gold)}
+.v3-hero-pick-tile.is-picked .v3-hero-pick-mark{background:var(--gold);color:#241d0c}
+.v3-hero-upload-block{border-top:1px solid var(--line);padding-top:14px;margin-top:6px}
+@media(max-width:560px){.v3-hero-picker-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 /* Header widgets: editorial tickets rather than rigid boxes */
 .v3-top-metrics{max-width:900px!important;margin:12px auto 4px!important;padding:0 18px!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important}

@@ -153,10 +153,18 @@
     unsub.push(DB.onAllPhotos(photos=>{
       const wrap = container.querySelector('#heroPhotoWrap');
       if(wrap){
-        const candidates = [];
-        window.MOVIE_CHAPTERS.forEach(c=>{ const p = heroPhotoFor(c.date, photos); if(p && !candidates.some(x=>x.url===p.url)) candidates.push(p); });
-        photos.filter(p=>p.hero).forEach(p=>{ if(!candidates.some(x=>x.url===p.url)) candidates.push(p); });
-        const urls = candidates.slice(0,5).map(p=>p.url);
+        // Photos picked explicitly for the home screen (homeHero:true) always win,
+        // up to 8; only fall back to the chapter/day-hero heuristic when nobody
+        // has picked anything yet.
+        const chosen = photos.filter(p=>p.homeHero).slice(0,8);
+        let candidates = chosen;
+        if(!candidates.length){
+          candidates = [];
+          window.MOVIE_CHAPTERS.forEach(c=>{ const p = heroPhotoFor(c.date, photos); if(p && !candidates.some(x=>x.url===p.url)) candidates.push(p); });
+          photos.filter(p=>p.hero).forEach(p=>{ if(!candidates.some(x=>x.url===p.url)) candidates.push(p); });
+          candidates = candidates.slice(0,5);
+        }
+        const urls = candidates.map(p=>p.url);
         if(urls.length){
           wrap.innerHTML = urls.map((u,i)=>`<img src="${u}" alt="" class="${i===0?'is-active':''}">`).join('');
           startCarousel(container, urls);

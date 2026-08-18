@@ -9,16 +9,89 @@
   let allPhotos=[];
   if(window.DB&&DB.onAllPhotos) DB.onAllPhotos(rows=>{allPhotos=rows||[]; refreshMovieSurfaces();});
 
-  /* ------------------------ HERO PHOTO ------------------------ */
+  /* ------------------------ HOME HERO PHOTO PICKER ------------------------ */
+  const HOME_HERO_MAX=8;
+  function heroFileToDataUrl(file,maxDim=1600,quality=.82){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onerror=reject;
+      reader.onload=()=>{
+        const img=new Image();
+        img.onerror=()=>reject(new Error('image-decode-failed'));
+        img.onload=()=>{
+          let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+          if(w>maxDim||h>maxDim){const s=maxDim/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
+          const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+          canvas.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL('image/jpeg',quality));
+        };
+        img.src=reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
   function heroUpload(){
-    if(window.AlbumView&&AlbumView.openUploader) AlbumView.openUploader(typeof todayISO==='function'?todayISO():'2025-10-23');
-    else Router.openView('album');
+    const panel=$('#uploadPanel'); if(!panel)return;
+    const today=typeof todayISO==='function'?todayISO():'2025-10-23';
+    function paint(){
+      const chosen=allPhotos.filter(p=>p.homeHero);
+      const countEl=$('#v3HeroPickerCount',panel); if(countEl)countEl.textContent=`${chosen.length} / ${HOME_HERO_MAX} 선택됨`;
+      const grid=$('#v3HeroPickerGrid',panel); if(!grid)return;
+      const sorted=allPhotos.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+      grid.innerHTML=sorted.length?sorted.map(p=>`
+        <button type="button" class="v3-hero-pick-tile ${p.homeHero?'is-picked':''}" data-hero-pick="${esc(p.id)}">
+          <img src="${esc(p.url)}" alt="" loading="lazy">
+          <span class="v3-hero-pick-date">${esc((p.date||'').slice(5))}</span>
+          <span class="v3-hero-pick-mark">${p.homeHero?'✓ 사용 중':'선택하기'}</span>
+        </button>`).join('') : '<div class="empty-frame" style="grid-column:1/-1;">아직 앨범에 사진이 없어요. 아래에서 새 사진을 올려보세요.</div>';
+      $$('[data-hero-pick]',grid).forEach(btn=>btn.addEventListener('click',async()=>{
+        const id=btn.dataset.heroPick, p=allPhotos.find(x=>String(x.id)===id); if(!p)return;
+        if(!p.homeHero && allPhotos.filter(x=>x.homeHero).length>=HOME_HERO_MAX){ Router.toast(`최대 ${HOME_HERO_MAX}장까지 고를 수 있어요`); return; }
+        await DB.updatePhoto(id,{homeHero:!p.homeHero});
+      }));
+    }
+    panel.innerHTML=`
+      <div class="modal-top"><button class="icon-btn" data-action="close-modal">✕</button></div>
+      <div class="v3-album-modal-k">HOME SCREEN</div>
+      <h2 class="modal-title" style="font-size:22px;">첫 화면 사진</h2>
+      <div class="section-note">홈 첫 화면에 사용할 사진을 직접 선택해요. 최대 ${HOME_HERO_MAX}장까지 고를 수 있고, 선택은 같은 링크를 여는 시현·강원에게 함께 보여요.</div>
+      <div class="v3-hero-picker-count" id="v3HeroPickerCount"></div>
+      <div class="v3-hero-picker-grid" id="v3HeroPickerGrid"></div>
+      <div class="v3-hero-upload-block">
+        <label class="section-note v3-album-field-label">새 사진 올리고 바로 사용하기</label>
+        <input class="field" type="date" id="v3HeroUploadDate" value="${esc(today)}">
+        <input class="v3-file-input" type="file" id="v3HeroUploadFiles" accept="image/*" multiple>
+        <div id="v3HeroUploadProgress" class="section-note"></div>
+      </div>`;
+    paint();
+    if(window.DB&&DB.onAllPhotos){
+      const off=DB.onAllPhotos(rows=>{ allPhotos=rows||[]; if(panel.isConnected&&$('#v3HeroPickerGrid',panel))paint(); else off&&off(); });
+    }
+    $('#v3HeroUploadFiles',panel).addEventListener('change',async e=>{
+      const files=Array.from(e.target.files||[]); if(!files.length)return;
+      const date=$('#v3HeroUploadDate',panel).value||today;
+      const progress=$('#v3HeroUploadProgress',panel);
+      const room=HOME_HERO_MAX-allPhotos.filter(p=>p.homeHero).length;
+      if(room<=0){ Router.toast(`최대 ${HOME_HERO_MAX}장까지 고를 수 있어요`); e.target.value=''; return; }
+      const toUpload=files.slice(0,room);
+      for(let i=0;i<toUpload.length;i++){
+        progress.textContent=`업로드 중 ${i+1} / ${toUpload.length}`;
+        try{
+          const url=await heroFileToDataUrl(toUpload[i]);
+          await DB.addPhoto({date,url,hero:false,homeHero:true,bookPick:false,place:'',food:'',type:'',moods:[],caption:'',author:me()});
+        }catch(err){ console.warn('[home hero upload]',err); }
+      }
+      progress.textContent=`${toUpload.length}장 추가했어요`;
+      e.target.value='';
+    });
+    $('#uploadModal').classList.add('is-open'); document.body.classList.add('modal-open');
   }
   function enhanceHero(){
     const wrap=$('#view-home #heroPhotoWrap'); if(!wrap)return;
     const imgs=$$('img',wrap);
     if(imgs.length){
       wrap.classList.add('v3-hero-carousel-ready');
+      wrap.classList.remove('v3-hero-empty-state');
       let dots=$('.v3-hero-dots',wrap);
       if(!dots){ dots=document.createElement('div');dots.className='v3-hero-dots';wrap.appendChild(dots); }
       dots.innerHTML=imgs.map((_,i)=>`<i class="${i===0?'is-active':''}"></i>`).join('');
@@ -28,10 +101,21 @@
           $$('.v3-hero-dots i',wrap).forEach((d,j)=>d.classList.toggle('is-active',j===i&&img.classList.contains('is-active')));
         }).observe(img,{attributes:true,attributeFilter:['class']});
       });
+      if(!$('.v3-hero-edit',wrap)){
+        const btn=document.createElement('button'); btn.type='button'; btn.className='v3-hero-edit'; btn.textContent='✎ 첫 화면 사진';
+        btn.addEventListener('click',heroUpload); wrap.appendChild(btn);
+      }
       return;
     }
+    wrap.classList.remove('v3-hero-carousel-ready');
     if($('.v3-hero-add',wrap))return;
-    wrap.innerHTML=`<button class="v3-hero-add" type="button"><span class="plus">＋</span><strong>ADD OUR HERO PHOTO</strong><span>첫 화면에 보여줄 실제 사진을 추가해요.</span><small>업로드 창에서 날짜를 고를 수 있고, 그 날짜의 첫 사진은 자동으로 대표사진이 됩니다.</small></button>`;
+    // .hero-photo has its own z-index:0 stacking context (Section: cinematic hero),
+    // so the add button — a child — can never paint above the text column sibling
+    // just by raising its own z-index. Marking the wrap itself lifts the whole
+    // stacking context instead; without this the button existed but every click
+    // silently landed on the invisible text-column div on top of it.
+    wrap.classList.add('v3-hero-empty-state');
+    wrap.innerHTML=`<button class="v3-hero-add" type="button"><span class="plus">＋</span><strong>✎ 첫 화면 사진</strong><span>첫 화면에 보여줄 실제 사진을 골라요.</span><small>앨범 사진 중에서 직접 선택하거나, 새 사진을 바로 올릴 수 있어요.</small></button>`;
     $('.v3-hero-add',wrap).addEventListener('click',heroUpload);
   }
 
