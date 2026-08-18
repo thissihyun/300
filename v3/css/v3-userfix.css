@@ -2,7 +2,7 @@
 
 /* HERO: real crossfade carousel + clear upload CTA */
 #view-home .hero-photo{position:absolute!important;inset:0!important;overflow:hidden!important}
-#view-home .hero-photo img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important;background:#e8decb!important;opacity:0!important;transition:opacity .75s ease!important;display:block!important}
+#view-home .hero-photo img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;background:#100c08!important;opacity:0!important;transition:opacity .75s ease!important;display:block!important}
 #view-home .hero-photo img.is-active{opacity:1!important;z-index:2}
 /* #heroPhotoWrap (.hero-photo) is its own z-index:0 stacking context (cinematic
    hero background layer); a child's z-index alone can never out-paint the

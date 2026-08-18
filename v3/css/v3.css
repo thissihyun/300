@@ -50,25 +50,16 @@
 .v3-reunion-popover input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fffdf8}
 .v3-reunion-actions{display:flex;gap:8px;margin:10px 0 6px}
 
-/* ---------- V1 scrapbook rhythm around V2 hero ---------- */
-#view-home.v3-enhanced .hero{
-  position:relative; padding:24px; border:1px solid var(--line); border-radius:20px;
-  background:
-    linear-gradient(120deg,rgba(255,253,248,.95),rgba(246,238,221,.88)),
-    repeating-linear-gradient(0deg,transparent 0 28px,rgba(138,106,75,.035) 28px 29px);
-  box-shadow:0 18px 48px rgba(35,31,22,.10); overflow:visible;
-}
-#view-home.v3-enhanced .hero::before{
-  content:'NEW YORK · 2025'; position:absolute; top:-12px; left:34px; padding:5px 11px;
-  background:#fff4c9; border:1px solid rgba(180,151,92,.45); box-shadow:0 5px 12px rgba(45,35,24,.08);
-  transform:rotate(-2deg); font-family:var(--hand); font-size:10px; letter-spacing:.09em; color:var(--kraft);
-}
-#view-home.v3-enhanced .hero::after{
-  content:'and somehow, we met here.'; position:absolute; right:32px; bottom:-14px; padding:6px 12px;
-  background:#fffdf8; border:1px solid var(--line); transform:rotate(1.5deg); font-family:var(--hand); font-size:10px; color:var(--red);
-}
-#view-home .hero-photo{background:var(--paper);border:10px solid #fffdf8;outline:1px solid var(--line);box-shadow:0 14px 32px rgba(35,31,22,.17)}
-#view-home .hero-photo img{object-fit:contain;background:#efe7d7}
+/* ---------- V1 scrapbook rhythm around V2 hero ----------
+   Superseded by the cinematic full-bleed hero (real photo fills the
+   whole section, dark scrim, overlaid light type) added later in
+   this codebase's history. These rules used to paint a bordered,
+   cream-background, object-fit:contain "polaroid" box — since the
+   hero markup now has the photo layer positioned inset:0 behind the
+   text as a full background, that combination just showed a plain
+   cream box with no visible photo. Left neutralized rather than
+   deleted so the selectors stay documented if the 2-column hero ever
+   comes back. */
 #view-home .hub-card{position:relative;overflow:visible}
 #view-home .hub-card:nth-child(3n+1){transform:rotate(-.35deg)}
 #view-home .hub-card:nth-child(3n+2){transform:rotate(.25deg)}
@@ -177,9 +168,6 @@
   .masthead-inner{max-width:1080px}
 }
 @media(max-width:760px){
-  #view-home.v3-enhanced .hero{padding:18px 14px}
-  #view-home.v3-enhanced .hero::before{left:16px}
-  #view-home.v3-enhanced .hero::after{right:14px}
   .v3-future-intro{grid-template-columns:1fr}
   .v3-beacon-route{grid-template-columns:1fr 1fr}
   .v3-beacon-route::before{display:none}
