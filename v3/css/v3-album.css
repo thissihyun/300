@@ -134,6 +134,18 @@
 .v3-chip-grid{display:flex;flex-wrap:wrap;gap:6px}
 .v3-danger-btn{background:transparent!important;color:var(--red)!important;border-color:rgba(165,55,44,.48)!important}
 
+/* calendar representative-photo focus editor */
+.v3-focus-editor{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.v3-focus-layout{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:start}
+.v3-focus-preview-frame{display:flex;flex-direction:column;align-items:center;gap:6px}
+.v3-focus-preview{width:150px;height:150px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#efe7d7;position:relative}
+.v3-focus-preview img{width:100%;height:100%;transition:object-position .1s linear,transform .1s linear}
+.v3-focus-controls{display:flex;flex-direction:column;gap:4px}
+.v3-focus-label{font-size:11px;color:var(--ink-soft);display:flex;justify-content:space-between;margin-top:6px}
+.v3-focus-controls input[type="range"]{width:100%}
+.v3-focus-controls .btn{margin-top:12px;align-self:flex-start}
+@media(max-width:600px){.v3-focus-layout{grid-template-columns:1fr}.v3-focus-preview-frame{align-items:flex-start}}
+
 /* lightbox metadata */
 #lightboxModal .modal-panel{flex-direction:column;gap:10px}
 .v3-lightbox-meta{color:#f3ead8;text-align:center;font-size:11px;max-width:min(760px,92vw);line-height:1.6}

@@ -69,8 +69,15 @@
       if(kind) cls.push('kind-'+kind);
       if(photo) cls.push('has-photo');
       if(isChatOnly) cls.push('chat-only');
-      const style = photo ? ` style="background-image:url('${photo.url}')"` : '';
-      cells += `<button class="${cls.join(' ')}"${style} ${ev?`data-action="memory" data-date="${key}"`:(isChatOnly?`data-action="memory" data-date="${key}"`:'')}>
+      let photoImg = '';
+      if(photo){
+        const fx = photo.focusX!=null ? photo.focusX : 50;
+        const fy = photo.focusY!=null ? photo.focusY : 50;
+        const fz = photo.focusZoom!=null ? photo.focusZoom : 100;
+        photoImg = `<img class="cal-photo-img" src="${photo.url}" alt="" style="object-position:${fx}% ${fy}%; transform:scale(${fz/100});">`;
+      }
+      cells += `<button class="${cls.join(' ')}" ${ev?`data-action="memory" data-date="${key}"`:(isChatOnly?`data-action="memory" data-date="${key}"`:'')}>
+        ${photoImg}
         <div class="cal-num">${d}</div>
         ${kind ? `<span class="cal-badge">${KIND_ICON[kind]}</span>` : ''}
         ${isChatOnly ? `<span class="cal-chat-badge">💬</span>` : ''}

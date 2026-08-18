@@ -48,6 +48,44 @@
     return `${hit.ap} ${hit.h}:${String(hit.m).padStart(2,'0')}`;
   }
 
+  // "우리 카톡" — up to 20 real messages for the day, pulled from the full Kakao
+  // archive and prioritized toward emotionally warm lines (두근거림/행복/편안함/
+  // 애틋함/보고싶음/고마움), each shown with its real timestamp.
+  const REAL_KAKAO_MAX = 20;
+  const REAL_KAKAO_COLLAPSED = 6;
+  const EMOTION_RE = /두근|설레|설렘|떨려|떨린|행복|최고|기쁘|즐거|신나|편안|안심|포근|든든|애틋|짠하|뭉클|보고\s?싶|그리워|그립|고마워|고맙|감사/;
+  function realKakaoList(date){
+    const rows = window.FULL_CHAT_DATA && window.FULL_CHAT_DATA[date];
+    if(!rows || !rows.length) return [];
+    const withMeta = rows.map((m,i)=>({
+      speaker: m.s, text: m.t, idx: i, emotion: EMOTION_RE.test(m.t),
+      time: `${m.ap} ${m.h}:${String(m.m).padStart(2,'0')}`,
+    }));
+    const emotion = withMeta.filter(m=>m.emotion);
+    const rest = withMeta.filter(m=>!m.emotion);
+    const picked = emotion.slice(0, REAL_KAKAO_MAX);
+    if(picked.length < REAL_KAKAO_MAX) picked.push(...rest.slice(0, REAL_KAKAO_MAX - picked.length));
+    return picked.sort((a,b)=>a.idx-b.idx);
+  }
+  function realKakaoHtml(date){
+    const list = realKakaoList(date);
+    if(!list.length) return '';
+    const bubble = (m,i)=>`
+      <div class="kakao-msg v2-msg-in ${m.emotion?'is-emotion':''} from-${escapeHtml(m.speaker)}" style="position:relative; animation-delay:${Math.min(i*70,500)}ms;">
+        ${emphasize(m.text)}
+        <span class="kakao-time">${escapeHtml(m.time)}</span>
+      </div>`;
+    const shown = list.slice(0, REAL_KAKAO_COLLAPSED);
+    const rest = list.slice(REAL_KAKAO_COLLAPSED);
+    return `
+      <div class="section-head" style="margin-top:20px;"><div class="section-title" style="font-size:16px;">우리 카톡</div><div class="section-note">실제 대화에서 뽑은 이날의 순간들 · ${list.length}개</div></div>
+      <div class="real-kakao-block" id="realKakaoBlock">
+        ${shown.map(bubble).join('')}
+        ${rest.length ? `<div class="real-kakao-rest" style="display:none;">${rest.map(bubble).join('')}</div>
+        <button class="btn btn-sm btn-outline real-kakao-more" id="realKakaoMoreBtn">카톡 더보기 (${list.length}개)</button>` : ''}
+      </div>`;
+  }
+
   function open(date){
     currentDate = date;
     clearSub();
@@ -84,17 +122,20 @@
         </button>`).join('')}
 
       ${ev.kakao && ev.kakao.length ? `
+        <div class="section-head" style="margin-top:20px;"><div class="section-title" style="font-size:16px;">하이라이트 카톡</div></div>
         <div class="kakao-block" id="kakaoBlock">
           ${ev.kakao.map(([who,text],i)=>`
             <div class="kakao-msg v2-msg-in from-${escapeHtml(who)}" data-kakao-msg="${i}" style="position:relative; animation-delay:${Math.min(i*70,500)}ms;">
               ${emphasize(text)}
-              <span class="kakao-time" data-kakao-time="${i}"></span>
+              <span class="kakao-time" data-kakao-time="${i}">${escapeHtml(realTimeFor(date, who, text)||'')}</span>
               <span class="kakao-like-row" data-kakao-idx="${i}">
                 <button class="kakao-like-btn" data-kakao-heart="${i}" title="저장">♡</button>
                 <button class="kakao-best-btn" data-kakao-best="${i}" title="BEST" style="display:none;">★</button>
               </span>
             </div>`).join('')}
         </div>` : ''}
+
+      <div id="realKakaoHost">${realKakaoHtml(date)}</div>
 
       <div class="section-head" style="margin-top:20px;"><div class="section-title" style="font-size:16px;">사진</div></div>
       <div class="photo-gallery" id="memPhotoGallery"></div>
@@ -131,27 +172,33 @@
     const panel = document.getElementById('memoryPanel');
     const me = myName();
 
-    // tap-to-expand: reveal a real timestamp (once the full archive is loaded) under the bubble
-    panel.querySelectorAll('.kakao-msg').forEach(msg=>{
-      msg.addEventListener('click', (e)=>{
-        if(e.target.closest('.kakao-like-row')) return;
-        const wasOpen = msg.classList.contains('is-expanded');
-        panel.querySelectorAll('.kakao-msg.is-expanded').forEach(m=>{ if(m!==msg) m.classList.remove('is-expanded'); });
-        msg.classList.toggle('is-expanded', !wasOpen);
-        if(!wasOpen){
-          const i = +msg.dataset.kakaoMsg;
-          const timeEl = msg.querySelector('.kakao-time');
-          if(timeEl && !timeEl.textContent && ev.kakao[i]){
-            const t = realTimeFor(date, ev.kakao[i][0], ev.kakao[i][1]);
-            if(t) timeEl.textContent = t;
-            else if(window.FullChat) window.FullChat.load().then(()=>{
-              const t2 = realTimeFor(date, ev.kakao[i][0], ev.kakao[i][1]);
-              if(t2) timeEl.textContent = t2;
-            });
-          }
-        }
+    // load the full archive (if not already) to backfill curated-message
+    // timestamps and populate the "우리 카톡" real-message section
+    function refreshRealKakao(){
+      const host = panel.querySelector('#realKakaoHost');
+      if(host) host.innerHTML = realKakaoHtml(date);
+      wireRealKakaoMore();
+      if(ev.kakao && ev.kakao.length){
+        panel.querySelectorAll('#kakaoBlock [data-kakao-time]').forEach(timeEl=>{
+          if(timeEl.textContent) return;
+          const i = +timeEl.dataset.kakaoTime;
+          if(!ev.kakao[i]) return;
+          const t = realTimeFor(date, ev.kakao[i][0], ev.kakao[i][1]);
+          if(t) timeEl.textContent = t;
+        });
+      }
+    }
+    function wireRealKakaoMore(){
+      const btn = panel.querySelector('#realKakaoMoreBtn');
+      if(!btn) return;
+      btn.addEventListener('click', ()=>{
+        const rest = panel.querySelector('.real-kakao-rest');
+        if(rest) rest.style.display = '';
+        btn.remove();
       });
-    });
+    }
+    wireRealKakaoMore();
+    if(window.FullChat) window.FullChat.load().then(refreshRealKakao);
 
     // per-message kakao like / best (Section: liked kakao messages archive)
     if(ev.kakao && ev.kakao.length){

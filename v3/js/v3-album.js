@@ -152,11 +152,14 @@
   function openMetaEditor(photo){
     const panel=$('#uploadPanel'); if(!panel||!photo) return;
     const moods=new Set(photo.moods||[]); let type=photo.type||'';
+    let focusX = photo.focusX!=null ? photo.focusX : 50;
+    let focusY = photo.focusY!=null ? photo.focusY : 50;
+    let focusZoom = photo.focusZoom!=null ? photo.focusZoom : 100;
     panel.innerHTML=`
       <div class="modal-top"><button class="icon-btn" data-action="close-modal">✕</button></div>
       <div class="v3-album-modal-k">ABOUT THIS PHOTO · ${esc(photo.date||'')}</div>
       <div class="v3-meta-layout">
-        <div class="v3-meta-preview"><img src="${esc(photo.url)}" alt="업로드한 실제 사진"></div>
+        <div class="v3-meta-preview" id="v3MetaPreview"><img src="${esc(photo.url)}" alt="업로드한 실제 사진"></div>
         <div>
           <label class="section-note v3-album-field-label">장소</label>
           <input class="field" id="v3MetaPlace" value="${esc(photo.place||'')}" placeholder="예: MoMA">
@@ -170,12 +173,45 @@
       <div class="v3-chip-grid" id="v3MetaTypes">${photoTypes().map(t=>`<button type="button" class="chip ${type===t?'is-selected':''}" data-v3-type="${esc(t)}">${esc(t)}</button>`).join('')}</div>
       <label class="section-note v3-album-field-label">느낌</label>
       <div class="v3-chip-grid" id="v3MetaMoods">${photoMoods().map(m=>`<button type="button" class="chip ${moods.has(m)?'is-selected':''}" data-v3-mood="${esc(m)}">${esc(m)}</button>`).join('')}</div>
+
+      <div class="v3-focus-editor">
+        <label class="section-note v3-album-field-label">달력 대표사진 위치 조정</label>
+        <div class="section-note" style="margin-bottom:8px;">달력·OUR FIRSTS·계절·Special 카드의 정사각형 칸에서 이 사진이 어떻게 잘려 보일지 조정해요. 사진 원본은 그대로 저장돼요.</div>
+        <div class="v3-focus-layout">
+          <div class="v3-focus-preview-frame"><div class="v3-focus-preview" id="v3FocusPreview"><img src="${esc(photo.url)}" alt=""></div></div>
+          <div class="v3-focus-controls">
+            <label class="v3-focus-label">좌우 <span id="v3FocusXVal">${focusX}</span></label>
+            <input type="range" id="v3FocusX" min="0" max="100" value="${focusX}">
+            <label class="v3-focus-label">상하 <span id="v3FocusYVal">${focusY}</span></label>
+            <input type="range" id="v3FocusY" min="0" max="100" value="${focusY}">
+            <label class="v3-focus-label">확대 <span id="v3FocusZoomVal">${focusZoom}%</span></label>
+            <input type="range" id="v3FocusZoom" min="100" max="250" value="${focusZoom}">
+            <button class="btn btn-sm btn-outline" id="v3FocusSave">달력 대표사진 프레임 저장</button>
+          </div>
+        </div>
+      </div>
+
       <div class="v3-album-modal-actions v3-album-modal-actions-wrap">
         <button class="btn btn-sm" id="v3MetaSave">정보 저장</button>
         <button class="btn btn-sm btn-outline" id="v3MetaHero">${photo.hero?'★ HERO · 현재 대표':'★ HERO로 설정'}</button>
         <button class="btn btn-sm btn-outline" id="v3MetaBook">${photo.bookPick?'B BOOK PICK 해제':'B BOOK PICK'}</button>
         <button class="btn btn-sm v3-danger-btn" id="v3MetaDelete">사진 삭제</button>
       </div>`;
+
+    function paintFocusPreview(){
+      const img=$('#v3FocusPreview img',panel); if(!img)return;
+      img.style.objectFit='cover';
+      img.style.objectPosition=`${focusX}% ${focusY}%`;
+      img.style.transform=`scale(${focusZoom/100})`;
+    }
+    paintFocusPreview();
+    $('#v3FocusX',panel).addEventListener('input',e=>{focusX=+e.target.value;$('#v3FocusXVal',panel).textContent=focusX;paintFocusPreview();});
+    $('#v3FocusY',panel).addEventListener('input',e=>{focusY=+e.target.value;$('#v3FocusYVal',panel).textContent=focusY;paintFocusPreview();});
+    $('#v3FocusZoom',panel).addEventListener('input',e=>{focusZoom=+e.target.value;$('#v3FocusZoomVal',panel).textContent=focusZoom+'%';paintFocusPreview();});
+    $('#v3FocusSave',panel).addEventListener('click',async()=>{
+      await DB.updatePhoto(photo.id,{focusX,focusY,focusZoom});
+      Router.toast('달력 대표사진 프레임을 저장했어요');
+    });
 
     $$('[data-v3-type]',panel).forEach(btn=>btn.addEventListener('click',()=>{
       type=btn.dataset.v3Type; $$('[data-v3-type]',panel).forEach(b=>b.classList.toggle('is-selected',b===btn));

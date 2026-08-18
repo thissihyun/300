@@ -264,9 +264,11 @@ main{ max-width:1080px; margin:0 auto; padding:20px 18px 60px; }
 .cal-title{ font-size:8px; color:var(--ink-soft); text-align:center; line-height:1.15; overflow:hidden; max-height:2.3em; }
 .cal-legend{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 12px; margin-top:12px; padding-top:10px; border-top:1px solid var(--line); font-size:10px; color:var(--ink-soft); }
 .cal-legend .is-today-sw{ border:1.5px solid var(--gold); border-radius:4px; padding:0 4px; }
-.cal-cell.has-photo{ background-size:cover; background-position:center; color:#fff; }
-.cal-cell.has-photo::before{ content:''; position:absolute; inset:0; border-radius:7px; background:linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.55)); }
-.cal-cell.has-photo .cal-num, .cal-cell.has-photo .cal-title{ position:relative; z-index:1; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+.cal-cell.has-photo{ color:#fff; overflow:hidden; }
+.cal-cell.has-photo .cal-photo-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 50%; z-index:0; border-radius:7px; }
+.cal-cell.has-photo::before{ content:''; position:absolute; inset:0; z-index:1; border-radius:7px; background:linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.55)); }
+.cal-cell.has-photo .cal-num, .cal-cell.has-photo .cal-title{ position:relative; z-index:2; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+.cal-cell.has-photo .cal-badge, .cal-cell.has-photo .cal-chat-badge, .cal-cell.has-photo .cal-mood-dots{ z-index:2; }
 .cal-cell.chat-only{ border-style:dashed; }
 .cal-chat-badge{ position:absolute; top:2px; left:3px; font-size:8px; line-height:1; z-index:1; }
 .cal-mood-dots{ position:absolute; bottom:3px; left:0; right:0; display:flex; justify-content:center; gap:3px; z-index:1; }
@@ -545,11 +547,15 @@ body.modal-open{ overflow:hidden; }
 .kakao-msg{ cursor:pointer; transition:transform .15s ease; }
 .kakao-msg:active{ transform:scale(.99); }
 .kakao-msg .kakao-time{
-  display:block; margin-top:4px; font-size:10px; color:var(--ink-soft); opacity:0; max-height:0; overflow:hidden;
-  transition:opacity .25s ease, max-height .25s ease;
+  display:block; margin-top:4px; font-size:10px; color:var(--ink-soft);
 }
-.kakao-msg.is-expanded .kakao-time{ opacity:1; max-height:20px; }
 .kakao-msg mark{ background:none; color:var(--red); font-weight:700; }
+
+/* ---- real-archive "우리 카톡" section (up to 20 real messages, emotion-priority) ---- */
+.real-kakao-block{ background:#a9c6a0; border-radius:12px; padding:14px; margin:16px 0; }
+.real-kakao-block .kakao-msg{ cursor:default; }
+.real-kakao-block .kakao-msg.is-emotion{ box-shadow:0 0 0 1.5px var(--gold) inset; }
+.real-kakao-more{ display:block; margin:10px auto 2px; }
 
 /* ---- home entrance sequence ---- */
 .hero-eyebrow.v2-reveal, .hero-title.v2-reveal, .hero-sub.v2-reveal, .hero-actions.v2-reveal{ animation-name:v2RevealUp; }
