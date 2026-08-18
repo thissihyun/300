@@ -106,7 +106,7 @@
 .cal-cell.has-photo{
   background-size:cover; background-position:center; color:#fff; overflow:hidden;
 }
-.cal-cell.has-photo::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,21,16,.06),rgba(26,21,16,.48));z-index:0}
+.cal-cell.has-photo::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,21,16,.06),rgba(26,21,16,.48));z-index:1}
 .cal-cell.has-photo>*{position:relative;z-index:1}
 .cal-cell.has-photo .cal-num{background:rgba(255,253,248,.88);color:var(--ink);border-radius:5px;padding:1px 4px}
 .cal-cell.has-photo .cal-title{background:rgba(255,253,248,.88);border-radius:4px;padding:2px 3px;color:var(--ink)}

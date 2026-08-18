@@ -91,13 +91,27 @@ function enhancePhotoEditor(){
   if($('#v10FocusEditor',panel))return;
   let f=focus(p);
   const box=document.createElement('section');box.id='v10FocusEditor';box.className='v10-focus-editor';
-  box.innerHTML=`<div class="v10-focus-head"><div><b>달력 대표사진 프레임</b><span>달력의 정사각형 칸에 어떻게 보일지 정해요. 원본 사진은 바뀌지 않아요.</span></div><button type="button" class="btn btn-sm btn-outline" id="v10FocusReset">초기화</button></div><div class="v10-focus-preview" id="v10FocusPreview"><img src="${esc(p.url)}" alt=""><span>달력에서는 이렇게 보여요</span></div><div class="v10-focus-sliders"><label><span>좌우</span><input type="range" min="0" max="100" value="${f.x}" id="v10FocusX"></label><label><span>상하</span><input type="range" min="0" max="100" value="${f.y}" id="v10FocusY"></label><label><span>확대</span><input type="range" min="100" max="250" step="5" value="${Math.round(f.z*100)}" id="v10FocusZ"></label></div><div class="v10-focus-actions"><button type="button" class="btn btn-sm btn-outline" id="v10HomeHero">${p.homeHero?'첫 화면 사진에서 빼기':'첫 화면 사진에 추가'}</button><button type="button" class="btn btn-sm" id="v10FocusSave">달력 프레임 저장</button></div>`;
+  box.innerHTML=`<div class="v10-focus-head"><div><b>달력 대표사진 프레임</b><span>카톡 프로필 사진처럼, 네모 칸 안에서 사진을 직접 끌어서 위치를 맞춰요. 원본 사진은 바뀌지 않아요.</span></div><button type="button" class="btn btn-sm btn-outline" id="v10FocusReset">초기화</button></div><div class="v10-focus-preview" id="v10FocusPreview"><img src="${esc(p.url)}" alt="" draggable="false"></div><label class="v10-focus-zoom"><span>확대</span><input type="range" min="100" max="250" step="5" value="${Math.round(f.z*100)}" id="v10FocusZ"></label><div class="v10-focus-actions"><button type="button" class="btn btn-sm btn-outline" id="v10HomeHero">${p.homeHero?'첫 화면 사진에서 빼기':'첫 화면 사진에 추가'}</button><button type="button" class="btn btn-sm" id="v10FocusSave">달력 프레임 저장</button></div>`;
   const actions=$('.v3-album-modal-actions',panel);actions?actions.before(box):panel.appendChild(box);
-  const x=$('#v10FocusX',box),y=$('#v10FocusY',box),z=$('#v10FocusZ',box),prev=$('#v10FocusPreview',box),pim=$('img',prev);
-  const draw=()=>{f={x:Number(x.value),y:Number(y.value),z:Number(z.value)/100};pim.style.objectPosition=`${f.x}% ${f.y}%`;pim.style.transform=`scale(${f.z})`;pim.style.transformOrigin=`${f.x}% ${f.y}%`};
-  x.oninput=y.oninput=z.oninput=draw;
-  prev.addEventListener('pointerdown',e=>{const r=prev.getBoundingClientRect();x.value=clamp(Math.round((e.clientX-r.left)/r.width*100),0,100);y.value=clamp(Math.round((e.clientY-r.top)/r.height*100),0,100);draw()});
-  $('#v10FocusReset',box).onclick=()=>{x.value=50;y.value=50;z.value=100;draw()};
+  const z=$('#v10FocusZ',box),prev=$('#v10FocusPreview',box),pim=$('img',prev);
+  const draw=()=>{pim.style.objectPosition=`${f.x}% ${f.y}%`;pim.style.transform=`scale(${f.z})`;pim.style.transformOrigin=`${f.x}% ${f.y}%`};
+  z.oninput=()=>{f={...f,z:Number(z.value)/100};draw()};
+  let dragging=false,startX=0,startY=0,startFx=50,startFy=50,moved=false,pid=null;
+  prev.addEventListener('pointerdown',e=>{
+    dragging=true;moved=false;pid=e.pointerId;startX=e.clientX;startY=e.clientY;startFx=f.x;startFy=f.y;
+    prev.classList.add('is-dragging');try{prev.setPointerCapture(pid)}catch(_e){}
+  });
+  prev.addEventListener('pointermove',e=>{
+    if(!dragging)return;
+    const r=prev.getBoundingClientRect();
+    const dxPct=(e.clientX-startX)/r.width*100,dyPct=(e.clientY-startY)/r.height*100;
+    if(Math.abs(dxPct)>.4||Math.abs(dyPct)>.4)moved=true;
+    f={...f,x:clamp(startFx-dxPct/f.z,0,100),y:clamp(startFy-dyPct/f.z,0,100)};
+    draw();
+  });
+  const endDrag=()=>{if(!dragging)return;dragging=false;prev.classList.remove('is-dragging');try{pid!=null&&prev.releasePointerCapture(pid)}catch(_e){}};
+  prev.addEventListener('pointerup',endDrag);prev.addEventListener('pointercancel',endDrag);prev.addEventListener('lostpointercapture',endDrag);
+  $('#v10FocusReset',box).onclick=()=>{f={x:50,y:50,z:1};z.value=100;draw()};
   $('#v10FocusSave',box).onclick=async()=>{await DB.updatePhoto(p.id,{focusX:f.x,focusY:f.y,focusZoom:f.z});Router.toast('달력 대표사진 프레임을 저장했어요')};
   $('#v10HomeHero',box).onclick=async e=>{const next=!p.homeHero;await DB.updatePhoto(p.id,{homeHero:next});p.homeHero=next;e.currentTarget.textContent=next?'첫 화면 사진에서 빼기':'첫 화면 사진에 추가';Router.toast(next?'첫 화면 사진에 추가했어요':'첫 화면 사진에서 뺐어요');paintHome()};
   draw();
@@ -145,6 +159,7 @@ function patchCalendar(){
     if(meta.title){let t=$('.cal-title',cell);if(!t){t=document.createElement('div');t.className='cal-title';cell.appendChild(t)}t.textContent=meta.title}else if(ev.title&&$('.cal-title',cell))$('.cal-title',cell).textContent=ev.title;
     cell.style.backgroundImage='none';
     let media=$('.v10-cal-media',cell);
+    cell.classList.toggle('has-photo',!!p);
     if(p){const f=focus(p);if(!media){media=document.createElement('div');media.className='v10-cal-media';media.innerHTML='<img alt="">';cell.prepend(media)}const im=$('img',media);im.src=p.url;im.style.objectPosition=`${f.x}% ${f.y}%`;im.style.transform=`scale(${f.z})`;im.style.transformOrigin=`${f.x}% ${f.y}%`;}
     else if(media)media.remove();
     if(date==='2025-12-20'||date==='2025-12-08'){
@@ -156,6 +171,7 @@ function patchCalendar(){
 /* ---------- V1-like Kakao block: no emotion/category label, 3 preview + up to 20 ---------- */
 const SYS=/^(사진(?: \d+장)?|동영상|이모티콘|파일:|카카오톡 프로필)$/;
 function chatRows(date){let rows=[];try{rows=FullChat.messagesForDate(date)||[]}catch(_e){}return rows.map((m,i)=>({...m,_i:i})).filter(m=>m.text&&!SYS.test(String(m.text).trim())&&!/^https?:\/\//.test(String(m.text).trim())&&!/원을 (보냈어요|받았어요)/.test(String(m.text)))}
+const CORE_WORDS=/사랑해|보고싶어|아가|여보|결혼|평생|고마워|행복/;
 function twentyFor(date){
   const rows=chatRows(date);if(rows.length<=20)return rows;
   const meta=dayMeta[date]||{},saved=Array.isArray(meta.repChat)?meta.repChat:[];
@@ -163,7 +179,17 @@ function twentyFor(date){
   const idxs=saved.map(x=>Number(x.index)).filter(Number.isFinite);if(idxs.length){const avg=idxs.reduce((a,b)=>a+b,0)/idxs.length;let dist=1e9;rows.forEach((r,i)=>{const d=Math.abs(r._i-avg);if(d<dist){dist=d;center=i}})}
   if(center<0){const ev=(window.EVENTS||{})[date]||{},anchors=(ev.kakao||[]).map(x=>x[1]).filter(Boolean);outer:for(const a of anchors){for(let i=0;i<rows.length;i++){if(rows[i].text===a||rows[i].text.includes(a)||a.includes(rows[i].text)){center=i;break outer}}}}
   if(center<0)center=Math.floor(rows.length*.55);
-  let start=Math.max(0,center-7);if(start+20>rows.length)start=Math.max(0,rows.length-20);return rows.slice(start,start+20);
+  let start=Math.max(0,center-7);if(start+20>rows.length)start=Math.max(0,rows.length-20);
+  const windowRows=rows.slice(start,start+20);
+  // 사랑해/보고싶어/아가/여보/결혼/평생/고마워/행복 matter too much to leave out just
+  // because they fall outside the usual 20-message window centered on the day's
+  // saved/curated highlight — always keep every message with one of these words,
+  // merged back into chronological order alongside the normal window.
+  const core=rows.filter(r=>CORE_WORDS.test(r.text||''));
+  if(!core.length)return windowRows;
+  const inWindow=new Set(windowRows.map(r=>r._i)),extra=core.filter(r=>!inWindow.has(r._i));
+  if(!extra.length)return windowRows;
+  return windowRows.concat(extra).sort((a,b)=>a._i-b._i);
 }
 async function paintKakao(){
   const modal=$('#memoryModal');if(!modal?.classList.contains('is-open'))return;const m=location.hash.match(/^#\/memory\/(\d{4}-\d{2}-\d{2})/);if(!m)return;const date=m[1],panel=$('#memoryPanel');if(!panel)return;
@@ -188,14 +214,40 @@ document.addEventListener('click',e=>{
 },true);
 
 /* ---------- SPECIAL: always read representative photos from the Album ---------- */
+/* Special-page cards without a photo used to just fall back to a plain
+   placeholder. If the day has real Kakao chat, show a representative line
+   from it instead — prefers a message with one of the CORE_WORDS, else the
+   day's middle message. */
+let fullChatReady=false;
+function ensureFullChatForSpecial(){
+  if(fullChatReady||!window.FullChat)return;
+  if(FullChat.ready){fullChatReady=true;return}
+  FullChat.load().then(()=>{fullChatReady=true;schedule()}).catch(()=>{});
+}
+function repChatFor(date){
+  if(!fullChatReady)return null;
+  const rows=chatRows(date);if(!rows.length)return null;
+  return rows.find(r=>CORE_WORDS.test(r.text||''))||rows[Math.floor(rows.length/2)];
+}
+function kakaoFallbackHTML(date){
+  const m=repChatFor(date);if(!m)return'';
+  const who=String(m.speaker||'').includes('시현')?'시현':String(m.speaker||'').includes('강원')?'강원':esc(m.speaker||'');
+  return `<div class="v10-special-kakao-fallback"><i>카톡</i><p><b>${esc(who)}</b> ${esc(m.text||'')}</p></div>`;
+}
 function syncSpecial(){
   const host=$('#specialDetailHost');if(!host||host.style.display==='none')return;
+  ensureFullChatForSpecial();
   $$('.v7-memory-photo-card[data-date],.v7-season-memory[data-date]',host).forEach(card=>{
-    const p=photoFor(card.dataset.date),frame=$('.v7-memory-photo,.v7-season-photo',card);if(!frame)return;
+    const date=card.dataset.date,p=photoFor(date),frame=$('.v7-memory-photo,.v7-season-photo',card);if(!frame)return;
     if(p){let im=$('img',frame);if(!im){frame.innerHTML='<img alt="">';im=$('img',frame)}const f=focus(p);im.src=p.url;im.style.objectPosition=`${f.x}% ${f.y}%`;im.style.transform=`scale(${f.z})`;im.style.transformOrigin=`${f.x}% ${f.y}%`}
+    else if(!$('img',frame)){const html=kakaoFallbackHTML(date);if(html&&frame.dataset.v10Kakao!==date){frame.dataset.v10Kakao=date;frame.innerHTML=html}}
   });
   $$('[data-action="memory"][data-date]',host).forEach(card=>{
-    if(card.matches('.v7-memory-photo-card,.v7-season-memory'))return;const p=photoFor(card.dataset.date);if(!p)return;let media=$('.v10-special-photo',card);if(!media){media=document.createElement('div');media.className='v10-special-photo';media.innerHTML='<img alt="">';card.prepend(media)}const f=focus(p),im=$('img',media);im.src=p.url;im.style.objectPosition=`${f.x}% ${f.y}%`;im.style.transform=`scale(${f.z})`;im.style.transformOrigin=`${f.x}% ${f.y}%`;
+    if(card.matches('.v7-memory-photo-card,.v7-season-memory'))return;const date=card.dataset.date,p=photoFor(date);
+    if(p){let media=$('.v10-special-photo',card);if(!media){media=document.createElement('div');media.className='v10-special-photo';media.innerHTML='<img alt="">';card.prepend(media)}const f=focus(p),im=$('img',media);im.src=p.url;im.style.objectPosition=`${f.x}% ${f.y}%`;im.style.transform=`scale(${f.z})`;im.style.transformOrigin=`${f.x}% ${f.y}%`;return}
+    if($('.v10-special-photo',card))return;
+    const html=kakaoFallbackHTML(date);if(!html||card.dataset.v10Kakao===date)return;card.dataset.v10Kakao=date;
+    const media=document.createElement('div');media.className='v10-special-photo v10-special-kakao-only';media.innerHTML=html;card.prepend(media);
   });
   $$('.v7-season-block',host).forEach((b,i)=>{b.classList.remove('is-autumn','is-winter','is-spring','is-summer');b.classList.add(['is-autumn','is-winter','is-spring','is-summer'][i%4])});
 }
@@ -206,6 +258,15 @@ const style=document.createElement('style');style.id='v10FinalCss';style.textCon
 #v6RepresentativeKakao[hidden]{display:none!important}
 .v10-photo-surface{position:relative!important;display:block!important;width:100%!important;aspect-ratio:4/5!important;padding:0!important;margin:0!important;border:0!important;border-radius:6px!important;overflow:hidden!important;background:#e9dfcd!important;appearance:none!important;-webkit-appearance:none!important;box-shadow:none!important;clip-path:none!important;-webkit-mask:none!important;mask:none!important;cursor:zoom-in!important}
 .v10-photo-surface::before,.v10-photo-surface::after{display:none!important;content:none!important}.v10-photo-surface>img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;background:transparent!important;border:0!important;box-shadow:none!important;clip-path:none!important;-webkit-mask:none!important;mask:none!important}
+/* polishAlbum() inserts .v10-photo-surface right before the old
+   .v6-clean-photo-hit/.v3-photo-imagebtn and sets old.style.display='none',
+   but v3-fix4.css/v3-fix6.css force those old elements display:block!important
+   — inline styles never beat !important CSS, so the old photo box stayed
+   visible as a second, separately-flowed block below the new one, doubling
+   every album card's height with the same photo twice. This rule (appended
+   to <head> at runtime, so it wins ties with those earlier !important rules
+   by cascade order) hides the old box for good. */
+.v10-photo-surface+.v3-photo-imagebtn,.v10-photo-surface+.v6-clean-photo-hit{display:none!important}
 .v10-home-manage{position:absolute;right:14px;top:14px;z-index:30;border:1px solid rgba(255,255,255,.72);background:rgba(28,23,18,.7);color:#fff;border-radius:999px;padding:9px 12px;font-family:var(--hand);font-size:10px;backdrop-filter:blur(6px);cursor:pointer}.v10-home-empty{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:0;background:#e9dfcd;color:var(--ink);cursor:pointer}.v10-home-empty span{font-size:30px}.v10-home-empty b{font-family:var(--serif);font-size:18px}.v10-home-empty small{font-size:10px;color:var(--ink-soft)}
 .v10-home-stage{position:absolute;inset:0;overflow:hidden;background:#e9dfcd}.v10-home-slide{position:absolute;inset:0;opacity:0;transition:opacity .6s ease;overflow:hidden}.v10-home-slide.is-active{opacity:1}.v10-home-slide>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 /* v3-userfix.css's older carousel rule blanket-hides every img inside
@@ -217,10 +278,32 @@ const style=document.createElement('style');style.id='v10FinalCss';style.textCon
 #view-home .hero-photo .v10-home-stage .v10-home-slide img{opacity:1!important}
 #view-home .hero-photo .v10-home-stage .v10-home-slide:not(.is-active) img{opacity:0!important}.v10-home-dots{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);display:flex;gap:5px;z-index:3}.v10-home-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.48);box-shadow:0 0 0 1px rgba(0,0,0,.15)}.v10-home-dots i.is-active{background:#fff}
 .v10-home-help{font-size:12px;line-height:1.65;color:var(--ink-soft);word-break:keep-all}.v10-home-upload{display:grid;grid-template-columns:minmax(140px,180px) auto 1fr;gap:8px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:13px;background:#fffaf0}.v10-home-filter{display:flex;gap:8px;margin:12px 0}.v10-home-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;max-height:55vh;overflow:auto}.v10-home-choice{position:relative;display:block;text-align:left;padding:6px;border:1px solid var(--line);border-radius:11px;background:#fffdf8;color:var(--ink);overflow:hidden}.v10-home-choice.is-selected{border:2px solid var(--red);padding:5px}.v10-home-choice>div{aspect-ratio:1;overflow:hidden;border-radius:7px;background:#e9dfcd}.v10-home-choice img{width:100%;height:100%;object-fit:cover;display:block}.v10-home-choice>b{display:block;margin:7px 3px 0;font-family:var(--serif);font-size:12px;line-height:1.25;word-break:keep-all}.v10-home-choice>span{display:block;margin:3px;font-size:8px;color:var(--kraft)}.v10-home-choice>i{position:absolute;right:10px;top:10px;background:rgba(255,253,248,.94);border-radius:999px;padding:4px 6px;font-style:normal;font-size:8px;color:var(--red)}
-#view-ourdays .cal-cell{position:relative!important;overflow:hidden!important;touch-action:manipulation}.v10-cal-media{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:#e9dfcd}.v10-cal-media img{width:100%;height:100%;object-fit:cover;display:block}.cal-cell .cal-num,.cal-cell .cal-title,.cal-cell .cal-badge,.cal-cell .cal-chat-badge,.cal-cell .cal-mood-dots,.v10-birthday{position:relative;z-index:3}.v10-birthday{position:absolute!important;right:4px;top:4px;font-size:18px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.2));pointer-events:none}.cal-cell[data-date="2025-12-20"] .cal-badge,.cal-cell[data-date="2025-12-08"] .cal-badge{display:none!important}
-.v10-focus-editor{margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:#fffaf0}.v10-focus-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.v10-focus-head b{font-family:var(--serif);font-size:16px}.v10-focus-head span{display:block;margin-top:3px;font-size:9px;line-height:1.5;color:var(--ink-soft);word-break:keep-all}.v10-focus-preview{position:relative;width:min(340px,100%);aspect-ratio:1;margin:12px auto;overflow:hidden;border:1px solid var(--line);border-radius:10px;background:#e9dfcd;touch-action:none;cursor:crosshair}.v10-focus-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.v10-focus-preview>span{position:absolute;left:8px;bottom:8px;background:rgba(20,17,14,.65);color:#fff;border-radius:999px;padding:4px 7px;font-size:8px;pointer-events:none}.v10-focus-sliders{display:grid;gap:9px}.v10-focus-sliders label{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;font-size:10px;color:var(--ink-soft)}.v10-focus-sliders input{width:100%}.v10-focus-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+#view-ourdays .cal-cell{position:relative!important;overflow:hidden!important;touch-action:manipulation}
+/* .cal-cell keeps its own padding:5px 3px (v3-userfix.css) for the day
+   number/title, but the photo itself should bleed edge-to-edge instead of
+   sitting inset inside that padding — negative inset matching the cell's
+   padding pulls .v10-cal-media out to the cell's true border edge.
+   v3.css's .cal-cell.has-photo>*{position:relative;z-index:1} (written for
+   plain text/badge children) outspecifies a bare .v10-cal-media rule and was
+   silently turning this back into a normal-flow, inset-inside-the-padding
+   box — .cal-cell.has-photo>.v10-cal-media matches it three classes deep to
+   win. */
+.cal-cell.has-photo>.v10-cal-media{position:absolute!important;inset:-5px -3px!important;z-index:0!important}
+.v10-cal-media{position:absolute;inset:-5px -3px;z-index:0;overflow:hidden;pointer-events:none;background:#e9dfcd}.v10-cal-media img{width:100%;height:100%;object-fit:cover;display:block}.cal-cell .cal-num,.cal-cell .cal-title,.cal-cell .cal-badge,.cal-cell .cal-chat-badge,.cal-cell .cal-mood-dots,.v10-birthday{position:relative;z-index:3}.v10-birthday{position:absolute!important;right:4px;top:4px;font-size:18px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.2));pointer-events:none}.cal-cell[data-date="2025-12-20"] .cal-badge,.cal-cell[data-date="2025-12-08"] .cal-badge{display:none!important}
+@media(max-width:560px){.v10-cal-media,.cal-cell.has-photo>.v10-cal-media{inset:-3px -1px!important}}
+.v10-focus-editor{margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:#fffaf0}.v10-focus-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.v10-focus-head b{font-family:var(--serif);font-size:16px}.v10-focus-head span{display:block;margin-top:3px;font-size:9px;line-height:1.5;color:var(--ink-soft);word-break:keep-all}
+.v10-focus-preview{position:relative;width:min(340px,100%);aspect-ratio:1;margin:12px auto;overflow:hidden;border-radius:12px;box-shadow:0 0 0 3px #fffaf0,0 0 0 4px var(--line),0 10px 26px rgba(35,31,22,.18);background:#e9dfcd;touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
+.v10-focus-preview.is-dragging{cursor:grabbing}
+.v10-focus-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.v10-focus-zoom{display:flex;align-items:center;gap:10px;max-width:340px;margin:0 auto;font-size:10px;color:var(--ink-soft)}.v10-focus-zoom input{flex:1}
+.v10-focus-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .v10-kakao{margin:20px 0}.v10-kakao-label{font-family:var(--hand);font-size:12px;font-weight:700;margin:0 0 9px;color:var(--ink)}.v10-kakao-box{min-height:145px;border:1px solid var(--line);border-radius:12px;background:#fffaf0;padding:14px 12px;display:flex;flex-direction:column;gap:7px}.v10-chat-row{display:flex}.v10-chat-row.gangwon{justify-content:flex-start}.v10-chat-row.sihyun{justify-content:flex-end}.v10-chat-row.is-more{display:none}.v10-kakao.is-open .v10-chat-row.is-more{display:flex}.v10-chat-bubble{max-width:76%;border:1px solid #d8c8aa;border-radius:10px;padding:8px 10px;background:#fff;box-shadow:0 2px 5px rgba(35,31,22,.03)}.v10-chat-row.sihyun .v10-chat-bubble{background:#f5d867;border-color:#ead48a}.v10-chat-bubble small{display:block;font-family:var(--hand);font-size:8px;margin-bottom:3px;color:#665944}.v10-chat-bubble p{margin:0;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:keep-all}.v10-kakao-more{margin-top:0;border:1px solid var(--line);border-radius:999px;background:#fffaf0;padding:7px 13px;color:var(--ink);font-family:var(--hand);font-weight:700;font-size:10px;cursor:pointer}
-.v10-special-photo{height:130px;margin:-2px -2px 10px;overflow:hidden;border-radius:9px;background:#e9dfcd}.v10-special-photo img,.v7-memory-photo img,.v7-season-photo img{width:100%;height:100%;object-fit:cover;display:block}.v7-season-photo{overflow:hidden}.v7-season-block.is-autumn{background:linear-gradient(145deg,#fffaf0,#f0e0c5);border-color:#d6b47f}.v7-season-block.is-winter{background:linear-gradient(145deg,#fbfcfd,#e8edf2);border-color:#b9c6d1}.v7-season-block.is-spring{background:linear-gradient(145deg,#fffaf7,#f2e2e5);border-color:#d9b9c0}.v7-season-block.is-summer{background:linear-gradient(145deg,#fffdf4,#eaf0df);border-color:#becaa8}
+.v10-special-photo{height:130px;margin:-2px -2px 10px;overflow:hidden;border-radius:9px;background:#e9dfcd}.v10-special-photo img,.v7-memory-photo img,.v7-season-photo img{width:100%;height:100%;object-fit:cover;display:block}.v7-season-photo{overflow:hidden}
+.v10-special-kakao-fallback{width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:14px;background:linear-gradient(145deg,#fffaf0,#f3e9d2);color:var(--ink)}
+.v10-special-kakao-fallback i{align-self:flex-start;font-style:normal;font-family:var(--hand);font-size:9px;letter-spacing:.1em;color:var(--kraft);border:1px solid rgba(180,151,92,.4);border-radius:999px;padding:2px 8px}
+.v10-special-kakao-fallback p{margin:0;font-size:11px;line-height:1.55;word-break:keep-all;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.v10-special-kakao-fallback p b{font-family:var(--hand);color:var(--red);margin-right:4px}
+.v10-special-kakao-only{cursor:pointer}.v7-season-block.is-autumn{background:linear-gradient(145deg,#fffaf0,#f0e0c5);border-color:#d6b47f}.v7-season-block.is-winter{background:linear-gradient(145deg,#fbfcfd,#e8edf2);border-color:#b9c6d1}.v7-season-block.is-spring{background:linear-gradient(145deg,#fffaf7,#f2e2e5);border-color:#d9b9c0}.v7-season-block.is-summer{background:linear-gradient(145deg,#fffdf4,#eaf0df);border-color:#becaa8}
 .section-title,.modal-title,.v3-photo-title,.v7-card-copy .t,.v7-season-copy b,.v10-home-choice>b{word-break:keep-all!important;overflow-wrap:break-word!important}.btn,button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 @media(max-width:760px){.v10-home-manage{right:9px;top:9px;min-height:42px}.v10-home-upload{grid-template-columns:1fr}.v10-home-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-height:50vh}.v10-focus-actions{display:grid;grid-template-columns:1fr}.v10-focus-actions .btn{width:100%}.v10-kakao-box{padding:12px 9px}.v10-chat-bubble{max-width:88%}.v10-chat-bubble p{font-size:12px}.cal-cell .cal-title{font-size:clamp(7px,2.3vw,9px)!important;line-height:1.12!important}.v10-birthday{font-size:17px}}
 @media(max-width:480px){main{padding-left:10px!important;padding-right:10px!important}.v3-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.v10-home-choice>b{font-size:11px}.v10-kakao-label{font-size:13px}.v10-chat-bubble{max-width:90%}.v10-chat-bubble p{font-size:12px}.v7-first-grid{grid-template-columns:1fr!important}.v7-season-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.modal-panel{width:min(96vw,720px)!important;padding-left:13px!important;padding-right:13px!important}.top-nav button,.future-tabs button,.v1-future-tabs button{white-space:nowrap!important}}
