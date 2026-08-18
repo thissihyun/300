@@ -264,9 +264,9 @@ main{ max-width:1080px; margin:0 auto; padding:20px 18px 60px; }
 .cal-title{ font-size:8px; color:var(--ink-soft); text-align:center; line-height:1.15; overflow:hidden; max-height:2.3em; }
 .cal-legend{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 12px; margin-top:12px; padding-top:10px; border-top:1px solid var(--line); font-size:10px; color:var(--ink-soft); }
 .cal-legend .is-today-sw{ border:1.5px solid var(--gold); border-radius:4px; padding:0 4px; }
-.cal-cell.has-photo{ color:#fff; overflow:hidden; }
-.cal-cell.has-photo .cal-photo-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 50%; z-index:0; border-radius:7px; }
-.cal-cell.has-photo::before{ content:''; position:absolute; inset:0; z-index:1; border-radius:7px; background:linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.55)); }
+.cal-cell.has-photo{ color:#fff; overflow:hidden; border-color:transparent; }
+.cal-cell.has-photo .cal-photo-img{ position:absolute; inset:-1px; width:calc(100% + 2px); height:calc(100% + 2px); object-fit:cover; object-position:50% 50%; z-index:0; border-radius:inherit; }
+.cal-cell.has-photo::before{ content:''; position:absolute; inset:-1px; z-index:1; border-radius:inherit; background:linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.55)); }
 .cal-cell.has-photo .cal-num, .cal-cell.has-photo .cal-title{ position:relative; z-index:2; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6); }
 .cal-cell.has-photo .cal-badge, .cal-cell.has-photo .cal-chat-badge, .cal-cell.has-photo .cal-mood-dots{ z-index:2; }
 .cal-cell.chat-only{ border-style:dashed; }
@@ -555,6 +555,7 @@ body.modal-open{ overflow:hidden; }
 .real-kakao-block{ background:#a9c6a0; border-radius:12px; padding:14px; margin:16px 0; }
 .real-kakao-block .kakao-msg{ cursor:default; }
 .real-kakao-block .kakao-msg.is-emotion{ box-shadow:0 0 0 1.5px var(--gold) inset; }
+.real-kakao-block .kakao-msg.is-core{ box-shadow:0 0 0 1.5px var(--red) inset; }
 .real-kakao-more{ display:block; margin:10px auto 2px; }
 
 /* ---- home entrance sequence ---- */

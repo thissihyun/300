@@ -176,19 +176,16 @@
 
       <div class="v3-focus-editor">
         <label class="section-note v3-album-field-label">달력 대표사진 위치 조정</label>
-        <div class="section-note" style="margin-bottom:8px;">달력·OUR FIRSTS·계절·Special 카드의 정사각형 칸에서 이 사진이 어떻게 잘려 보일지 조정해요. 사진 원본은 그대로 저장돼요.</div>
-        <div class="v3-focus-layout">
-          <div class="v3-focus-preview-frame"><div class="v3-focus-preview" id="v3FocusPreview"><img src="${esc(photo.url)}" alt=""></div></div>
-          <div class="v3-focus-controls">
-            <label class="v3-focus-label">좌우 <span id="v3FocusXVal">${focusX}</span></label>
-            <input type="range" id="v3FocusX" min="0" max="100" value="${focusX}">
-            <label class="v3-focus-label">상하 <span id="v3FocusYVal">${focusY}</span></label>
-            <input type="range" id="v3FocusY" min="0" max="100" value="${focusY}">
-            <label class="v3-focus-label">확대 <span id="v3FocusZoomVal">${focusZoom}%</span></label>
-            <input type="range" id="v3FocusZoom" min="100" max="250" value="${focusZoom}">
-            <button class="btn btn-sm btn-outline" id="v3FocusSave">달력 대표사진 프레임 저장</button>
-          </div>
+        <div class="section-note" style="margin-bottom:8px;">카톡 프로필 사진처럼 — 사진을 직접 끌어서 정사각형 칸에 맞추고, 확대는 옆에서 조절해요. 사진 원본은 그대로 저장돼요.</div>
+        <div class="v3-focus-crop" id="v3FocusCrop">
+          <img src="${esc(photo.url)}" alt="" id="v3FocusImg" draggable="false">
         </div>
+        <div class="v3-focus-zoom-row">
+          <button type="button" class="icon-btn" id="v3FocusZoomOut">－</button>
+          <input type="range" id="v3FocusZoom" min="100" max="250" value="${focusZoom}">
+          <button type="button" class="icon-btn" id="v3FocusZoomIn">＋</button>
+        </div>
+        <button class="btn btn-sm btn-outline" id="v3FocusSave">달력 대표사진 프레임 저장</button>
       </div>
 
       <div class="v3-album-modal-actions v3-album-modal-actions-wrap">
@@ -199,15 +196,46 @@
       </div>`;
 
     function paintFocusPreview(){
-      const img=$('#v3FocusPreview img',panel); if(!img)return;
-      img.style.objectFit='cover';
+      const img=$('#v3FocusImg',panel); if(!img)return;
       img.style.objectPosition=`${focusX}% ${focusY}%`;
       img.style.transform=`scale(${focusZoom/100})`;
     }
     paintFocusPreview();
-    $('#v3FocusX',panel).addEventListener('input',e=>{focusX=+e.target.value;$('#v3FocusXVal',panel).textContent=focusX;paintFocusPreview();});
-    $('#v3FocusY',panel).addEventListener('input',e=>{focusY=+e.target.value;$('#v3FocusYVal',panel).textContent=focusY;paintFocusPreview();});
-    $('#v3FocusZoom',panel).addEventListener('input',e=>{focusZoom=+e.target.value;$('#v3FocusZoomVal',panel).textContent=focusZoom+'%';paintFocusPreview();});
+
+    // Kakao-profile-photo style: drag the photo itself inside the square frame
+    // (instead of abstract X/Y sliders) to position it; zoom stays a slider
+    // since there's no reliable pinch-gesture equivalent for mouse users.
+    const cropEl=$('#v3FocusCrop',panel);
+    let dragging=false,dragPid=null,startClientX=0,startClientY=0,startFX=focusX,startFY=focusY;
+    cropEl.addEventListener('pointerdown',e=>{
+      dragging=true;dragPid=e.pointerId;startClientX=e.clientX;startClientY=e.clientY;startFX=focusX;startFY=focusY;
+      cropEl.classList.add('is-dragging');
+      try{cropEl.setPointerCapture(dragPid)}catch(_e){}
+    });
+    cropEl.addEventListener('pointermove',e=>{
+      if(!dragging)return;
+      const rect=cropEl.getBoundingClientRect();
+      const dxPct=((e.clientX-startClientX)/rect.width)*100*(focusZoom/100);
+      const dyPct=((e.clientY-startClientY)/rect.height)*100*(focusZoom/100);
+      // dragging the photo right/down should reveal more of its left/top —
+      // object-position moves the opposite way from the drag direction.
+      focusX=Math.max(0,Math.min(100,startFX-dxPct));
+      focusY=Math.max(0,Math.min(100,startFY-dyPct));
+      paintFocusPreview();
+      e.preventDefault();
+    });
+    const stopFocusDrag=()=>{ if(!dragging)return; dragging=false; cropEl.classList.remove('is-dragging'); try{if(dragPid!=null)cropEl.releasePointerCapture(dragPid)}catch(_e){} dragPid=null; };
+    cropEl.addEventListener('pointerup',stopFocusDrag);
+    cropEl.addEventListener('pointercancel',stopFocusDrag);
+    cropEl.addEventListener('wheel',e=>{
+      e.preventDefault();
+      focusZoom=Math.max(100,Math.min(250,focusZoom-Math.sign(e.deltaY)*8));
+      $('#v3FocusZoom',panel).value=focusZoom;
+      paintFocusPreview();
+    },{passive:false});
+    $('#v3FocusZoom',panel).addEventListener('input',e=>{focusZoom=+e.target.value;paintFocusPreview();});
+    $('#v3FocusZoomIn',panel).addEventListener('click',()=>{focusZoom=Math.min(250,focusZoom+10);$('#v3FocusZoom',panel).value=focusZoom;paintFocusPreview();});
+    $('#v3FocusZoomOut',panel).addEventListener('click',()=>{focusZoom=Math.max(100,focusZoom-10);$('#v3FocusZoom',panel).value=focusZoom;paintFocusPreview();});
     $('#v3FocusSave',panel).addEventListener('click',async()=>{
       await DB.updatePhoto(photo.id,{focusX,focusY,focusZoom});
       Router.toast('달력 대표사진 프레임을 저장했어요');

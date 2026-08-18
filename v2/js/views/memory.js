@@ -48,30 +48,37 @@
     return `${hit.ap} ${hit.h}:${String(hit.m).padStart(2,'0')}`;
   }
 
-  // "우리 카톡" — up to 20 real messages for the day, pulled from the full Kakao
-  // archive and prioritized toward emotionally warm lines (두근거림/행복/편안함/
-  // 애틋함/보고싶음/고마움), each shown with its real timestamp.
+  // "우리 카톡" — real messages for the day, pulled from the full Kakao archive.
+  // Baseline is up to 20, prioritized toward emotionally warm lines (두근거림/
+  // 행복/편안함/애틋함/보고싶음/고마움), each shown with its real timestamp.
+  // Messages containing one of the CORE_WORDS are never truncated by the cap —
+  // every one of those shows, even if that pushes the day's total past 20.
   const REAL_KAKAO_MAX = 20;
   const REAL_KAKAO_COLLAPSED = 6;
   const EMOTION_RE = /두근|설레|설렘|떨려|떨린|행복|최고|기쁘|즐거|신나|편안|안심|포근|든든|애틋|짠하|뭉클|보고\s?싶|그리워|그립|고마워|고맙|감사/;
+  const CORE_WORDS = ['사랑해','보고싶어','보고 싶어','아가','여보','결혼','평생','고마워','행복'];
+  const CORE_WORDS_RE = new RegExp(CORE_WORDS.map(w=>w.replace(/ /g,'\\s?')).join('|'));
   function realKakaoList(date){
     const rows = window.FULL_CHAT_DATA && window.FULL_CHAT_DATA[date];
     if(!rows || !rows.length) return [];
     const withMeta = rows.map((m,i)=>({
-      speaker: m.s, text: m.t, idx: i, emotion: EMOTION_RE.test(m.t),
+      speaker: m.s, text: m.t, idx: i,
+      core: CORE_WORDS_RE.test(m.t), emotion: EMOTION_RE.test(m.t),
       time: `${m.ap} ${m.h}:${String(m.m).padStart(2,'0')}`,
     }));
-    const emotion = withMeta.filter(m=>m.emotion);
-    const rest = withMeta.filter(m=>!m.emotion);
-    const picked = emotion.slice(0, REAL_KAKAO_MAX);
-    if(picked.length < REAL_KAKAO_MAX) picked.push(...rest.slice(0, REAL_KAKAO_MAX - picked.length));
+    const core = withMeta.filter(m=>m.core);
+    const otherEmotion = withMeta.filter(m=>!m.core && m.emotion);
+    const rest = withMeta.filter(m=>!m.core && !m.emotion);
+    const picked = core.slice(); // uncapped — every core-word message shows
+    picked.push(...otherEmotion.slice(0, Math.max(0, REAL_KAKAO_MAX - picked.length)));
+    picked.push(...rest.slice(0, Math.max(0, REAL_KAKAO_MAX - picked.length)));
     return picked.sort((a,b)=>a.idx-b.idx);
   }
   function realKakaoHtml(date){
     const list = realKakaoList(date);
     if(!list.length) return '';
     const bubble = (m,i)=>`
-      <div class="kakao-msg v2-msg-in ${m.emotion?'is-emotion':''} from-${escapeHtml(m.speaker)}" style="position:relative; animation-delay:${Math.min(i*70,500)}ms;">
+      <div class="kakao-msg v2-msg-in ${m.core?'is-core':(m.emotion?'is-emotion':'')} from-${escapeHtml(m.speaker)}" style="position:relative; animation-delay:${Math.min(i*70,500)}ms;">
         ${emphasize(m.text)}
         <span class="kakao-time">${escapeHtml(m.time)}</span>
       </div>`;
