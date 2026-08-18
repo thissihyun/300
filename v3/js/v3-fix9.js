@@ -2,24 +2,21 @@
 (function(){
 'use strict';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-let photos=[],homeTimer=null;
+let photos=[];
 const photoFor=date=>photos.find(p=>p.date===date&&p.hero)||photos.find(p=>p.date===date)||null;
-
-/* Keep first-screen selections authoritative even when the base Home view refreshes. */
-function selectedHome(){return photos.filter(p=>p.homeHero).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).slice(0,8)}
-function forceHomePhotos(){
-  const wrap=$('#view-home #heroPhotoWrap');if(!wrap)return;
-  const list=selectedHome();
-  if(!list.length){const old=$('.v10-home-layer',wrap);if(old)old.remove();return;}
-  const sig=list.map(p=>`${p.id}:${p.url}`).join('|');let layer=$('.v10-home-layer',wrap);
-  if(layer&&layer.dataset.sig===sig)return;
-  clearInterval(homeTimer);
-  if(layer)layer.remove();
-  layer=document.createElement('div');layer.className='v10-home-layer';layer.dataset.sig=sig;
-  layer.innerHTML=list.map((p,i)=>`<img src="${String(p.url||'').replace(/"/g,'&quot;')}" alt="" class="${i?'':'is-active'}" style="object-position:${p.homeFocusX??50}% ${p.homeFocusY??50}%">`).join('')+(list.length>1?`<div class="v10-home-dots">${list.map((_,i)=>`<i class="${i?'':'is-active'}"></i>`).join('')}</div>`:'');
-  wrap.appendChild(layer);
-  if(list.length>1){let i=0;homeTimer=setInterval(()=>{if(!layer.isConnected){clearInterval(homeTimer);return}const imgs=$$('img',layer),dots=$$('i',layer);i=(i+1)%imgs.length;imgs.forEach((im,j)=>im.classList.toggle('is-active',j===i));dots.forEach((d,j)=>d.classList.toggle('is-active',j===i))},4200)}
-}
+/* Home-hero rendering (first-screen photo picker/carousel) now lives solely in
+   v3-release-final.js's paintHome(), which signature-diffs #heroPhotoWrap before
+   touching it. This file used to run a second, independent renderer
+   (forceHomePhotos/.v10-home-layer) that appendChild'd its own photo layer next
+   to paintHome()'s .v10-home-stage. Both scripts observe the same
+   document.body mutations, so each one's DOM write re-triggered the other's
+   observer: paintHome() replaces wrap.innerHTML whenever its own signature
+   changes, silently destroying this file's .v10-home-layer, while this file's
+   appendChild left stale layers behind paintHome()'s rebuilds. The endless
+   churn between two competing writers of the same subtree left the browser's
+   painted state out of sync with the final computed style (photo geometry and
+   opacity looked correct in devtools, but nothing was actually rendered on
+   screen). Removed; paintHome() alone owns #heroPhotoWrap now. */
 if(window.DB&&DB.onAllPhotos)DB.onAllPhotos(rows=>{photos=rows||[];requestAnimationFrame(run)});
 
 /* Give every calendar day a canonical date. Photo-only days used to miss data-date. */
@@ -56,11 +53,15 @@ function cleanProductCopy(){
 
 /* Final photo-surface + mobile interaction rules. These only affect viewports, never source files. */
 const style=document.createElement('style');style.textContent=`
-#view-home #heroPhotoWrap{position:relative!important;overflow:hidden!important}
-.v10-home-layer{position:absolute;inset:0;z-index:8;background:#eee5d6;overflow:hidden;border-radius:inherit}
-.v10-home-layer>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;display:block;opacity:0;transition:opacity .65s ease;background:#eee5d6;border:0!important;box-shadow:none!important;clip-path:none!important;-webkit-mask:none!important;mask:none!important}
-.v10-home-layer>img.is-active{opacity:1}
-.v10-home-dots{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);display:flex;gap:5px;z-index:3}.v10-home-dots i{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.5);box-shadow:0 0 0 1px rgba(0,0,0,.15)}.v10-home-dots i.is-active{background:#fff}
+/* Must stay absolute (matches v3-userfix.css's #view-home .hero-photo rule):
+   .hero-photo fills .hero via inset:0, and an element with position:absolute
+   is itself already a valid containing block for its own absolutely-
+   positioned children — it never needed to be relative for that. Overriding
+   it to relative here (this selector's two ids out-specify that rule) was
+   silently collapsing the whole hero photo area to near-zero size, since
+   nothing inside it contributes to intrinsic sizing once every child is
+   itself position:absolute. */
+#view-home #heroPhotoWrap{position:absolute!important;inset:0!important;overflow:hidden!important}
 #view-album .v3-feature-grid .v3-photo-card,#view-album .v3-feature-grid .v6-clean-photo-hit,#view-album .v3-feature-grid .v3-photo-imagebtn{background:#e9dfcd!important;overflow:hidden!important;clip-path:none!important;-webkit-mask:none!important;mask:none!important}
 #view-album .v3-feature-grid .v6-clean-photo-hit>img,#view-album .v3-feature-grid .v3-photo-imagebtn>img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;background:transparent!important;border:0!important;box-shadow:none!important;clip-path:none!important;-webkit-mask:none!important;mask:none!important}
 #view-album .v3-feature-grid .v6-clean-photo-hit::before,#view-album .v3-feature-grid .v6-clean-photo-hit::after,#view-album .v3-feature-grid .v3-photo-imagebtn::before,#view-album .v3-feature-grid .v3-photo-imagebtn::after{display:none!important;content:none!important}
@@ -69,7 +70,7 @@ button,.btn,[role="button"],.v6-day-edit-icon,.v6-calendar-photo-hit,.v9-home-ch
 `;
 document.head.appendChild(style);
 
-let queued=false;function run(){queued=false;cleanProductCopy();ensureOurDaysCells();forceHomePhotos()}
+let queued=false;function run(){queued=false;cleanProductCopy();ensureOurDaysCells()}
 new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(run)}).observe(document.body,{childList:true,subtree:true,characterData:true});
 window.addEventListener('hashchange',()=>setTimeout(run,50));run();
 })();

@@ -105,7 +105,18 @@
   DB.onAllPhotos = function(cb){
     const state={cb,modern:[],alive:true}; subscribers.add(state);
     const unsub=originalOnAllPhotos(rows=>{ state.modern=rows||[]; if(state.alive)cb(mergePhotos(state.modern,legacyCache)); });
-    if(legacyLoaded) cb(mergePhotos(state.modern,legacyCache)); else loadLegacy();
+    // Real Firestore's onSnapshot never fires synchronously on registration —
+    // every caller across this codebase (correctly) assumes that guarantee,
+    // often subscribing at the top of a file before defining the functions/
+    // variables the callback touches further down. Once legacyLoaded flips to
+    // true (after the first load), calling cb() immediately here broke that
+    // contract for every subsequent subscription — i.e. every later view
+    // render — causing "Cannot access '...' before initialization" crashes
+    // that silently killed whatever ran after the crash point (home hero
+    // painting, calendar decoration, etc.) on the second-and-later render of
+    // whatever view had just been opened.
+    if(legacyLoaded) Promise.resolve().then(()=>{ if(state.alive) cb(mergePhotos(state.modern,legacyCache)); });
+    else loadLegacy();
     return ()=>{ state.alive=false; subscribers.delete(state); try{unsub&&unsub()}catch(e){} };
   };
 

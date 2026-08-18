@@ -59,7 +59,16 @@
   box-shadow:0 18px 48px rgba(35,31,22,.10); overflow:visible;
 }
 #view-home.v3-enhanced .hero::before{
-  content:'NEW YORK · 2025'; position:absolute; top:-12px; left:34px; padding:5px 11px;
+  /* v2/main.css's base .hero::before rule sets inset:0 (its own dark photo
+     scrim, superseded here). This rule overrides top/left to reposition the
+     pseudo-element as a small "NEW YORK · 2025" sticky-note tag, but never
+     overrode right/bottom — so those stayed at inset:0's right:0/bottom:0,
+     stretching this absolutely-positioned box to nearly the full .hero area.
+     At z-index:1 (also inherited, between the photo's z:0 and the hero copy's
+     z:2) its opaque #fff4c9 background silently covered the entire home hero
+     photo. right/bottom:auto lets the box size itself by content+padding
+     again, like the small tag it's meant to be. */
+  content:'NEW YORK · 2025'; position:absolute; top:-12px; left:34px; right:auto; bottom:auto; padding:5px 11px;
   background:#fff4c9; border:1px solid rgba(180,151,92,.45); box-shadow:0 5px 12px rgba(45,35,24,.08);
   transform:rotate(-2deg); font-family:var(--hand); font-size:10px; letter-spacing:.09em; color:var(--kraft);
 }
