@@ -1,5 +1,5 @@
 /* 300 Days With You — app cache */
-const CACHE = 'days300-production-13';
+const CACHE = 'days300-production-14';
 const CORE = [
   './', './index.html', './css/v3.css', './css/v3-full.css', './css/v3-album.css', './css/v3-polish.css', './css/v3-production.css', './css/v3-userfix.css', './css/v3-guard.css', './css/v3-fix2.css', './css/v3-hotfix3.css', './css/v3-fix4.css',
   './js/v3.js', './js/v3-full.js', './js/v3-album.js', './js/v3-photo-legacy.js', './js/v3-polish.js', './js/v3-production.js', './js/v3-userfix.js', './js/v3-fix2.js', './js/v3-hotfix3.js', './js/v3-fix4.js', './manifest.webmanifest',

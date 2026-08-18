@@ -61,10 +61,38 @@
   Router.registerSpecial('firsts', {render(host){
     host.innerHTML = subHeader('OUR FIRSTS') + `<div class="grid grid-3">${window.FIRSTS.map(([date,label])=>`
       <button class="card card-btn hub-card v2-stamp" data-action="memory" data-date="${date}">
-        <div class="empty-frame" style="height:90px; display:flex; align-items:center; justify-content:center; margin-bottom:8px;">▣</div>
+        <div class="empty-frame firsts-media" data-firsts-media="${date}" style="height:90px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; overflow:hidden; border-radius:8px; padding:0;">▣</div>
         <div class="t">${escapeHtml(label)}</div><div class="s">${date}</div>
       </button>`).join('')}</div>`;
     if(window.V2Anim) V2Anim.observeReveal(host.querySelectorAll('.v2-stamp'));
+
+    // Real photo when the date has one; otherwise a real Kakao line from that
+    // day so the card is never just a blank placeholder.
+    function paintMedia(photos){
+      window.FIRSTS.forEach(([date])=>{
+        const el = host.querySelector(`[data-firsts-media="${date}"]`);
+        if(!el) return;
+        const dayPhotos = photos.filter(p=>p.date===date);
+        const photo = dayPhotos.find(p=>p.hero) || dayPhotos[0];
+        if(photo){
+          el.style.padding = '0';
+          el.innerHTML = `<img src="${photo.url}" alt="" style="width:100%; height:100%; object-fit:cover;">`;
+          return;
+        }
+        const rows = window.FULL_CHAT_DATA && window.FULL_CHAT_DATA[date];
+        if(rows && rows.length){
+          const line = rows[0];
+          el.style.padding = '8px';
+          el.innerHTML = `<div style="font-size:10px; line-height:1.4; text-align:left; color:var(--ink-soft);">
+            <span style="font-weight:700; color:var(--kraft);">💬 ${escapeHtml(line.s)}</span><br>${escapeHtml(line.t.slice(0,50))}${line.t.length>50?'…':''}
+          </div>`;
+        }
+      });
+    }
+    let photosNow = [];
+    const offPhotos = DB.onAllPhotos(rows=>{ photosNow = rows||[]; paintMedia(photosNow); });
+    if(window.FullChat) window.FullChat.load().then(()=> paintMedia(photosNow));
+    const stop = setInterval(()=>{ if(!host.isConnected){ clearInterval(stop); try{offPhotos&&offPhotos()}catch(e){} } }, 1500);
   }});
 
   /* ---- CONSTELLATION ---- */

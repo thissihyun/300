@@ -199,6 +199,16 @@
   /* ---------- PWA (Section 70) ---------- */
   if('serviceWorker' in navigator){
     window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{}));
+    // A cache-version bump alone isn't enough: the tab that's already open keeps
+    // running whatever build it loaded with until something tells it to reload.
+    // Reload once automatically the moment a newer service worker takes over, so
+    // a fix that's live on the server doesn't sit unseen behind a stale tab.
+    let swReloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+      if(swReloaded) return;
+      swReloaded = true;
+      location.reload();
+    });
   }
 
   /* ---------- ADD TO HOME SCREEN ---------- */

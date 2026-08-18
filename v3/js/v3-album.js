@@ -316,7 +316,7 @@
     const ev=eventFor(p.date), tags=tagsFor(p).slice(0,4);
     return `<article class="v3-photo-card ${opts.compact?'is-compact':''}" data-photo-card="${esc(p.id)}">
       <div class="v3-photo-flags">${p.hero?'<span class="v3-photo-flag hero">HERO</span>':''}${p.bookPick?'<span class="v3-photo-flag book">BOOK PICK</span>':''}</div>
-      <button class="v3-photo-imagebtn" type="button" data-v3-open-photo="${esc(p.id)}"><img src="${esc(p.url)}" alt="${esc(p.caption||ev.title||'우리 사진')}" loading="lazy"></button>
+      <button class="v3-photo-imagebtn" type="button" data-v3-open-photo="${esc(p.id)}"><img src="${esc(p.url)}" alt="${esc(p.caption||ev.title||'우리 사진')}"></button>
       <button class="v3-photo-edit" type="button" data-v3-edit-photo="${esc(p.id)}" aria-label="사진 정보 수정">✎</button>
       ${opts.compact?'':`<div class="v3-photo-copy"><div class="v3-photo-date">${esc(p.date||'')}</div><div class="v3-photo-title">${esc(ev.title||'Our photo')}</div>${p.caption?`<div class="v3-photo-caption">${esc(p.caption)}</div>`:''}${tags.length?`<div class="v3-photo-tags">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}</div>`}
     </article>`;
@@ -349,13 +349,13 @@
 
   function renderContact(host,list){
     if(!list.length)return empty(host);
-    host.innerHTML=`<div class="v3-contact-sheet">${list.map(p=>`<button type="button" class="v3-contact-tile" data-v3-open-photo="${esc(p.id)}"><img src="${esc(p.url)}" alt="" loading="lazy"><span>${esc((p.date||'').slice(5))}</span>${p.hero?'<i>★</i>':''}</button>`).join('')}</div>`; bindPhotoActions(host);
+    host.innerHTML=`<div class="v3-contact-sheet">${list.map(p=>`<button type="button" class="v3-contact-tile" data-v3-open-photo="${esc(p.id)}"><img src="${esc(p.url)}" alt=""><span>${esc((p.date||'').slice(5))}</span>${p.hero?'<i>★</i>':''}</button>`).join('')}</div>`; bindPhotoActions(host);
   }
 
   function renderFilmStrip(host,list){
     if(!list.length)return empty(host);
     const chronological=sortPhotos(list,false);
-    host.innerHTML=`<div class="v3-filmstrip-note">V1 FILM STRIP · 옆으로 넘겨서 시간순으로 봐요.</div><div class="v3-filmstrip">${chronological.map(p=>`<button type="button" class="v3-film-frame" data-v3-open-photo="${esc(p.id)}"><div class="v3-film-image"><img src="${esc(p.url)}" alt="" loading="lazy"></div><div class="v3-film-label">${esc(p.date)} · ${esc(eventFor(p.date).title||'')}</div></button>`).join('')}</div>`; bindPhotoActions(host);
+    host.innerHTML=`<div class="v3-filmstrip-note">V1 FILM STRIP · 옆으로 넘겨서 시간순으로 봐요.</div><div class="v3-filmstrip">${chronological.map(p=>`<button type="button" class="v3-film-frame" data-v3-open-photo="${esc(p.id)}"><div class="v3-film-image"><img src="${esc(p.url)}" alt=""></div><div class="v3-film-label">${esc(p.date)} · ${esc(eventFor(p.date).title||'')}</div></button>`).join('')}</div>`; bindPhotoActions(host);
   }
 
   function renderFilmViewer(host,list){
