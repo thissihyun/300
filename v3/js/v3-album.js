@@ -23,6 +23,8 @@
   let mode = 'day';
   let filmIndex = 0;
   let randomId = null;
+  let selectMode = false;
+  const selected = new Set();
   const filters = {search:'', type:'', mood:'', month:''};
 
   // Keep a lightweight global photo cache so Memory Detail can open the uploader
@@ -158,6 +160,8 @@
       <div class="v3-meta-layout">
         <div class="v3-meta-preview"><img src="${esc(photo.url)}" alt="업로드한 실제 사진"></div>
         <div>
+          <label class="section-note v3-album-field-label">날짜</label>
+          <input class="field" type="date" id="v3MetaDate" value="${esc(photo.date||'')}">
           <label class="section-note v3-album-field-label">장소</label>
           <input class="field" id="v3MetaPlace" value="${esc(photo.place||'')}" placeholder="예: MoMA">
           <label class="section-note v3-album-field-label">음식 / 메뉴</label>
@@ -184,7 +188,8 @@
       const m=btn.dataset.v3Mood; if(moods.has(m)){moods.delete(m);btn.classList.remove('is-selected')}else{moods.add(m);btn.classList.add('is-selected')}
     }));
     $('#v3MetaSave',panel).addEventListener('click',async()=>{
-      await DB.updatePhoto(photo.id,{place:$('#v3MetaPlace',panel).value.trim(),food:$('#v3MetaFood',panel).value.trim(),caption:$('#v3MetaCaption',panel).value.trim(),type,moods:[...moods]});
+      const newDate=$('#v3MetaDate',panel).value||photo.date;
+      await DB.updatePhoto(photo.id,{date:newDate,place:$('#v3MetaPlace',panel).value.trim(),food:$('#v3MetaFood',panel).value.trim(),caption:$('#v3MetaCaption',panel).value.trim(),type,moods:[...moods]});
       Router.toast('사진 정보를 저장했어요'); $('#uploadModal').classList.remove('is-open'); document.body.classList.remove('modal-open');
     });
     $('#v3MetaHero',panel).addEventListener('click',async()=>{
@@ -250,7 +255,8 @@
 
   function card(p,opts={}){
     const ev=eventFor(p.date), tags=tagsFor(p).slice(0,4);
-    return `<article class="v3-photo-card ${opts.compact?'is-compact':''}" data-photo-card="${esc(p.id)}">
+    return `<article class="v3-photo-card ${opts.compact?'is-compact':''} ${selectMode?'is-select-mode':''} ${selected.has(String(p.id))?'is-selected':''}" data-photo-card="${esc(p.id)}">
+      ${selectMode?`<button class="v3-photo-select" type="button" data-v3-select-photo="${esc(p.id)}" aria-label="사진 선택"><i></i></button>`:''}
       <div class="v3-photo-flags">${p.hero?'<span class="v3-photo-flag hero">HERO</span>':''}${p.bookPick?'<span class="v3-photo-flag book">BOOK PICK</span>':''}</div>
       <button class="v3-photo-imagebtn" type="button" data-v3-open-photo="${esc(p.id)}"><img src="${esc(p.url)}" alt="${esc(p.caption||ev.title||'우리 사진')}" loading="lazy"></button>
       <button class="v3-photo-edit" type="button" data-v3-edit-photo="${esc(p.id)}" aria-label="사진 정보 수정">✎</button>
@@ -258,9 +264,25 @@
     </article>`;
   }
 
+  function toggleSelect(id,host){
+    id=String(id);
+    if(selected.has(id))selected.delete(id);else selected.add(id);
+    const card=$(`.v3-photo-card[data-photo-card="${id}"]`,host);if(card)card.classList.toggle('is-selected',selected.has(id));
+    updateSelectBar();
+  }
+  function updateSelectBar(){
+    const bar=document.getElementById('v3SelectBar');if(!bar)return;
+    bar.querySelector('#v3SelectCount').textContent=`${selected.size}장 선택됨`;
+    bar.querySelector('#v3SelectDelete').disabled=!selected.size;
+  }
   function bindPhotoActions(host){
-    $$('[data-v3-open-photo]',host).forEach(btn=>btn.addEventListener('click',()=>{const p=photoCache.find(x=>String(x.id)===btn.dataset.v3OpenPhoto);if(p)openLightboxPhoto(p)}));
+    $$('[data-v3-open-photo]',host).forEach(btn=>btn.addEventListener('click',()=>{
+      const id=btn.dataset.v3OpenPhoto;
+      if(selectMode){toggleSelect(id,host);return}
+      const p=photoCache.find(x=>String(x.id)===id);if(p)openLightboxPhoto(p);
+    }));
     $$('[data-v3-edit-photo]',host).forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();const p=photoCache.find(x=>String(x.id)===btn.dataset.v3EditPhoto);if(p)openMetaEditor(p)}));
+    $$('[data-v3-select-photo]',host).forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();toggleSelect(btn.dataset.v3SelectPhoto,host)}));
   }
 
   function empty(host,text='아직 앨범에 사진이 없어요.'){ host.innerHTML=`<div class="empty-frame">${esc(text)}</div>`; }
@@ -356,6 +378,7 @@
     else if(mode==='bookpicks')renderBookPicks(host,list);
     else if(mode==='random')renderRandom(host,list);
     else if(mode==='photobooth')renderPhotobooth(host,list);
+    updateSelectBar();
   }
 
   function render(container){
@@ -363,7 +386,11 @@
     container.innerHTML=`
       <div class="v3-album-hero">
         <div><div class="v3-album-k">V1 + V2 · COMPLETE PHOTO ARCHIVE</div><h1>OUR PHOTO ALBUM</h1><p>날짜에 흩어진 실제 사진을 한 권처럼. 원본 사진은 그대로 두고, 보기 방식과 기록만 더합니다.</p></div>
-        <div class="v3-album-hero-actions"><button class="btn" id="v3AlbumAdd">＋ ADD PHOTOS</button><span id="v3AlbumCount">0 PHOTOS</span></div>
+        <div class="v3-album-hero-actions"><button class="btn" id="v3AlbumAdd">＋ ADD PHOTOS</button><button class="btn btn-sm btn-outline" id="v3AlbumSelectToggle">${selectMode?'선택 취소':'선택'}</button><span id="v3AlbumCount">0 PHOTOS</span></div>
+      </div>
+      <div class="v3-select-bar" id="v3SelectBar" style="display:${selectMode?'flex':'none'}">
+        <span id="v3SelectCount">0장 선택됨</span>
+        <button class="btn btn-sm v3-danger-btn" id="v3SelectDelete" disabled>선택 삭제</button>
       </div>
       <div class="v3-album-filterbar">
         <input class="field" id="v3AlbumSearch" placeholder="날짜 · 장소 · 음식 · 느낌 · 캡션 검색" value="${esc(filters.search)}">
@@ -387,6 +414,21 @@
       <div id="v3AlbumHost"><div class="empty-frame">사진을 모으는 중…</div></div>`;
 
     $('#v3AlbumAdd',container).addEventListener('click',()=>openUploader(localToday()));
+    $('#v3AlbumSelectToggle',container).addEventListener('click',()=>{
+      selectMode=!selectMode;if(!selectMode)selected.clear();
+      render(container);
+    });
+    $('#v3SelectDelete',container).addEventListener('click',async()=>{
+      if(!selected.size)return;
+      const n=selected.size;
+      if(!confirm(`선택한 ${n}장의 사진을 삭제할까요? 되돌릴 수 없어요.`))return;
+      const btn=$('#v3SelectDelete',container);btn.disabled=true;btn.textContent='삭제 중…';
+      const ids=[...selected];
+      for(const id of ids){try{await DB.deletePhoto(id)}catch(e){console.warn('[bulk delete]',id,e)}}
+      selected.clear();selectMode=false;
+      Router.toast(`${n}장 삭제했어요`);
+      render(container);
+    });
     $('#v3AlbumSearch',container).addEventListener('input',e=>{filters.search=e.target.value.trim();draw(container)});
     $('#v3AlbumType',container).addEventListener('change',e=>{filters.type=e.target.value;draw(container)});
     $('#v3AlbumMood',container).addEventListener('change',e=>{filters.mood=e.target.value;draw(container)});

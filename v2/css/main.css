@@ -304,9 +304,15 @@ textarea.field{ min-height:80px; resize:vertical; }
 .modal-backdrop{
   display:none; position:fixed; inset:0; background:rgba(20,16,8,.55); z-index:80;
   align-items:flex-start; justify-content:center; overflow-y:auto; padding:0;
+  overscroll-behavior:none;
 }
 .modal-backdrop.is-open{ display:flex; }
-body.modal-open{ overflow:hidden; }
+/* overflow:hidden alone doesn't stop iOS Safari's rubber-band bounce at the
+   top/bottom of .modal-backdrop's own scroll — once you overscroll past its
+   content, the bounce reveals the page underneath through the gap.
+   overscroll-behavior:none on the backdrop keeps the bounce contained to
+   itself instead of chaining to the body. */
+body.modal-open{ overflow:hidden; overscroll-behavior:none; }
 .modal-panel{
   background:var(--paper); width:100%; max-width:720px; margin:0 auto; min-height:100vh;
   box-shadow:var(--shadow); padding:20px 20px 60px; position:relative;
